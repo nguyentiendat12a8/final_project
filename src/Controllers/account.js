@@ -1,11 +1,11 @@
-// const { Account, Role } = require("../Databases/Users/account");
+//const { Account, Role } = require("../Databases/Users/account");
 const db = require('../Databases/Users/index')
-const User = db.user
+const Account = db.account
 const Role = db.role
 const bcrypt = require('bcryptjs')
 
 exports.add = async (req,res)=>{
-    const user = new User({
+    const user = new Account({
         username: req.body.username,
         email: req.body.email,
         password: req.body.password

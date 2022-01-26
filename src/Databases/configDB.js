@@ -10,7 +10,7 @@ exports.connectDB = async () =>{
             autoIndex:true
         })
         console.log("Connect to database successfully!")
-        //initial()
+        initial()
     } catch (error) {
         console.log("Connect to database failed!")
     }

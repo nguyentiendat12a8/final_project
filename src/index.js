@@ -7,9 +7,10 @@ const route = require('./Routers/index')
 require('dotenv').config()
 const port = process.env.PORT
 
-// app.use(express.urlencoded({
-//     extended: true
-// }))
+//handler formdata
+app.use(express.urlencoded({
+    extended: true
+}))
 app.use(express.json())
 //dont follow data sharing via api
 app.use(cors())

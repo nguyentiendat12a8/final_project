@@ -1,12 +1,13 @@
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
-
+const { Account } = require("./account")
+const { Role } = require("./role")
 const db = {}
 
 db.mongoose = mongoose
 
-db.user = require('./account')
-db.role =require('./role')
+db.account = Account
+db.role =Role
 
 db.ROLES = ['user', 'admin', ' moderator']
 
