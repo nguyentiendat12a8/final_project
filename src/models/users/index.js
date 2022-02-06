@@ -7,7 +7,7 @@ const db = {}
 db.mongoose = mongoose
 
 db.account = Account
-db.role =Role
+db.role = Role
 
 db.ROLES = ['user', 'admin', ' moderator']
 

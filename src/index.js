@@ -1,8 +1,8 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const db = require('./Databases/configDB')
-const route = require('./Routers/index')
+const db = require('./models/configDB')
+const route = require('./routers/index.routers')
 
 require('dotenv').config()
 const port = process.env.PORT
