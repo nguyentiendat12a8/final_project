@@ -25,7 +25,7 @@ db.connectDB()
 //route init
 
 route(app)
-require("../src/routers/user.routers")(app);
+
 
 app.listen(port, () => {
     console.log(`ON PORT: ${port}`)

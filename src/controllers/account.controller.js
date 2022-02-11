@@ -53,42 +53,102 @@ exports.register = async (req,res)=>{
     });
 }
 
+// exports.signin = async (req, res, next) => {
+//     try {
+//         const { username, password } = req.body
+//         if (!(username && password)) {
+//             res.status(400).send({
+//                 error: true,
+//                 message: 'All input is required'
+//             })
+//         }
+//         const user = await Account.findOne({ username: username })
+//         if (!user) {
+//             res.status(404).send({ error: true, message: 'User not found!' })
+//         }
+
+//         if (bcrypt.compareSync(password, user.password)) {
+//             const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
+//                 expiresIn: process.env.tokenLife
+//             })
+//             const refreshToken = jwt.sign({id: user._id}, process.env.REFRESH_TOKEN_KEY,{
+//                 expiresIn: process.env.RefreshTokenLife
+//             })
+//             const userRole = await Role.findById(user.roles).then(response =>{
+//                 return response.name 
+//             })
+//             return res.status(200).send({
+//                 token,
+//                 refreshToken,
+//                 user: userRole
+//             })
+//         } else {
+//             return res.status(400).send({ message: 'Invalid Credentials, password' })
+//         }
+//     } catch (err) {
+//         return console.log(err)
+//     }
+// }
+
 exports.signin = async (req, res, next) => {
     try {
-        const { username, password } = req.body
-        if (!(username && password)) {
-            res.status(400).send({
-                error: true,
-                message: 'All input is required'
-            })
-        }
-        const user = await Account.findOne({ username: username })
-        if (!user) {
-            res.status(404).send({ error: true, message: 'User not found!' })
-        }
-
-        if (bcrypt.compareSync(password, user.password)) {
-            const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
-                expiresIn: process.env.tokenLife
-            })
-            const refreshToken = jwt.sign({id: user._id}, process.env.REFRESH_TOKEN_KEY,{
-                expiresIn: process.env.RefreshTokenLife
-            })
-            const userRole = await Role.findById(user.roles).then(response =>{
-                return response.name 
-            })
-            return res.status(200).send({
-                token,
-                refreshToken,
-                user: userRole
-            })
-        } else {
-            return res.status(400).send({ message: 'Invalid Credentials, password' })
-        }
+      const { username, password } = req.body;
+      if (!(username && password)) {
+        res.status("200").json({
+          errorCode: 500,
+          errorMessage: "All input is required",
+        });
+      }
+      const user = await Account.findOne({ username: username });
+      if (!user) {
+        res.status("200").json({
+          errorCode: "404",
+          errorMessage: "User not found ~~~",
+        });
+      }
+  
+      if (await bcrypt.compareSync(password, user.password)) {
+        const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
+          expiresIn: process.env.tokenLife,
+        });
+        const refreshToken = jwt.sign(
+          { id: user._id },
+          process.env.REFRESH_TOKEN_KEY,
+          {
+            expiresIn: process.env.RefreshTokenLife,
+          }
+        );
+        const role = await Role.findById(user.roles).then((response) => {
+          console.log("response", response);
+          return response.name;
+        });
+        return res.status("200").json({
+          errorCode: 0,
+          token: token,
+          role: role,
+        });
+  
+        // return res
+        // .cookie('access_token',token, {
+        //     httpOnly: true,//cookie chi duoc set tu ben server
+        //     //secure: process.env.NODE_ENV === "production", //trinh duyet phai duoc ket noi bao mat https
+        // })
+  
+        // .cookie('refresh_token',refresh,{
+        //     httpOnly: true
+        // })
+        //.status(200)
+        // .redirect('/')
+      } else {
+        return res.status("200").json({
+          errorCode: 400,
+          errorMessage: "Invalid Credentials, password",
+        });
+      }
     } catch (err) {
-        return console.log(err)
+      return console.log(err);
     }
-}
+  };
 
 exports.updatePassword = async (req,res, next) =>{
     try {
