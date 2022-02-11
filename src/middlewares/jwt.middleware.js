@@ -4,8 +4,6 @@ const db = require('../models/users/index')
 const User = db.user
 const Role = db.role
 
-
-
 verifyToken = async (req, res, next) => {
     let token = req.body.token || req.query.token ||req.headers["x-access-token"];
     //const token = req.cookies.access_token

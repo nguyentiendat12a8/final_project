@@ -77,7 +77,7 @@ exports.signin = async (req, res, next) => {
             const userRole = await Role.findById(user.roles).then(response =>{
                 return response.name 
             })
-            return res.send({
+            return res.status(200).send({
                 token,
                 refreshToken,
                 user: userRole

@@ -10,6 +10,8 @@ exports.store = (req,res,next) =>{
         });
         path = path.substring(0, path.lastIndexOf(','))
         req.body.picture = path
+    
+    
     }else {
         req.body.picture='khong co anh'
     }
@@ -21,6 +23,6 @@ exports.store = (req,res,next) =>{
     })
     .catch(error =>{
         console.log(error)
-        res.status(500).send({message : 'an errorr'})
+        res.status(500).send({message : error})
     })
 }
