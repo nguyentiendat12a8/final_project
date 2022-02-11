@@ -21,6 +21,7 @@ app.get('/', (req,res)=>{
 //connect to db
 db.connectDB()
 
+
 //route init
 route(app)
 app.listen(port, () => {

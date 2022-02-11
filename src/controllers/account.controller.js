@@ -2,6 +2,7 @@
 const db = require('../models/users/index')
 const Account = db.account
 const Role = db.role
+const ROLES = db.ROLES
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
@@ -89,10 +90,6 @@ exports.signin = async (req, res, next) => {
     }
 }
 
-exports.changePassword = async (req,res, next) =>{
-
-}
-
 exports.updatePassword = async (req,res, next) =>{
     try {
         const { id } = req.params
@@ -104,9 +101,11 @@ exports.updatePassword = async (req,res, next) =>{
             return res.status(200).send({message: 'Change password successfully!'})
         }
         else{
-            return res.status(400).send({message : 'sai mat khau!'})
+            return res.status(400).send({message : 'Wrong password!'})
         }
     } catch (error) {
         console.log(error)
     }
-}
+}   
+
+
