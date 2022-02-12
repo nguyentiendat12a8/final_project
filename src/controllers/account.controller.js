@@ -6,166 +6,119 @@ const ROLES = db.ROLES
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
-exports.register = async (req,res)=>{
-    const user = new Account({
-        username: req.body.username,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 8)
-    })
+exports.register = async (req, res) => {
+  const user = new Account({
+    username: req.body.username,
+    email: req.body.email,
+    password: bcrypt.hashSync(req.body.password, 8)
+  })
 
-    user.save((err, user) => {
+  user.save((err, user) => {
+    if (err) {
+      return res.status(500).send({ message: err })
+    }
+
+    if (req.body.roles) {
+      Role.find({
+        name: { $in: req.body.roles }
+      }, (err, roles) => {
         if (err) {
+          return res.status(500).send({ message: err })
+        }
+        user.roles = roles.map(role => role._id)
+        user.save(err => {
+          if (err) {
             return res.status(500).send({ message: err })
-        }
-
-        if(req.body.roles){
-        Role.find({
-            name: { $in: req.body.roles }
-        }, (err, roles) => {
-            if (err) {
-                return res.status(500).send({ message: err })
-            }
-            user.roles = roles.map(role => role._id)
-            user.save(err => {
-                if (err) {
-                    return res.status(500).send({ message: err })
-                }
-                res.send({ message: 'User was registered successfully' })
-            })
+          }
+          res.send({ message: 'User was registered successfully' })
         })
-        } 
-            else {
-                Role.findOne({name: 'user'},(err,role)=>{
-                    if(err){
+      })
+    }
+    else {
+      Role.findOne({ name: 'user' }, (err, role) => {
+        if (err) {
 
-                        return res.status(500).send({message: err})
-                    }
-                    user.roles = [role._id];
-                    user.save(err => {
-                    if (err) {
-                        res.status(500).send({ message: err });
-                        return;
-                    }
-                    res.send({ message: "User was registered successfully!" });
-                    });
-          });
+          return res.status(500).send({ message: err })
         }
-    });
+        user.roles = [role._id];
+        user.save(err => {
+          if (err) {
+            res.status(500).send({ message: err });
+            return;
+          }
+          res.send({ message: "User was registered successfully!" });
+        });
+      });
+    }
+  });
 }
 
-// exports.signin = async (req, res, next) => {
-//     try {
-//         const { username, password } = req.body
-//         if (!(username && password)) {
-//             res.status(400).send({
-//                 error: true,
-//                 message: 'All input is required'
-//             })
-//         }
-//         const user = await Account.findOne({ username: username })
-//         if (!user) {
-//             res.status(404).send({ error: true, message: 'User not found!' })
-//         }
-
-//         if (bcrypt.compareSync(password, user.password)) {
-//             const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
-//                 expiresIn: process.env.tokenLife
-//             })
-//             const refreshToken = jwt.sign({id: user._id}, process.env.REFRESH_TOKEN_KEY,{
-//                 expiresIn: process.env.RefreshTokenLife
-//             })
-//             const userRole = await Role.findById(user.roles).then(response =>{
-//                 return response.name 
-//             })
-//             return res.status(200).send({
-//                 token,
-//                 refreshToken,
-//                 user: userRole
-//             })
-//         } else {
-//             return res.status(400).send({ message: 'Invalid Credentials, password' })
-//         }
-//     } catch (err) {
-//         return console.log(err)
-//     }
-// }
 
 exports.signin = async (req, res, next) => {
-    try {
-      const { username, password } = req.body;
-      if (!(username && password)) {
-        res.status("200").json({
-          errorCode: 500,
-          errorMessage: "All input is required",
-        });
-      }
-      const user = await Account.findOne({ username: username });
-      if (!user) {
-        res.status("200").json({
-          errorCode: "404",
-          errorMessage: "User not found ~~~",
-        });
-      }
-  
-      if (await bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
-          expiresIn: process.env.tokenLife,
-        });
-        const refreshToken = jwt.sign(
-          { id: user._id },
-          process.env.REFRESH_TOKEN_KEY,
-          {
-            expiresIn: process.env.RefreshTokenLife,
-          }
-        );
-        const role = await Role.findById(user.roles).then((response) => {
-          console.log("response", response);
-          return response.name;
-        });
-        return res.status("200").json({
-          errorCode: 0,
-          token: token,
-          role: role,
-        });
-  
-        // return res
-        // .cookie('access_token',token, {
-        //     httpOnly: true,//cookie chi duoc set tu ben server
-        //     //secure: process.env.NODE_ENV === "production", //trinh duyet phai duoc ket noi bao mat https
-        // })
-  
-        // .cookie('refresh_token',refresh,{
-        //     httpOnly: true
-        // })
-        //.status(200)
-        // .redirect('/')
-      } else {
-        return res.status("200").json({
-          errorCode: 400,
-          errorMessage: "Invalid Credentials, password",
-        });
-      }
-    } catch (err) {
-      return console.log(err);
+  try {
+    const { username, password } = req.body;
+    if (!(username && password)) {
+      res.status("500").json({
+        errorCode: 500,
+        errorMessage: "All input is required",
+      });
     }
-  };
+    const user = await Account.findOne({ username: username });
+    if (!user) {
+      res.status("404").json({
+        errorCode: "404",
+        errorMessage: "User not found ~~~",
+      });
+    }
 
-exports.updatePassword = async (req,res, next) =>{
-    try {
-        const { id } = req.params
-        const user = await Account.findOne({ _id: id })
-        const password = req.body.password
-        const newPassword = bcrypt.hashSync(req.body.newPassword, 8)
-        if (bcrypt.compareSync(password, user.password)){
-            await Account.findByIdAndUpdate({_id: id},{password: newPassword}, {new : true})
-            return res.status(200).send({message: 'Change password successfully!'})
+    if (bcrypt.compareSync(password, user.password)) {
+      const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
+        expiresIn: process.env.tokenLife,
+      });
+      const refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.REFRESH_TOKEN_KEY,
+        {
+          expiresIn: process.env.RefreshTokenLife,
         }
-        else{
-            return res.status(400).send({message : 'Wrong password!'})
-        }
-    } catch (error) {
-        console.log(error)
+      );
+      const role = await Role.findById(user.roles).then((response) => {
+        console.log("response", response);
+        return response.name;
+      });
+      return res.status("200").json({
+        errorCode: 0,
+        token: token,
+        role: role,
+        refreshToken: refreshToken
+      });
+    } else {
+      return res.status("400").json({
+        errorCode: 400,
+        errorMessage: "Invalid Credentials, password",
+      });
     }
-}   
+  } catch (err) {
+    return console.log(err);
+  }
+};
+
+exports.updatePassword = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const user = await Account.findOne({ _id: id })
+    const password = req.body.password
+    const newPassword = bcrypt.hashSync(req.body.newPassword, 8)
+    if (bcrypt.compareSync(password, user.password)) {
+      await Account.findByIdAndUpdate({ _id: id }, { password: newPassword }, { new: true })
+      return res.status(200).send({ message: 'Change password successfully!' })
+    }
+    else {
+      return res.status(400).send({ message: 'Wrong password!' })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 

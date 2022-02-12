@@ -1,21 +1,19 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator');
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.Tour = mongoose.model(
     'Tour',
     new mongoose.Schema({
         tourName: {type: String, required: true},
-        price: String,
+        startDate: String,
+        adultPrice: String,
+        childPrice: String,
         picture: String,
         description: String,
         status: Boolean,
-        
-        // accountId: [{
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'Account'
-        // }],
-        //slug: {type: String, slug: 'tourName', unique: true}
+        accountId: String,
+        slug: {type: String, slug: 'tourName', unique: true}
     })
 )
 
-//mongoose.plugin(slug)
