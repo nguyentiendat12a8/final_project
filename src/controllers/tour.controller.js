@@ -1,8 +1,9 @@
-// const {Tour} = require('../models/users/tour')
 const db = require('../models/users/index')
 const Tour = db.tour
+//const { multipleMongooseToObject } = require('../util/mongoose');
 
 const jwt = require('jsonwebtoken')
+const { multipleMongooseToObject } = require('../util/mongoose')
 const config = process.env
 
 exports.store = (req,res,next) =>{
@@ -51,5 +52,18 @@ exports.store = (req,res,next) =>{
     .catch(error =>{
         console.log(error)
         res.status(500).send({message : error})
+    })
+}
+
+exports.show = (req,res,next) =>{
+    
+    Tour.find({
+        accountId: req.userId
+    })
+    .then(tour =>{
+        res.status(200).send({message: tour})
+    })
+    .catch(err =>{
+        console.log(err)
     })
 }

@@ -21,9 +21,10 @@ app.get('/', (req,res)=>{
 //connect to db
 db.connectDB()
 
+//path use photo
+app.use('/uploads', express.static('uploads'))
 
 //route init
-
 route(app)
 
 

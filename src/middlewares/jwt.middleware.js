@@ -19,8 +19,8 @@ verifyToken = async (req, res, next) => {
             return res.status(401).send({message: err.message})
         }
         req.userId = decoded.id
-        return res.send({token : token})
-        //next()
+        //return res.send({token : token})
+        next()
     })
 }
 
