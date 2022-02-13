@@ -6,11 +6,11 @@ exports.Tour = mongoose.model(
     'Tour',
     new mongoose.Schema({
         tourName: {type: String, required: true},
-        startDate: String,
-        adultPrice: String,
-        childPrice: String,
-        picture: String,
-        description: String,
+        startDate: {type: String, required: true},
+        adultPrice: {type: String, required: true},
+        childPrice: {type: String, required: true},
+        picture: {type: String, required: true},
+        description: {type: String, required: true},
         status: Boolean,
         accountId: String,
         slug: {type: String, slug: 'tourName', unique: true}

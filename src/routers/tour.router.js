@@ -1,10 +1,12 @@
 const express = require('express');
-const { store, show } = require('../controllers/tour.controller');
+const { show, storeTour, bookedTourStore } = require('../controllers/tour.controller');
 const { verifyToken, isModerator } = require('../middlewares/jwt.middleware');
 const router = express.Router();
-const upload = require('../middlewares/uploadFile.middleware')
+const upload = require('../middlewares/uploadFile.middleware');
 
-router.post('/add', [verifyToken, upload.array('picture')], store)
+
+router.post('/add', [ upload.array('picture')], storeTour)
 router.get('/show', show)
+router.post('/bookTour', bookedTourStore)
 
 module.exports = router

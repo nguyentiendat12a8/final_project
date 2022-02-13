@@ -6,6 +6,8 @@ exports.Account = mongoose.model(
         username: String,
         password: String,
         email: String,
+        phone: String,
+        avatar: String,
         roles: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Role'

@@ -3,67 +3,78 @@ const Tour = db.tour
 //const { multipleMongooseToObject } = require('../util/mongoose');
 
 const jwt = require('jsonwebtoken')
-const { multipleMongooseToObject } = require('../util/mongoose')
+const BookedTour = db.bookedTour
 const config = process.env
 
-exports.store = (req,res,next) =>{
-    if(req.files){
+exports.storeTour = (req, res, next) => {
+    if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
             path = path + files.path + ','
         });
         path = path.substring(0, path.lastIndexOf(','))
         req.body.picture = path
-    }else {
-        req.body.picture='No photo'
+    } else {
+        req.body.picture = 'No photo'
     }
-
-    // TEST LAY ID Acount
-    // let token = req.body.token || req.query.token ||req.headers["x-access-token"];
-    // //const token = req.cookies.access_token
-    // //const token = req.body.access_token
-    // if(!token){
-    //    return res.status(401).send("token is required!")
-    // }
-    // jwt.verify(token, config.TOKEN_KEY, (err,decoded)=>{
-    //     if(err){
-    //         if(err.name === 'JsonWebTokenError'){
-    //             return res.status(401).send({message:'Unauthorized!'})
-    //         }
-    //         return res.status(401).send({message: err.message})
-    //     }
-    //     req.userId = decoded.id
-       
-    //     //next()
-    // })
-
-
-    if(req.userId){
+    if (req.userId) {
         req.body.accountId = req.userId
     } else {
         req.body.accountId = 'khong co id'
     }
-    
-    const tour = new Tour (req.body)
+
+    const tour = new Tour(req.body)
     tour.save()
-    .then (response =>{
-        res.status(200).send({message: 'upload successfully!'})
-    })
-    .catch(error =>{
-        console.log(error)
-        res.status(500).send({message : error})
-    })
+        .then(response => {
+            res.status(200).send({
+                errorCode: 0,
+                message: 'upload successfully!'
+            })
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(500).send({ message: error })
+        })
 }
 
-exports.show = (req,res,next) =>{
+exports.updateTour = (req,res,next) =>{
+
+}
+
+exports.deleteTour = (req,res,next) =>{
     
+}
+
+exports.show = (req, res, next) => {
     Tour.find({
         accountId: req.userId
     })
-    .then(tour =>{
-        res.status(200).send({message: tour})
+        .then(tour => {
+            res.status(200).send({ 
+                errorCode: 0,
+                message: tour })
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+
+exports.bookedTourStore = (req,res,next) =>{
+    const bookedTour = new BookedTour({
+        accountId: req.body.id,
+        tourId: req.body.id1,
+        bookDate: Date.now()
+    })
+    bookedTour.save()
+    .then(()=>{
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'save booked tour successfully'
+        })
     })
     .catch(err =>{
         console.log(err)
     })
 }
+
