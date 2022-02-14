@@ -66,8 +66,8 @@ exports.show = (req, res, next) => {
 
 exports.storeBookedTour = (req,res,next) =>{
     const bookedTour = new BookedTour({
-        accountId: req.body.id,
-        tourId: req.body.id1,
+        accountId: 'req.body.id',
+        tourId: 'req.body.id1',
         bookDate: Date.now()
     })
     bookedTour.save()

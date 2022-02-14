@@ -27,8 +27,12 @@ app.use('/uploads', express.static('uploads'))
 //route init
 route(app)
 
+//test payment
+const ejs = require('ejs');
+app.set('view engine', 'ejs');
+app.get('/tour', (req, res) => res.render('index'));
+
 
 app.listen(port, () => {
     console.log(`ON PORT: ${port}`)
 })
-

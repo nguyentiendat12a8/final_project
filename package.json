@@ -13,11 +13,13 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^14.3.0",
+    "ejs": "^3.1.6",
     "express": "^4.17.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.1.8",
     "mongoose-slug-generator": "^1.0.4",
     "multer": "^1.4.4",
-    "multer-gridfs-storage": "^5.0.2"
+    "multer-gridfs-storage": "^5.0.2",
+    "paypal-rest-sdk": "^1.8.1"
   }
 }
