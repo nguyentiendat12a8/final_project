@@ -37,6 +37,10 @@ exports.storeTour = (req, res, next) => {
         })
 }
 
+exports.editTour = (req,res,next) =>{
+    
+}
+
 exports.updateTour = (req,res,next) =>{
 
 }
@@ -60,7 +64,7 @@ exports.show = (req, res, next) => {
 }
 
 
-exports.bookedTourStore = (req,res,next) =>{
+exports.storeBookedTour = (req,res,next) =>{
     const bookedTour = new BookedTour({
         accountId: req.body.id,
         tourId: req.body.id1,
@@ -78,3 +82,18 @@ exports.bookedTourStore = (req,res,next) =>{
     })
 }
 
+exports.editBookedTour = (req,res,next) =>{
+    
+}
+
+exports.updateBookedTour = (req,res,next) =>{
+    
+}
+
+exports.deleteBookedTour = (req,res,next) =>{
+    
+}
+
+exports.showBookedTour = (req,res,next) =>{
+    
+}
