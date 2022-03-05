@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { Role } = require('./users/role')
+const { Role } = require('./schema/role')
 
 exports.connectDB = async () =>{
     try {

@@ -2,7 +2,9 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const db = require('./models/configDB')
-const route = require('./routers/index.routers')
+const routeUser = require('./routers/user/index.router')
+const routeMod = require('./routers/moderator/index.router')
+const routeAdmin = require('./routers/admin/index.router')
 
 require('dotenv').config()
 const port = process.env.PORT
@@ -15,9 +17,6 @@ app.use(express.json())
 //dont follow data sharing via api
 app.use(cors())
 
-app.get('/', (req,res)=>{
-    res.send("done")
-})
 //connect to db
 db.connectDB()
 
@@ -25,7 +24,9 @@ db.connectDB()
 app.use('/uploads', express.static('uploads'))
 
 //route init
-route(app)
+routeUser(app)
+routeMod(app)
+routeAdmin(app)
 
 //test payment
 const ejs = require('ejs');

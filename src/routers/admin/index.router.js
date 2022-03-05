@@ -3,8 +3,11 @@ const tour = require('./tour.router')
 
 function route(app){
     app.use('/user',user)
-    app.use('/tour', tour)
+    app.use('/mod', tour)
+    app.use('/admin', tour)
 }
+
+
 
 module.exports = route;
 

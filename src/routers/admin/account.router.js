@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, signin, updatePassword, updateAccount, editAccount, deleteAccount } = require('../controllers/account.controller');
+const { signup, signin, updatePassword, updateAccount, editAccount, deleteAccount } = require('../../controllers/account.controller');
 const { verifyToken, verifyRefreshToken} = require('../middlewares/jwt.middleware');
 const verifySignUp = require('../middlewares/verifySignUp.middleware');
 const router = express.Router();

@@ -1,5 +1,5 @@
 
-const db = require('../models/users/index')
+const db = require('../models/schema/index')
 const Account = db.account
 const ROLES = db.ROLES
 

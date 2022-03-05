@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const config = process.env
-const db = require('../models/users/index')
+const db = require('../models/schema/index')
 const User = db.user
 const Role = db.role
 

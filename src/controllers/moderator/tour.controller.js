@@ -1,7 +1,72 @@
-const paypal = require('paypal-rest-sdk');
-const db = require('../models/schema/index')
-const BookedTour = db.bookedTour
+const db = require('../models/users/index')
 const Tour = db.tour
+//const { multipleMongooseToObject } = require('../util/mongoose');
+
+const jwt = require('jsonwebtoken')
+const BookedTour = db.bookedTour
+const config = process.env
+const paypal = require('paypal-rest-sdk')
+
+exports.storeTour = (req, res, next) => {
+    if (req.files) {
+        let path = ''
+        req.files.forEach((files, index, arr) => {
+            path = path + files.path + ','
+        });
+        path = path.substring(0, path.lastIndexOf(','))
+        req.body.picture = path
+    } else {
+        req.body.picture = 'No photo'
+    }
+    if (req.body.userId) {
+        req.body.accountId = req.body.userId
+    } else {
+        req.body.accountId = 'khong co id'
+    }
+
+    const tour = new Tour(req.body)
+    tour.save()
+        .then(response => {
+            res.status(200).send({
+                errorCode: 0,
+                message: 'upload successfully!'
+            })
+        })
+        .catch(error => {
+            console.log(error)
+            res.status(500).send({ message: error })
+        })
+}
+
+exports.editTour = (req, res, next) => {
+
+}
+
+exports.updateTour = (req, res, next) => {
+
+}
+
+exports.deleteTour = (req, res, next) => {
+
+}
+
+exports.show = (req, res, next) => {
+    Tour.find({
+        accountId: req.userId
+    })
+        .then(tour => {
+            res.status(200).send({
+                errorCode: 0,
+                message: tour
+            })
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+//booked tour
+// payment online
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
     'client_id': 'AW08gKdTJAStrt0PenCcUa-EPaqphhipPcMNjtWKfIoRSHWBt-YRM5bea51ZAiv16baUZQLO2BNCKETw',
@@ -113,4 +178,20 @@ exports.success = async (req, res, next) => {
 exports.cancel = (req, res) => {
     res.send('Cancelled (Đơn hàng đã hủy)')
     return
+}
+
+exports.editBookedTour = (req, res, next) => {
+
+}
+
+exports.updateBookedTour = (req, res, next) => {
+
+}
+
+exports.deleteBookedTour = (req, res, next) => {
+
+}
+
+exports.showBookedTour = (req, res, next) => {
+
 }
