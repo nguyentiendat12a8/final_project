@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+
 exports.BillHotelRoom = mongoose.model(
     'BillHotelRoom',
     new mongoose.Schema({

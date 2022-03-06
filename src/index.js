@@ -1,9 +1,9 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
-const db = require('./models/configDB')
-const routeUser = require('./routers/user/index.router')
-const routeMod = require('./routers/moderator/index.router')
+const db = require('../src/db/configDB')
+//const routeUser = require('./routers/user/index.router')
+//const routeMod = require('./routers/moderator/index.router')
 const routeAdmin = require('./routers/admin/index.router')
 
 require('dotenv').config()
@@ -24,8 +24,8 @@ db.connectDB()
 app.use('/uploads', express.static('uploads'))
 
 //route init
-routeUser(app)
-routeMod(app)
+//routeUser(app)
+//routeMod(app)
 routeAdmin(app)
 
 //test payment

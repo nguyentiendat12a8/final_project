@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.HotelRoom = mongoose.model(
     'HotelRoom',
@@ -14,6 +16,6 @@ exports.HotelRoom = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }],
-        slug: {type: String, slug: roomName, unique: true }
+        slug: {type: String, slug: 'roomName', unique: true }
     })
 )

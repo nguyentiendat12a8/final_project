@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.Tour = mongoose.model(
     'Tour',
@@ -18,6 +20,6 @@ exports.Tour = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'CategoryTour'
         }],
-        slug: {type: String, slug: tourName, unique: true }
+        slug: {type: String, slug: 'tourName', unique: true }
     })
 )

@@ -7,7 +7,7 @@ const BookedTour = db.bookedTour
 const config = process.env
 const paypal = require('paypal-rest-sdk')
 
-exports.storeTour = (req, res, next) => {
+exports.createTour = (req, res, next) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -50,7 +50,7 @@ exports.deleteTour = (req, res, next) => {
 
 }
 
-exports.show = (req, res, next) => {
+exports.listTour = (req, res, next) => {
     Tour.find({
         accountId: req.userId
     })
@@ -65,6 +65,9 @@ exports.show = (req, res, next) => {
         })
 }
 
+exports.detailTour = () =>{
+
+}
 //booked tour
 // payment online
 paypal.configure({
@@ -180,18 +183,11 @@ exports.cancel = (req, res) => {
     return
 }
 
-exports.editBookedTour = (req, res, next) => {
+
+exports.listBillTour = (req, res, next) => {
 
 }
 
-exports.updateBookedTour = (req, res, next) => {
-
-}
-
-exports.deleteBookedTour = (req, res, next) => {
-
-}
-
-exports.showBookedTour = (req, res, next) => {
+exports.detailBillTour = (req, res, next) => {
 
 }

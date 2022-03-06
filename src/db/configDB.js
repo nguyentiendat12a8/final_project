@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const { Role } = require('./schema/role')
+
 
 exports.connectDB = async () =>{
     try {
@@ -10,37 +10,7 @@ exports.connectDB = async () =>{
             autoIndex:true
         })
         console.log("Connect to database successfully!")
-        initial()
     } catch (error) {
         console.log("Connect to database failed!")
     }
 }
-
-function initial(){
-    Role.estimatedDocumentCount((err,count) =>{
-        if(!err && count === 0){
-            new Role({name: 'user'})
-            .save(err =>{
-                if(err) {
-                    console.log('error: ', err)
-                }
-                console.log('added USER to role colection')
-            })
-            new Role({name: 'moderator'})
-            .save(err =>{
-                if(err) {
-                    console.log('error: ', err)
-                }
-                console.log('added Moderator to role colection')
-            })
-            new Role({name: 'admin'})
-            .save(err =>{
-                if(err) {
-                    console.log('error: ', err)
-                }
-                console.log('added ADMIN to role colection')
-            })
-        }
-    })
-}
-

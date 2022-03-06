@@ -1,19 +1,21 @@
 
-const db = require('../models/users/index')
-const Account = db.account
-const Role = db.role
+const db = require('../../models/index')
+const Moderator = db.moderator
 const ROLES = db.ROLES
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 exports.signup = async (req, res) => {
-  const user = new Account({
+  const user = new Moderator({
     username: req.body.username,
-    email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
-    phone: req.body.phone
+    modName: req.body.modName,
+    email: req.body.email,
+    phone: req.body.phone,
+    avatar: req.file.path,
+    organizationName: req.body.organizationName ,
+    tourCustomStatus: req.body.tourCustomStatus
   })
-
   user.save((err, user) => {
     if (err) {
       return res.status(500).send({
@@ -21,57 +23,11 @@ exports.signup = async (req, res) => {
         message: err
       })
     }
-
-    if (req.body.roles) {
-      Role.find({
-        name: { $in: req.body.roles }
-      }, (err, roles) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = roles.map(role => role._id)
-        user.save(err => {
-          if (err) {
-            return res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-          }
-          res.send({
-            errorCode: 0,
-            message: 'User was registered successfully'
-          })
-        })
-      })
-    }
-    else {
-      Role.findOne({ name: 'user' }, (err, role) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = [role._id];
-        user.save(err => {
-          if (err) {
-            res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-            return
-          }
-          res.send({
-            errorCode: 0,
-            message: "User was registered successfully!"
-          });
-        });
-      });
-    }
-  });
+    res.send({
+      errorCode: 0,
+      message: "Moderator was registered successfully!"
+    })
+  })
 }
 
 

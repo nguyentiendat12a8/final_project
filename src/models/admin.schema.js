@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.Admin = mongoose.model(
     'Admin',
@@ -9,6 +11,6 @@ exports.Admin = mongoose.model(
         email: {type: String, required: true},
         phone: {type: String, required: true},
         avatar: String,
-        slug: {type: String, slug: adminName, unique: true }
+        slug: {type: String, slug: 'adminName', unique: true }
     })
 )

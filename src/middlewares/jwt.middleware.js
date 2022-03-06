@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken')
 const config = process.env
-const db = require('../models/schema/index')
-const User = db.user
-const Role = db.role
+const db = require('../models/index')
+const Admin = db.admin
+const Moderator = db.moderator
 
-verifyToken = async (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
     let token = req.body.token || req.query.token ||req.headers["x-access-token"];
     //const token = req.cookies.access_token
     //const token = req.body.access_token
@@ -24,7 +24,7 @@ verifyToken = async (req, res, next) => {
     })
 }
 
-verifyRefreshToken = (req, res, next) => {
+exports.verifyRefreshToken = (req, res, next) => {
     let refreshToken = req.body.refreshToken || req.query.refreshToken
     //const refreshToken = req.cookies.access_token
     //const token = req.body.access_token
@@ -45,70 +45,20 @@ verifyRefreshToken = (req, res, next) => {
     })
 }
 
-isAdmin = (req, res, next) => {
-    User.findById(req.userId).exec((err, user) => {
+exports.isAdmin = (req, res, next) => {
+    Admin.findById(req.userId).exec((err, user) => {
         if (err) {
             return res.status(500).send({ message: err })
         }
-
-        Role.find({
-            _id: { $in: user.roles }
-        },
-            (err, roles) => {
-                if (err) {
-                    res.status(500).send({ message: err })
-                    return
-                }
-
-                for (let i = 0; i < roles.length; i++) {
-                    if (roles[i].name === 'admin') {
-                        next()
-                        return res.json(roles)
-                        return
-                    }
-                }
-
-                res.status(403).send({ message: 'Require admin role!' })
-                return
-            })
-
+        next()
     })
 }
 
-isModerator = (req, res, next) => {
-    User.findById(req.userId).exec((err, user) => {
+exports.isModerator = (req, res, next) => {
+    Moderator.findById(req.userId).exec(err => {
         if (err) {
             return res.status(500).send({ message: err })
         }
-
-        Role.find({
-            _id: { $in: user.roles }
-        },
-            (err, roles) => {
-                if (err) {
-                    res.status(500).send({ message: err })
-                    return
-                }
-
-                for (let i = 0; i < roles.length; i++) {
-                    if (roles[i].name === 'moderator') {
-                        next()
-                        return
-                    }
-                }
-
-                res.status(403).send({ message: 'Require Moderator role!' })
-                return
-            })
-
+        next()
     })
 }
-
-const authJwt = {
-    verifyToken,
-    isAdmin,
-    isModerator,
-    verifyRefreshToken
-}
-
-module.exports = authJwt

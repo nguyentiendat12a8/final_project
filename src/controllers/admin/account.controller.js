@@ -1,19 +1,18 @@
 
-const db = require('../models/users/index')
-const Account = db.account
-const Role = db.role
-const ROLES = db.ROLES
+const db = require('../../models/index')
+const Admin = db.admin
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 exports.signup = async (req, res) => {
-  const user = new Account({
+  const user = new Admin({
     username: req.body.username,
-    email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
-    phone: req.body.phone
+    adminName: req.body.adminName,
+    email: req.body.email,
+    phone: req.body.phone,
+    //avatar: req.file.path
   })
-
   user.save((err, user) => {
     if (err) {
       return res.status(500).send({
@@ -21,59 +20,12 @@ exports.signup = async (req, res) => {
         message: err
       })
     }
-
-    if (req.body.roles) {
-      Role.find({
-        name: { $in: req.body.roles }
-      }, (err, roles) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = roles.map(role => role._id)
-        user.save(err => {
-          if (err) {
-            return res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-          }
-          res.send({
-            errorCode: 0,
-            message: 'User was registered successfully'
-          })
-        })
-      })
-    }
-    else {
-      Role.findOne({ name: 'user' }, (err, role) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = [role._id];
-        user.save(err => {
-          if (err) {
-            res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-            return
-          }
-          res.send({
-            errorCode: 0,
-            message: "User was registered successfully!"
-          });
-        });
-      });
-    }
-  });
+    res.send({
+      errorCode: 0,
+      message: "Admin was registered successfully!"
+    })
+  })
 }
-
 
 exports.signin = async (req, res, next) => {
   try {
@@ -82,57 +34,66 @@ exports.signin = async (req, res, next) => {
       res.status(500).json({
         errorCode: 500,
         message: "All input is required",
-      });
+      })
     }
-    const user = await Account.findOne({ username: username });
+    const user = await Admin.findOne({ username });
     if (!user) {
       res.status(404).json({
         errorCode: "404",
         message: "User not found ~~~",
-      });
+      })
     }
-
     if (bcrypt.compareSync(password, user.password)) {
       const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
         expiresIn: process.env.tokenLife,
-      });
+      })
       const refreshToken = jwt.sign(
         { id: user._id },
         process.env.REFRESH_TOKEN_KEY,
         {
           expiresIn: process.env.RefreshTokenLife,
         }
-      );
-      const role = await Role.findById(user.roles).then((response) => {
-        console.log("response", response);
-        return response.name;
-      });
+      )
+      userInfo = {
+        adminName: user.adminName,
+        email: user.email,
+        phone: user.phone,
+        avatar: user.avatar
+      }
       return res.status(200).json({
         errorCode: 0,
         token: token,
-        role: role,
-        refreshToken: refreshToken
-      });
+        refreshToken: refreshToken,
+        data: userInfo
+      })
     } else {
       return res.status(400).json({
         errorCode: 400,
-        message: "Invalid Credentials, password",
+        message: "Invalid password",
       })
     }
   } catch (err) {
-    return console.log(err);
+    return console.log(err)
   }
-};
+}
+
+exports.forgotPassword = (req,res) =>{
+
+}
+
+exports.linkChangePassword = (req,res) =>{
+
+}
 
 exports.updatePassword = async (req, res, next) => {
   try {
     //const { id } = req.params
     const id = req.body.id
-    const user = await Account.findOne({ _id: id })
+    const user = await Admin.findOne({ _id: id })
     const password = req.body.password
     const newPassword = bcrypt.hashSync(req.body.newPassword, 8)
     if (bcrypt.compareSync(password, user.password)) {
-      await Account.findByIdAndUpdate({ _id: id }, { password: newPassword }, { new: true })
+      await Admin.findByIdAndUpdate({ _id: id }, { password: newPassword }, { new: true })
       return res.status(200).send({ message: 'Change password successfully!' })
     }
     else {
@@ -148,17 +109,19 @@ exports.updatePassword = async (req, res, next) => {
 
 exports.editAccount = async (req, res, next) => {
   const id = req.userId
-  Account.findById({ _id: id }).then(accInfo => {
+  Admin.findById({ _id: id }).then(accInfo => {
     const acc = {
+      adminName: accInfo.adminName,
+      email: accInfo.email,
+      phone: accInfo.phone,
       avatar: accInfo.avatar,
-      phone: accInfo.phone
-    } 
+    }
     return res.status(200).send({
       errorCode: 0,
-      acc
+      data: acc
     })
   })
-    .catch(err =>{
+    .catch(err => {
       return res.status(500).send({
         errorCode: '500',
         message: err
@@ -171,10 +134,19 @@ exports.updateAccount = async (req, res, next) => {
   try {
     //const { id } = req.params
     const id = req.body.id
-    console.log(id)
+    //console.log(id)
+    const adminName = req.body.adminName
+    const email = req.body.email
     const avatar = req.file.path
     const phone = req.body.phone
-    await Account.findByIdAndUpdate({ _id: id }, { avatar: avatar,phone:phone }, { new: true })
+    await Admin.findByIdAndUpdate({ _id: id },
+      { 
+        adminName : adminName,
+        email: email,
+        avatar: avatar, 
+        phone: phone
+      },
+      { new: true })
     return res.status(200).send({ message: 'Change info successfully!' })
   } catch (error) {
     console.log(error)
@@ -183,20 +155,109 @@ exports.updateAccount = async (req, res, next) => {
 
 
 
-exports.deleteAccount = async (req, res, next) => {
-  try {
-    const id = req.params.id
-    Account.deleteOne({_id: id})
-    .then(()=>{
-      return res.status(200).send({
-        errorCode: 0,
-        message: 'Delete account successfully!'
-      })
-    })
-  }
-  catch(err){
-    
-  }
+// exports.deleteAccount = async (req, res, next) => {
+//   try {
+//     const id = req.params.id
+//     Admin.deleteOne({ _id: id })
+//       .then(() => {
+//         return res.status(200).send({
+//           errorCode: 0,
+//           message: 'Delete account successfully!'
+//         })
+//       })
+//   }
+//   catch (err) {
+
+//   }
+// }
+
+
+// manage account of user
+exports.listUserAccount = async (req,res) =>{
+
 }
 
+exports.detailUserAccount = async (req,res) =>{
 
+}
+
+exports.editUserAccount = async (req,res) =>{
+
+}
+
+exports.updateUserAccount = async (req,res) =>{
+
+}
+
+exports.deleteUserAccount = async (req,res) =>{
+
+}
+
+// manage account of moderator
+
+exports.listModAccount = async (req,res) =>{
+
+}
+
+exports.detailModAccount = async (req,res) =>{
+
+}
+
+exports.editModAccount = async (req,res) =>{
+
+}
+
+exports.updateModAccount = async (req,res) =>{
+
+}
+
+exports.deleteModAccount = async (req,res) =>{
+
+}
+
+//manage account of admin
+exports.listAdminAccount = async (req,res) =>{
+try{
+  Admin.find({})
+  .then(list =>{
+    return res.status(200).send({
+      errorCode: 0,
+      message: list
+    })
+  })
+}
+catch (err){
+
+}
+}
+
+exports.detailAdminAccount = async (req,res) =>{
+
+}
+
+exports.editAdminAccount = async (req,res) =>{
+
+}
+
+exports.updateAdminAccount = async (req,res) =>{
+
+}
+
+exports.deleteAdminAccount = async (req,res) =>{
+
+}
+
+//search acccountt
+// app.get('/users/search', (req,res) => {
+// 	var name_search = req.query.name // lấy giá trị của key name trong query parameters gửi lên
+
+// 	var result = users.filter( (user) => {
+// 		// tìm kiếm chuỗi name_search trong user name. 
+// 		// Lưu ý: Chuyển tên về cùng in thường hoặc cùng in hoa để không phân biệt hoa, thường khi tìm kiếm
+// 		return user.name.toLowerCase().indexOf(name_search.toLowerCase()) !== -1
+// 	})
+
+// 	res.render('users/index', {
+// 		users: result // render lại trang users/index với biến users bây giờ chỉ bao gồm các kết quả phù hợp
+// 	});
+// })

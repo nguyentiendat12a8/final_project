@@ -1,10 +1,10 @@
-const user = require('./user.routers')
-const tour = require('./tour.router')
+const account = require('./manageAccount.router')
+const tour = require('./manageTour.router')
 
 function route(app){
-    app.use('/user',user)
-    app.use('/mod', tour)
-    app.use('/admin', tour)
+    app.use('/admin/account',account)
+    //app.use('/admin/tour', tour)
+    // app.use('/admin/', tour)
 }
 
 

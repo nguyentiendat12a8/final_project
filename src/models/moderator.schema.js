@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.Moderator = mongoose.model(
     'Moderator',
@@ -13,6 +15,6 @@ exports.Moderator = mongoose.model(
         numberOfRates: {type: String},
         dueDate: {type: String, required: true},
         tourCustomStatus: {type: Boolean},
-        slug: {type: String, slug: modName, unique: true },
+        slug: {type: String, slug: 'modName', unique: true },
     })
 )

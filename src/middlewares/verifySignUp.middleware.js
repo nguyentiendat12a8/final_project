@@ -1,10 +1,11 @@
-
-const db = require('../models/schema/index')
-const Account = db.account
+const dbb = require('../')
+const db = require('../models/index')
+const User = db.user
+const Admin = db.admin
 const ROLES = db.ROLES
 
-checkDuplicateUsernameOrEmail = (req, res, next) => {
-    Account.findOne({
+exports.checkDuplicateUser = (req, res, next) => {
+    User.findOne({
         username: req.body.username
     }).exec((err, user) => {
         if (err) {
@@ -16,7 +17,7 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
             res.status(400).send({ message: 'Failed! username is already in use' })
             return
         }
-        Account.findOne({
+        User.findOne({
             email: req.body.email
         }).exec((err, user) => {
             if (err) {
@@ -32,7 +33,36 @@ checkDuplicateUsernameOrEmail = (req, res, next) => {
     })
 }
 
-checkRolesExisted = (req, res, next) => {
+exports.checkDuplicateAdmin = (req, res, next) => {
+    Admin.findOne({
+        username: req.body.username
+    }).exec((err, user) => {
+        if (err) {
+            res.status(500).send({ message: err })
+            return
+        }
+
+        if (user) {
+            res.status(400).send({ message: 'Failed! username is already in use' })
+            return
+        }
+        Admin.findOne({
+            email: req.body.email
+        }).exec((err, user) => {
+            if (err) {
+                res.status(500).send({ message: err })
+                return
+            }
+            if (user) {
+                res.status(400).send({ message: 'failed! email is already in use' })
+                return
+            }
+            next()
+        })
+    })
+}
+
+exports.checkRolesExisted = (req, res, next) => {
     if (req.body.roles) {
         //thu thay for = if (req.body.roles.length > 0)
         //for(let i = 0; i < req.body.roles.length; i++){
@@ -46,10 +76,3 @@ checkRolesExisted = (req, res, next) => {
     }
     next()
 }
-
-const verifySignUp = 
-{
-    checkDuplicateUsernameOrEmail,
-    checkRolesExisted
-}
-module.exports = verifySignUp

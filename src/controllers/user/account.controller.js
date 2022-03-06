@@ -7,122 +7,13 @@ var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 exports.signup = async (req, res) => {
-  const user = new Account({
-    username: req.body.username,
-    email: req.body.email,
-    password: bcrypt.hashSync(req.body.password, 8),
-    phone: req.body.phone
-  })
-
-  user.save((err, user) => {
-    if (err) {
-      return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-    }
-
-    if (req.body.roles) {
-      Role.find({
-        name: { $in: req.body.roles }
-      }, (err, roles) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = roles.map(role => role._id)
-        user.save(err => {
-          if (err) {
-            return res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-          }
-          res.send({
-            errorCode: 0,
-            message: 'User was registered successfully'
-          })
-        })
-      })
-    }
-    else {
-      Role.findOne({ name: 'user' }, (err, role) => {
-        if (err) {
-          return res.status(500).send({
-            errorCode: 500,
-            message: err
-          })
-        }
-        user.roles = [role._id];
-        user.save(err => {
-          if (err) {
-            res.status(500).send({
-              errorCode: 500,
-              message: err
-            })
-            return
-          }
-          res.send({
-            errorCode: 0,
-            message: "User was registered successfully!"
-          });
-        });
-      });
-    }
-  });
+  
 }
 
 
 exports.signin = async (req, res, next) => {
-  try {
-    const { username, password } = req.body;
-    if (!(username && password)) {
-      res.status(500).json({
-        errorCode: 500,
-        message: "All input is required",
-      });
-    }
-    const user = await Account.findOne({ username: username });
-    if (!user) {
-      res.status(404).json({
-        errorCode: "404",
-        message: "User not found ~~~",
-      });
-    }
-
-    if (bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
-        expiresIn: process.env.tokenLife,
-      });
-      const refreshToken = jwt.sign(
-        { id: user._id },
-        process.env.REFRESH_TOKEN_KEY,
-        {
-          expiresIn: process.env.RefreshTokenLife,
-        }
-      );
-      const role = await Role.findById(user.roles).then((response) => {
-        console.log("response", response);
-        return response.name;
-      });
-      return res.status(200).json({
-        errorCode: 0,
-        token: token,
-        role: role,
-        refreshToken: refreshToken
-      });
-    } else {
-      return res.status(400).json({
-        errorCode: 400,
-        message: "Invalid Credentials, password",
-      })
-    }
-  } catch (err) {
-    return console.log(err);
-  }
-};
+  
+}
 
 exports.updatePassword = async (req, res, next) => {
   try {
