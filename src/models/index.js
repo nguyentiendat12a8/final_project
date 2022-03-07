@@ -15,6 +15,7 @@ const { Post } = require('./post.schema')
 const { PostExperience } = require('./postExperience.schema')
 const { Rate } = require('./rate.schema')
 const { User } = require('./user.schema')
+const { ResetPassword } = require('./resetPassword.schema')
 
 const db = {}
 
@@ -35,6 +36,7 @@ db.postExperience = PostExperience
 db.rate = Rate
 db.tourCustom = TourCustom
 db.user = User
+db.resetPassword = ResetPassword
 db.ROLES = ['user', 'admin', 'moderator']
 
 module.exports = db
