@@ -2,7 +2,7 @@ const db = require('../../models/index')
 const HotelRoom = db.hotelRoom
 
 
-exports.listHotel = (req, res) => {
+exports.listHotelRoom = (req, res) => {
     HotelRoom.find({}, (err, hotelRoom) => {
         if (err) return res.status(500).send({
             errorCode: 500,
@@ -15,7 +15,7 @@ exports.listHotel = (req, res) => {
     })
 }
 
-exports.detailHotel = (req, res) => {
+exports.detailHotelRoom = (req, res) => {
     const hotelRoomID = req.params.hotelRoomID
     if(!hotelRoomID) return res.status(400).send({
         errorCode: 400,
@@ -33,13 +33,13 @@ exports.detailHotel = (req, res) => {
     })
 }
 
-exports.deleteHotel = (req, res) => {
+exports.deleteHotelRoom = (req, res) => {
     const hotelRoomID = req.params.hotelRoomID
     if(!hotelRoomID) return res.status(400).send({
         errorCode: 400,
         message: 'link invalid!'
     })
-    HotelRoom.findByIdAndDelete({_id: hotelRoomID}, (err)=>{
+    HotelRoom.delete({_id: hotelRoomID}, (err)=>{
         if (err) return res.status(500).send({
             errorCode: 500,
             message: 'hotel server is error'
@@ -51,26 +51,67 @@ exports.deleteHotel = (req, res) => {
     })
 }
 
-exports.restoreHotel = (req, res, next) => {
-
+exports.trashHotelRoom = (req, res, next) => {
+    HotelRoom.findDeleted({}, (err,listDelete)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listDelete
+        })
+    })
 }
 
-exports.forceDeleteHotel = (req, res, next) => {
+exports.restoreHotelRoom = (req, res, next) => {
+    const hotelRoomID = req.params.hotelRoomID
+    if(!hotelRoomID) return res.status(400).send({
+        errorCode: 400,
+        message: 'link invalid!'
+    })
+    HotelRoom.restore({_id: hotelRoomID}, (err)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'Restore room successfully!'
+        })
+    })
+}
 
+exports.forceDeleteHotelRoom = (req, res, next) => {
+    const hotelRoomID = req.params.hotelRoomID
+    if(!hotelRoomID) return res.status(400).send({
+        errorCode: 400,
+        message: 'link invalid!'
+    })
+    HotelRoom.deleteOne({_id: hotelRoomID}, (err)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'Force delete room successfully!'
+        })
+    })
 }
 
 //bộ lọc
-exports.filterMostHotel = (req, res, next) => {
+exports.filterMostHotelRoom = (req, res, next) => {
 
 }
 
-exports.filterLeastHotel = (req, res, next) => {
+exports.filterLeastHotelRoom = (req, res, next) => {
 
 }
 
-
-//xem danh sách hotel của mod từ danh sách account//lọc theo id của từng mod
-exports.listModHotel = (req, res, next) => {
+//bộ lọc search
+//query params
+exports.filterModHotelRoom = (req, res, next) => {
     const moderatorID = req.params.moderatorID
     if(!moderatorID) return res.status(400).send({
         errorCode: 400,
@@ -88,7 +129,7 @@ exports.listModHotel = (req, res, next) => {
     })
 }
 
-exports.detailModHotel = (req, res, next) => {
+exports.detailModHotelRoom = (req, res, next) => {
     const hotelroomID = req.params.hotelroomID
     if(!hotelroomID) return res.status(400).send({
         errorCode: 400,
@@ -106,57 +147,113 @@ exports.detailModHotel = (req, res, next) => {
     })
 }
 
-exports.deleteModHotel = (req, res, next) => {
-
+exports.deleteModHotelRoom = (req, res, next) => {
+    const hotelroomID = req.params.hotelroomID
+    if(!hotelroomID) return res.status(400).send({
+        errorCode: 400,
+        message: 'link invalid!'
+    })
+    HotelRoom.delete({hotelroomID}, err=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'Delete room successfully!'
+        })
+    })
 }
 
-exports.restoreModHotel = (req, res, next) => {
-
+exports.trashModHotelRoom = (req, res, next) => {
+    HotelRoom.findDeleted({}, (err, listDelete)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listDelete
+        })
+    })
 }
 
-exports.forceDeleteModHotel = (req, res, next) => {
+exports.restoreModHotelRoom = (req, res, next) => {
+    const hotelroomID = req.params.hotelroomID
+    if(!hotelroomID) return res.status(400).send({
+        errorCode: 400,
+        message: 'link invalid!'
+    })
+    HotelRoom.restore({hotelroomID}, err=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'Restore hotel successfully!'
+        })
+    })
+}
 
+exports.forceDeleteModHotelRoom = (req, res, next) => {
+    const hotelroomID = req.params.hotelroomID
+    if(!hotelroomID) return res.status(400).send({
+        errorCode: 400,
+        message: 'link invalid!'
+    })
+    HotelRoom.deleteOne({hotelroomID}, (err)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'hotel server is error'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'Force delete successfully!'
+        })
+    })
 }
 
 //xem danh sach hoa don tu danh sach account
-exports.listBillModHotel = (req, res, next) => {
+exports.listBillModHotelRoom = (req, res, next) => {
     //lọc theo id của từng mod
-}
-
-exports.detailBillModHotel = (req, res, next) => {
 
 }
 
-exports.deleteBillModHotel = (req, res, next) => {
+exports.detailBillModHotelRoom = (req, res, next) => {
 
 }
 
-exports.restoreBillModHotel = (req, res, next) => {
+exports.deleteBillModHotelRoom = (req, res, next) => {
 
 }
 
-exports.forceDeleteBillModHotel = (req, res, next) => {
+exports.restoreBillModHotelRoom = (req, res, next) => {
+
+}
+
+exports.forceDeleteBillModHotelRoom = (req, res, next) => {
 
 }
 
 
 //xem danh sach hoa don tu danh sach user account 
-exports.listBillUserHotel = (req, res, next) => {
+exports.listBillUserHotelRoom = (req, res, next) => {
     //lọc theo id của từng mod
 }
 
-exports.detailBillUserHotel = (req, res, next) => {
+exports.detailBillUserHotelRoom = (req, res, next) => {
 
 }
 
-exports.deleteBillUserHotel = (req, res, next) => {
+exports.deleteBillUserHotelRoom = (req, res, next) => {
 
 }
 
-exports.restoreBillUserHotel = (req, res, next) => {
+exports.restoreBillUserHotelRoom = (req, res, next) => {
 
 }
 
-exports.forceDeleteBillUserHotel = (req, res, next) => {
+exports.forceDeleteBillUserHotelRoom = (req, res, next) => {
 
 }

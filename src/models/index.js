@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 mongoose.Promise = global.Promise
+const softDelete = require('mongoose-delete')
 const { Account } = require("./user.schema")
 const { BillTour } = require('./billTour.schema')
 const {Tour} = require('./tour.schema')
@@ -16,6 +17,12 @@ const { PostExperience } = require('./postExperience.schema')
 const { Rate } = require('./rate.schema')
 const { User } = require('./user.schema')
 const { ResetPassword } = require('./resetPassword.schema')
+
+
+mongoose.plugin(softDelete, {
+    deleteAt: true,
+    overrideMethods : 'all'
+})
 
 const db = {}
 

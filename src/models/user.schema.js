@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const slug = require('mongoose-slug-generator')
+const softDelete = require('mongoose-delete')
 mongoose.plugin(slug)
 
 exports.User = mongoose.model(
@@ -12,5 +13,9 @@ exports.User = mongoose.model(
         phone: {type: String, required: true},
         avatar: {type: String},
         slug: {type: String, slug: 'userName', unique: true }
+    },
+    {
+        timestamps: true
     })
 )
+

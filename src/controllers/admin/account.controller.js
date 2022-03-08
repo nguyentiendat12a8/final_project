@@ -320,6 +320,55 @@ exports.deleteUserAccount = async (req, res) => {
   })
 }
 
+exports.trashUserAccount = async(req,res) =>{
+  User.findDeleted({}, (err, listDelete) =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'User account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      data: listDelete
+    })
+  })
+}
+
+exports.restoreUserAccount = async (req,res)=>{
+  const userID = req.params.userID
+  if (!userID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  User.restore({_id: userID}, (err)=>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'User account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Restore user account successfully'
+    })
+  })
+}
+
+exports.forceDeleteUserAccount = async (req,res)=>{
+  const userID = req.params.userID
+  if (!userID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  User.deleteOne({_id: userID}, err =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'User account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Force delete user account successfully'
+    })
+  })
+}
+
 // manage account of moderator
 
 exports.listModAccount = async (req, res) => {
@@ -411,6 +460,55 @@ exports.deleteModAccount = async (req, res) => {
   })
 }
 
+exports.trashModAccount = async(req,res) =>{
+  Moderator.findDeleted({}, (err, listDelete) =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Moderator account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      data: listDelete
+    })
+  })
+}
+
+exports.restoreModAccount = async (req,res)=>{
+  const moderatorID = req.params.moderatorID
+  if (!moderatorID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  Moderator.restore({_id: moderatorID}, (err)=>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Moderator account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Restore Moderator account successfully'
+    })
+  })
+}
+
+exports.forceDeleteModAccount = async (req,res)=>{
+  const moderatorID = req.params.moderatorID
+  if (!moderatorID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  Moderator.deleteOne({_id: moderatorID}, err =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Moderator account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Force delete moderator account successfully'
+    })
+  })
+}
+
 //manage account of admin
 exports.listAdminAccount = async (req, res) => {
   User.find({}, (err, list) => {
@@ -499,7 +597,56 @@ exports.deleteAdminAccount = async (req, res) => {
   })
 }
 
-//backup data
+exports.trashAdminAccount = async(req,res) =>{
+  Admin.findDeleted({}, (err, listDelete) =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Admin account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      data: listDelete
+    })
+  })
+}
+
+exports.restoreAdminAccount = async (req,res)=>{
+  const adminID = req.params.adminID
+  if (!adminID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  Admin.restore({_id: adminID}, (err)=>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Admin account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Restore Admin account successfully'
+    })
+  })
+}
+
+exports.forceDeleteAdminAccount = async (req,res)=>{
+  const adminID = req.params.adminID
+  if (!adminID) return res.status(400).send({
+    errorCode: 400,
+    message: 'Invalid link'
+  })
+  Admin.deleteOne({_id: adminID}, err =>{
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: 'Admin account server is error'
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Force delete Admin account successfully'
+    })
+  })
+}
+
+
 
 
 
