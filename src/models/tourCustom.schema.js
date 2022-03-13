@@ -26,5 +26,8 @@ exports.TourCustom = mongoose.model(
             ref: 'CategoryTour'
         }],
         slug: {type: String, slug: 'tourName', unique: true }
+    },
+    {
+        timestamps: true
     })
 )

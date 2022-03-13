@@ -12,5 +12,8 @@ exports.Rate = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }]
+    },
+    {
+        timestamps: true
     })
 )

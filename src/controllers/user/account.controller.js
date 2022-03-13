@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
           message: err
         })
       }
-      res.send({
+      return res.send({
         errorCode: 0,
         message: "User was registered successfully!"
       })
@@ -38,14 +38,14 @@ exports.signin = async (req, res, next) => {
   try {
     const { username, password } = req.body;
     if (!(username && password)) {
-      res.status(400).json({
+      return res.status(400).json({
         errorCode: 400,
         message: "All input is required",
       })
     }
     const user = await User.findOne({ username });
     if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         errorCode: "404",
         message: "User not found ~~~",
       })

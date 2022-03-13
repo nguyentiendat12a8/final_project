@@ -8,7 +8,10 @@ exports.HotelRoom = mongoose.model(
         roomName: {type: String, required: true},
         price: {type: String, required: true},
         bedroom: {type: String, required: true},
-        utilities: {type: String, required: true},
+        utilities: {
+            dexe: {type : Boolean, default: false},
+            wifi: {type : Boolean, default: false}
+        },
         photo: {type: String, required: true},
         description: {type: String, required: true},
         address: {type: String, required: true},
@@ -17,5 +20,8 @@ exports.HotelRoom = mongoose.model(
             ref: 'Moderator'
         }],
         slug: {type: String, slug: 'roomName', unique: true }
+    },
+    {
+        timestamps: true
     })
 )

@@ -12,5 +12,8 @@ exports.Like = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'PostExperience'
         }]
+    },
+    {
+        timestamps: true
     })
 )

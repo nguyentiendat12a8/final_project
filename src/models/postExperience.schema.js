@@ -6,11 +6,14 @@ exports.PostExperience = mongoose.model(
         postText: {type: String, required: true},
         photo: {type: String},
         address: {type: String, required: true},
-        time: {type: String, required: true},
+        //time: {type: String, required: true},
         numberOfLike: {type: Number},
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }]
+    },
+    {
+        timestamps: true
     })
 )

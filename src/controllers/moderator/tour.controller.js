@@ -1,13 +1,15 @@
-const db = require('../models/users/index')
+const db = require('../../models/index')
 const Tour = db.tour
-//const { multipleMongooseToObject } = require('../util/mongoose');
-
 const jwt = require('jsonwebtoken')
-const BookedTour = db.bookedTour
+const billTour = db.billTour
+const CategoryTour = db.categoryTour
+const BillTour = db.billTour
+const Moderator = db.moderator
 const config = process.env
 const paypal = require('paypal-rest-sdk')
 
-exports.createTour = (req, res, next) => {
+
+exports.addTour = async (req, res, next) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -18,15 +20,20 @@ exports.createTour = (req, res, next) => {
     } else {
         req.body.picture = 'No photo'
     }
-    if (req.body.userId) {
-        req.body.accountId = req.body.userId
-    } else {
-        req.body.accountId = 'khong co id'
-    }
-
-    const tour = new Tour(req.body)
+    const category = await CategoryTour.findOne({ categoryName: req.query.categoryName })
+    const moderator = await Moderator.findById(req.accountID)
+    const tour = new Tour({
+        tourName: req.body.tourName,
+        startDate: req.body.startDate,
+        price: req.body.price,
+        picture: req.body.picture,
+        address: req.body.address,
+        description: req.body.description,
+        moderatorID: moderator._id,
+        categoryTourID: category._id,
+    })
     tour.save()
-        .then(response => {
+        .then(() => {
             res.status(200).send({
                 errorCode: 0,
                 message: 'upload successfully!'
@@ -51,21 +58,34 @@ exports.deleteTour = (req, res, next) => {
 }
 
 exports.listTour = (req, res, next) => {
-    Tour.find({
-        accountId: req.userId
-    })
-        .then(tour => {
-            res.status(200).send({
-                errorCode: 0,
-                message: tour
+    let perPage = 10
+    let page = req.params.page || 1
+    Tour.find({ moderatorID: req.accountID })
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(async (err, list) => {
+            if (err) return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
+            Tour.countDocuments({ deleted: false }, (err, count) => {
+                if (err) return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
+                return res.status(200).send({
+                    errorCode: 0,
+                    data: list,
+                    current: page,
+                    pages: Math.ceil(count / perPage)
+                })
             })
         })
-        .catch(err => {
-            console.log(err)
-        })
+
+
 }
 
-exports.detailTour = () =>{
+exports.detailTour = () => {
 
 }
 //booked tour
@@ -113,6 +133,7 @@ exports.payment = async (req, res) => {
             "description": "book tour tien loi"
         }]
     };
+    
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
@@ -157,12 +178,12 @@ exports.success = async (req, res, next) => {
             console.log(error.response);
             throw error;
         } else {
-            const bookedTour = new BookedTour({
+            const billTour = new BillTour({
                 accountId: '62090db6bd7ef1e7c3f98332', //req.userId
                 tourId: '6210a649b7ccdfb4c06cd388', //req.params.tourId
                 bookedDate: Date.now()
             })
-            bookedTour.save()
+            billTour.save()
                 .then(() => {
                     return res.status(200).send({
                         errorCode: 0,
