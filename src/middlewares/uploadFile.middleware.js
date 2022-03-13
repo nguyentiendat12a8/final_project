@@ -11,7 +11,7 @@ const storage = multer.diskStorage({
     }
 })
 
-var upload = multer({
+exports.upload = multer({
     storage: storage,
     fileFilter: function(req, file, callback) {
         if(
@@ -39,7 +39,7 @@ const storageAvatar = multer.diskStorage({
         cb(null, Date.now()+ext)
     }
 })
-var uploadAvatar = multer({
+exports.uploadAvatar = multer({
     storage: storageAvatar,
     fileFilter: function(req, file, callback) {
         if(
@@ -57,6 +57,3 @@ var uploadAvatar = multer({
     //     fileSize: 1024 * 1024 * 2
     // }
 })
-
-module.exports = upload
-module.exports = uploadAvatar

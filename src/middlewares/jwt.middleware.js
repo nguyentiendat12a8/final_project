@@ -6,8 +6,6 @@ const Moderator = db.moderator
 
 exports.verifyToken = async (req, res, next) => {
     let token = req.body.token || req.query.token ||req.headers["x-access-token"];
-    //const token = req.cookies.access_token
-    //const token = req.body.access_token
     if(!token){
        return res.status(401).send("token is required!")
     }
@@ -18,8 +16,7 @@ exports.verifyToken = async (req, res, next) => {
             }
             return res.status(401).send({message: err.message})
         }
-        req.userId = decoded.id
-        //return res.send({token : token})
+        req.accountID = decoded.id
         next()
     })
 }

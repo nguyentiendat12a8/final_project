@@ -14,5 +14,8 @@ exports.BillHotelRoom = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'HotelRoom'
         }],
+    },
+    {
+        timestamps: true
     })
 )

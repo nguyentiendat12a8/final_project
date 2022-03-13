@@ -11,6 +11,10 @@ exports.Admin = mongoose.model(
         email: {type: String, required: true},
         phone: {type: String, required: true},
         avatar: String,
+        deleted: {type: Boolean, default: false},
         slug: {type: String, slug: 'adminName', unique: true }
-    })
+    }, {
+        timestamps: true
+    }
+    )
 )

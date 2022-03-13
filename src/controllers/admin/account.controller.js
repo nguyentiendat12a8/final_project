@@ -1,5 +1,8 @@
 var jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const Joi = require('joi')
+const crypto = require('crypto')
+const sendEmail = require('../../util/sendEmail')
 const db = require('../../models/index')
 const Admin = db.admin
 const ResetPassword = db.resetPassword
@@ -13,7 +16,7 @@ exports.signup = async (req, res) => {
     adminName: req.body.adminName,
     email: req.body.email,
     phone: req.body.phone,
-    avatar: req.file.path
+    //avatar: req.file.path
   })
   user.save((err, user) => {
     if (err) {
@@ -81,10 +84,9 @@ exports.signin = async (req, res, next) => {
 
 exports.updatePassword = async (req, res, next) => {
   try {
-    //const { id } = req.params
-    const id = req.body.id //req.userId
+    const id = req.accountID
     const user = await Admin.findOne({ _id: id })
-    if(!user) return res.status(404).send({
+    if (!user) return res.status(404).send({
       errorCode: 404,
       message: 'User not found'
     })
@@ -106,7 +108,7 @@ exports.updatePassword = async (req, res, next) => {
 }
 
 exports.editAccount = async (req, res, next) => {
-  const id = req.userId
+  const id = req.accountID
   Admin.findById({ _id: id }).then(accInfo => {
     const acc = {
       adminName: accInfo.adminName,
@@ -129,8 +131,7 @@ exports.editAccount = async (req, res, next) => {
 
 exports.updateAccount = async (req, res, next) => {
   try {
-    //const { id } = req.params
-    const id = req.body.id //req.userId
+    const id = req.accountID
     const adminName = req.body.adminName
     const email = req.body.email
     const avatar = req.file.path
@@ -170,8 +171,8 @@ exports.sendEmailResetPass = async (req, res) => {
       }).save()
     }
 
-    const link = `${process.env.BASE_URL}/admin/confirmLink/${user._id}/${token.token}`
-    await sendEmail(user.accountEmail, "Password reset", link);
+    const link = `${process.env.BASE_URL}/admin/account/update-forgotten-password/${user._id}/${token.token}`
+    await sendEmail(user.email, "Password reset", link);
 
     res.send("password reset link sent to your email account")
   } catch (error) {
@@ -183,11 +184,11 @@ exports.sendEmailResetPass = async (req, res) => {
 
 exports.confirmLink = async (req, res) => {
   try {
-    const schema = Joi.object({ accountPassword: Joi.string().required() })
+    const schema = Joi.object({ password: Joi.string().required() })
     const { error } = schema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message)
 
-    const user = await Account.findById(req.params.accountID);
+    const user = await Admin.findById(req.params.accountID);
     if (!user) return res.status(400).send({
       errorCode: 400,
       message: "invalid link or expired"
@@ -199,7 +200,7 @@ exports.confirmLink = async (req, res) => {
     })
     if (!token) return res.status(400).send("Invalid link or expired")
 
-    user.accountPassword = bcrypt.hashSync(req.body.accountPassword, 8)
+    user.password = bcrypt.hashSync(req.body.password, 8)
     await user.save()
     await token.delete()
     res.send("password reset sucessfully.")
@@ -210,36 +211,31 @@ exports.confirmLink = async (req, res) => {
 }
 
 
-
-// exports.deleteAccount = async (req, res, next) => {
-//   try {
-//     const id = req.params.id
-//     Admin.deleteOne({ _id: id })
-//       .then(() => {
-//         return res.status(200).send({
-//           errorCode: 0,
-//           message: 'Delete account successfully!'
-//         })
-//       })
-//   }
-//   catch (err) {
-
-//   }
-// }
-
-
 // manage account of user
 exports.listUserAccount = async (req, res) => {
-  User.find({}, (err, list) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'User account server is error'
+  let perPage = 10
+  let page = req.params.page || 1
+  User.find({ deleted: false })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      User.countDocuments({ deleted: false }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
     })
-    return res.status(200).send({
-      errorCode: 0,
-      data: list
-    })
-  })
 }
 
 exports.detailUserAccount = async (req, res) => {
@@ -248,56 +244,14 @@ exports.detailUserAccount = async (req, res) => {
     errorCode: 400,
     message: 'Invalid link'
   })
-  User.findById({ _id: userID }, (err, user) => {
+  User.findOne({ _id: userID }, (err, user) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'User account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
       data: user
-    })
-  })
-}
-
-exports.editUserAccount = async (req, res) => {
-  const userID = req.params.userID
-  if (!userID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  User.findById({_id: userID}, (err, user) =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'User account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      data: user
-    })
-  })
-}
-
-exports.updateUserAccount = async (req, res) => {
-  const userID = req.params.userID
-  if (!userID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  User.findByIdAndUpdate({_id: userID}, {
-    password:  bcrypt.hashSync(req.body.password, 8),
-    userName: req.body.userName,
-    email: req.body.email,
-    phone: req.body.phone,
-    avatar: req.file.avatar
-  }, {new: true}, err =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'User account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'update user data is successfully!'
     })
   })
 }
@@ -308,39 +262,52 @@ exports.deleteUserAccount = async (req, res) => {
     errorCode: 400,
     message: 'Invalid link'
   })
-  const user = await User.findById({_id: userID})
-  if(!user) return res.status(400).send({
-    errorCode: 400,
-    message: 'user not found!'
-  })
-  await user.delete()
-  return res.status(200).send({
-    errorCode: 0,
-    message: `Delete user successfully!`
-  })
-}
-
-exports.trashUserAccount = async(req,res) =>{
-  User.findDeleted({}, (err, listDelete) =>{
-    if(err) return res.status(500).send({
+  User.findByIdAndUpdate({ _id: userID }, { deleted: true }, { new: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'User account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
-      data: listDelete
+      message: `Delete user successfully!`
     })
   })
 }
 
-exports.restoreUserAccount = async (req,res)=>{
+exports.trashUserAccount = async (req, res) => {
+  let perPage = 10
+  let page = req.params.page || 1
+  User.find({ deleted: true })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      User.countDocuments({ deleted: true }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
+    })
+}
+
+exports.restoreUserAccount = async (req, res) => {
   const userID = req.params.userID
   if (!userID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  User.restore({_id: userID}, (err)=>{
-    if(err) return res.status(500).send({
+  User.findByIdAndUpdate({ _id: userID }, { deleted: false }, { new: true }, (err) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: 'User account server is error'
     })
@@ -351,16 +318,16 @@ exports.restoreUserAccount = async (req,res)=>{
   })
 }
 
-exports.forceDeleteUserAccount = async (req,res)=>{
+exports.forceDeleteUserAccount = async (req, res) => {
   const userID = req.params.userID
   if (!userID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  User.deleteOne({_id: userID}, err =>{
-    if(err) return res.status(500).send({
+  User.deleteOne({ _id: userID, deleted: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'User account server is error'
+      message: 'delete function invalid or user server is error'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -372,16 +339,29 @@ exports.forceDeleteUserAccount = async (req,res)=>{
 // manage account of moderator
 
 exports.listModAccount = async (req, res) => {
-  Moderator.find({}, (err, list) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'Moderator account server is error'
+  let perPage = 10
+  let page = req.params.page || 1
+  Moderator.find({ deleted: false })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      Moderator.countDocuments({ deleted: false }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
     })
-    return res.status(200).send({
-      errorCode: 0,
-      data: list
-    })
-  })
 }
 
 exports.detailModAccount = async (req, res) => {
@@ -389,55 +369,11 @@ exports.detailModAccount = async (req, res) => {
   Moderator.findById({ _id: moderatorID }, (err, mod) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Moderator account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
       data: mod
-    })
-  })
-}
-
-exports.editModAccount = async (req, res) => {
-  const moderatorID = req.params.moderatorID
-  if (!moderatorID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Moderator.findById({_id: moderatorID}, (err, mod) =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'Mod account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      data: mod
-    })
-  })
-}
-
-exports.updateModAccount = async (req, res) => {
-  const moderatorID = req.params.moderatorID
-  if (!moderatorID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Moderator.findByIdAndUpdate({_id: moderatorID}, {
-    password:  bcrypt.hashSync(req.body.password, 8),
-    modName: req.body.modName,
-    email: req.body.email,
-    phone: req.body.phone,
-    avatar: req.file.avatar,
-    organizationName: req.body.organizationName,
-    dueDate: req.body.dueDate
-  }, {new: true}, err =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'Moderator account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'Update moderator data is successfully!'
     })
   })
 }
@@ -448,39 +384,52 @@ exports.deleteModAccount = async (req, res) => {
     errorCode: 400,
     message: 'Invalid link'
   })
-  const mod = await Moderator.findById({_id: moderatorID})
-  if(!mod) return res.status(400).send({
-    errorCode: 400,
-    message: 'moderator not found!'
-  })
-  await mod.delete()
-  return res.status(200).send({
-    errorCode: 0,
-    message: `Delete moderator successfully!`
-  })
-}
-
-exports.trashModAccount = async(req,res) =>{
-  Moderator.findDeleted({}, (err, listDelete) =>{
-    if(err) return res.status(500).send({
+  Moderator.findByIdAndUpdate({ _id: moderatorID }, { deleted: true }, { new: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Moderator account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
-      data: listDelete
+      message: `Delete moderator successfully!`
     })
   })
 }
 
-exports.restoreModAccount = async (req,res)=>{
+exports.trashModAccount = async (req, res) => {
+  let perPage = 10
+  let page = req.params.page || 1
+  Moderator.find({ deleted: true })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      Moderator.countDocuments({ deleted: true }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
+    })
+}
+
+exports.restoreModAccount = async (req, res) => {
   const moderatorID = req.params.moderatorID
   if (!moderatorID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  Moderator.restore({_id: moderatorID}, (err)=>{
-    if(err) return res.status(500).send({
+  Moderator.findByIdAndUpdate({ _id: moderatorID }, { deleted: false }, { new: true }, (err) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: 'Moderator account server is error'
     })
@@ -491,16 +440,16 @@ exports.restoreModAccount = async (req,res)=>{
   })
 }
 
-exports.forceDeleteModAccount = async (req,res)=>{
+exports.forceDeleteModAccount = async (req, res) => {
   const moderatorID = req.params.moderatorID
   if (!moderatorID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  Moderator.deleteOne({_id: moderatorID}, err =>{
-    if(err) return res.status(500).send({
+  Moderator.deleteOne({ _id: moderatorID, deleted: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Moderator account server is error'
+      message: 'delete function invalid or mod server is error'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -511,16 +460,29 @@ exports.forceDeleteModAccount = async (req,res)=>{
 
 //manage account of admin
 exports.listAdminAccount = async (req, res) => {
-  User.find({}, (err, list) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'Admin account server is error'
+  let perPage = 10
+  let page = req.params.page || 1
+  Admin.find({ deleted: false })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      Admin.countDocuments({ deleted: false }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
     })
-    return res.status(200).send({
-      errorCode: 0,
-      data: list
-    })
-  })
 }
 
 exports.detailAdminAccount = async (req, res) => {
@@ -528,53 +490,11 @@ exports.detailAdminAccount = async (req, res) => {
   Admin.findById({ _id: adminID }, (err, admin) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Admin account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
       data: admin
-    })
-  })
-}
-
-exports.editAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  if (!adminID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Admin.findById({_id: adminID}, (err, admin) =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'Admin account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      data: admin
-    })
-  })
-}
-
-exports.updateAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  if (!adminID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  User.findByIdAndUpdate({_id: adminID}, {
-    password:  bcrypt.hashSync(req.body.password, 8),
-    adminName: req.body.adminName,
-    email: req.body.email,
-    phone: req.body.phone,
-    avatar: req.file.avatar
-  }, {new: true}, err =>{
-    if(err) return res.status(500).send({
-      errorCode: 500,
-      message: 'admin account server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'update admin data is successfully!'
     })
   })
 }
@@ -585,41 +505,55 @@ exports.deleteAdminAccount = async (req, res) => {
     errorCode: 400,
     message: 'Invalid link'
   })
-  const admin = await Admin.findById({_id: adminID})
-  if(!admin) return res.status(400).send({
-    errorCode: 400,
-    message: 'Admin not found!'
-  })
-  await admin.delete()
-  return res.status(200).send({
-    errorCode: 0,
-    message: `Delete Admin successfully!`
-  })
-}
-
-exports.trashAdminAccount = async(req,res) =>{
-  Admin.findDeleted({}, (err, listDelete) =>{
-    if(err) return res.status(500).send({
+  Admin.findByIdAndUpdate({ _id: adminID }, { deleted: true }, { new: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Admin account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
-      data: listDelete
+      message: `Delete Admin successfully!`
     })
   })
+
 }
 
-exports.restoreAdminAccount = async (req,res)=>{
+exports.trashAdminAccount = async (req, res) => {
+  let perPage = 10
+  let page = req.params.page || 1
+  Admin.find({ deleted: true })
+    .skip((perPage * page) - perPage)
+    .limit(perPage)
+    .exec(async (err, list) => {
+      if (err) return res.status(500).send({
+        errorCode: 500,
+        message: err
+      })
+      Admin.countDocuments({ deleted: true }, (err, count) => {
+        if (err) return res.status(500).send({
+          errorCode: 500,
+          message: err
+        })
+        return res.status(200).send({
+          errorCode: 0,
+          data: list,
+          current: page,
+          pages: Math.ceil(count / perPage)
+        })
+      })
+    })
+}
+
+exports.restoreAdminAccount = async (req, res) => {
   const adminID = req.params.adminID
   if (!adminID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  Admin.restore({_id: adminID}, (err)=>{
-    if(err) return res.status(500).send({
+  Admin.findByIdAndUpdate({ _id: adminID }, { deleted: false }, { new: true }, (err) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Admin account server is error'
+      message: err
     })
     return res.status(200).send({
       errorCode: 0,
@@ -628,16 +562,16 @@ exports.restoreAdminAccount = async (req,res)=>{
   })
 }
 
-exports.forceDeleteAdminAccount = async (req,res)=>{
+exports.forceDeleteAdminAccount = async (req, res) => {
   const adminID = req.params.adminID
   if (!adminID) return res.status(400).send({
     errorCode: 400,
     message: 'Invalid link'
   })
-  Admin.deleteOne({_id: adminID}, err =>{
-    if(err) return res.status(500).send({
+  Admin.deleteOne({ _id: adminID, deleted: true }, err => {
+    if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Admin account server is error'
+      message: 'delete function invalid or mod server is error'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -645,22 +579,3 @@ exports.forceDeleteAdminAccount = async (req,res)=>{
     })
   })
 }
-
-
-
-
-
-//search acccountt
-// app.get('/users/search', (req,res) => {
-// 	var name_search = req.query.name // lấy giá trị của key name trong query parameters gửi lên
-
-// 	var result = users.filter( (user) => {
-// 		// tìm kiếm chuỗi name_search trong user name. 
-// 		// Lưu ý: Chuyển tên về cùng in thường hoặc cùng in hoa để không phân biệt hoa, thường khi tìm kiếm
-// 		return user.name.toLowerCase().indexOf(name_search.toLowerCase()) !== -1
-// 	})
-
-// 	res.render('users/index', {
-// 		users: result // render lại trang users/index với biến users bây giờ chỉ bao gồm các kết quả phù hợp
-// 	});
-// })
