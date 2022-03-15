@@ -5,6 +5,7 @@ const BillTour = db.billTour
 const Moderator = db.moderator
 const User = db.user
 const paypal = require('paypal-rest-sdk')
+const { HotelRoom } = require('../../models/hotelRoom.schema')
 
 exports.addTour = async (req, res, next) => {
     if (req.files) {
@@ -147,6 +148,37 @@ exports.detailTour = () => {
         })
     })
 }
+
+//search, filter
+exports.searchTour = (req,res) =>{
+    var search = req.query.search
+    Tour.find({}, (err, tour)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var dataSearch = tour.filter(r => search.toLowerCase().include(r.tourName.toLowerCase()))
+        return res.status(200).send({
+            errorCode: 0,
+            data: dataSearch
+        })
+    })
+}
+
+exports.filterTour =(req,res) =>{
+    Tour.find({},(err, tour)=>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var dataSort = tour.sort((a,b) => a.price - b.price)
+        return res.status(200).send({
+            errorCode: 0,
+            data: dataSort
+        })
+    })
+}
+
 //booked tour
 // payment online
 paypal.configure({
@@ -339,6 +371,7 @@ exports.deleteBillTour = async (req,res) =>{
         })
     }
 }
-// exports.detailBillTour = (req, res, next) => {
 
-// }
+
+
+//custom tour

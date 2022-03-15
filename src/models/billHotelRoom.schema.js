@@ -6,6 +6,7 @@ exports.BillHotelRoom = mongoose.model(
     new mongoose.Schema({
         checkIn: {type: Date, required: true},
         checkOut: {type: Date, required: true},
+        deleted: {type: Boolean, default: false},
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
