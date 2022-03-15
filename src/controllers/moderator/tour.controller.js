@@ -1,18 +1,15 @@
 const db = require('../../models/index')
 const Tour = db.tour
-const jwt = require('jsonwebtoken')
-const billTour = db.billTour
 const CategoryTour = db.categoryTour
 const BillTour = db.billTour
 const Moderator = db.moderator
-const config = process.env
+const User = db.user
 const paypal = require('paypal-rest-sdk')
-
 
 exports.addTour = async (req, res, next) => {
     if (req.files) {
         let path = ''
-        req.files.forEach((files, index, arr) => {
+        req.files.forEach(files => {
             path = path + files.path + ','
         });
         path = path.substring(0, path.lastIndexOf(','))
@@ -28,7 +25,10 @@ exports.addTour = async (req, res, next) => {
         price: req.body.price,
         picture: req.body.picture,
         address: req.body.address,
-        description: req.body.description,
+        description: {
+            vehicle: req.body.vehicle,
+            timeDecription: req.body.timeDecription
+        },
         moderatorID: moderator._id,
         categoryTourID: category._id,
     })
@@ -46,17 +46,57 @@ exports.addTour = async (req, res, next) => {
 }
 
 exports.editTour = (req, res, next) => {
-
+    Tour.find({_id: req.params.tourID, moderatorID: req.accountID}, (err, tour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: tour
+        })
+    })
 }
 
-exports.updateTour = (req, res, next) => {
-
+exports.updateTour = async (req, res, next) => {
+    const category = CategoryTour.findOne({ categoryName: req.body.categoryName })
+    Tour.findOneAndUpdate({_id: req.params.tourID, moderatorID: req.accountID}, {
+        tourName: req.body.tourName,
+        startDate: req.body.startDate,
+        price: req.body.price,
+        picture: req.body.picture,
+        address: req.body.address,
+        description: {
+            vehicle: req.body.vehicle,
+            timeDecription: req.body.timeDecription
+        },
+        categoryTourID: category._id
+    }, { new: true }, err => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'update tour successfully!'
+        })
+    })
 }
 
 exports.deleteTour = (req, res, next) => {
-
+    Tour.findOneAndDelete({_id: req.params.tourID, moderatorID: req.accountID}, err => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'delete tour successfully!'
+        })
+    })
 }
 
+//list tour according moderator 
 exports.listTour = (req, res, next) => {
     let perPage = 10
     let page = req.params.page || 1
@@ -68,14 +108,24 @@ exports.listTour = (req, res, next) => {
                 errorCode: 500,
                 message: err
             })
-            Tour.countDocuments({ deleted: false }, (err, count) => {
+            Tour.countDocuments({ moderatorID: req.accountID }, (err, count) => {
                 if (err) return res.status(500).send({
                     errorCode: 500,
                     message: err
                 })
+                let show = []
+                list.forEach(e => {
+                    var tour = {
+                        tourID: e._id,
+                        tourName: e.startDate,
+                        price: e.price,
+                        address: e.address
+                    }
+                    show.append(tour)
+                })
                 return res.status(200).send({
                     errorCode: 0,
-                    data: list,
+                    data: show,
                     current: page,
                     pages: Math.ceil(count / perPage)
                 })
@@ -86,7 +136,16 @@ exports.listTour = (req, res, next) => {
 }
 
 exports.detailTour = () => {
-
+    Tour.findById(req.params.tourID, (err, tour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: tour
+        })
+    })
 }
 //booked tour
 // payment online
@@ -96,8 +155,10 @@ paypal.configure({
     'client_secret': 'EF-_jU1cTmNx1UQHkyl7nq3puKAd2JSAvFSbHxgfGeoNgiXsaW4eQ-PalxcQ5hZHcGJ5kD3sfB-21w7L'
 });
 
-exports.payment = async (req, res) => {
-    await Tour.findById({ _id: '6210a649b7ccdfb4c06cd388' })
+
+//book tour la chuc nang cua user
+exports.paymentTour = async (req, res) => {
+    await Tour.findById(req.params.tourID)
         .then(tour => {
             tourName = tour.tourName
             price = tour.price
@@ -133,7 +194,7 @@ exports.payment = async (req, res) => {
             "description": "book tour tien loi"
         }]
     };
-    
+
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
@@ -204,11 +265,80 @@ exports.cancel = (req, res) => {
     return
 }
 
+exports.listBillTour = async (req, res, next) => {
+    try {
+        Tour.find({ moderatorID: req.accountID }, (err, listTour) => {
+            if (err) return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
+            let listBill = []
+            let listDetail = []
+            listTour.forEach(async e => {
+                BillTour.find({ tourID: e._id }, (err, bill) => {
+                    if (err) return res.status(500).send({
+                        errorCode: 500,
+                        message: err
+                    })
 
-exports.listBillTour = (req, res, next) => {
-
+                    listBill.append(bill)
+                })
+            })
+            listBill.forEach(async e => {
+                var user = await User.findById(e.userID)
+                var tour = await Tour.findById(e.tourID)
+                var detail = {
+                    bookedDate: e.bookedDate,
+                    tourName: tour.tourName,
+                    userID: user.userName
+                }
+                listDetail.append(detail)
+            })
+            return res.status(200).send({
+                errorCode: 0,
+                data: listDetail
+            })
+        })
+    }
+    catch (err) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+    }
 }
 
-exports.detailBillTour = (req, res, next) => {
-
+exports.deleteBillTour = async (req,res) =>{
+    try {
+        Tour.find({moderatorID: req.accountID}, (err, list)=>{
+            if (err) return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
+            list.forEach(e=>{
+                const bill = await BillTour.findById(req.params.billTourID)
+                if(bill.tourID === e._id){
+                    await BillTour.findByIdAndUpdate(req.params.billTourID, {deleted: true}, {new: true}, err =>{
+                        if (err) return res.status(500).send({
+                            errorCode: 500,
+                            message: err
+                        })
+                        return res.status(200).send({
+                            errorCode: 0,
+                            message: 'Delete bill tour successfully!'
+                        })
+                    })
+                }
+    
+            })
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: error
+        })
+    }
 }
+// exports.detailBillTour = (req, res, next) => {
+
+// }
