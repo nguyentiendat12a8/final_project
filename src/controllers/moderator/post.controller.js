@@ -82,7 +82,7 @@ exports.deletePost = (req, res) =>{
 
 exports.listPost = async (req, res) =>{
     let perPage = 10
-    let page = req.params.page || 1
+    let page = req.query.page || 1
     Post.find({moderatorID: req.accountID})
     .skip((perPage*page) - perPage)
     .limit(perPage)

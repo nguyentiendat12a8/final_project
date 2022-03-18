@@ -19,3 +19,6 @@ exports.detailBillTour = (req, res, next) => {
 
 }
 
+exports.addCustomTour = (req,res) =>{
+
+}

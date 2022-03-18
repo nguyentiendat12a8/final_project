@@ -14,7 +14,8 @@ exports.Tour = mongoose.model(
             vehicle: {type: String},
             timeDecription: {type: String}
         },
-        //deleted: {type: Boolean, default: false},
+        mode: {type: Boolean, default: true},
+        deleted: {type: Boolean, default: false},
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'

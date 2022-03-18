@@ -214,7 +214,7 @@ exports.confirmLink = async (req, res) => {
 // manage account of user
 exports.listUserAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   User.find({ deleted: false })
     .skip((perPage * page) - perPage)
     .limit(perPage)
@@ -276,7 +276,7 @@ exports.deleteUserAccount = async (req, res) => {
 
 exports.trashUserAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   User.find({ deleted: true })
     .skip((perPage * page) - perPage)
     .limit(perPage)
@@ -340,7 +340,7 @@ exports.forceDeleteUserAccount = async (req, res) => {
 
 exports.listModAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   Moderator.find({ deleted: false })
     .skip((perPage * page) - perPage)
     .limit(perPage)
@@ -398,7 +398,7 @@ exports.deleteModAccount = async (req, res) => {
 
 exports.trashModAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   Moderator.find({ deleted: true })
     .skip((perPage * page) - perPage)
     .limit(perPage)
@@ -461,7 +461,7 @@ exports.forceDeleteModAccount = async (req, res) => {
 //manage account of admin
 exports.listAdminAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   Admin.find({ deleted: false })
     .skip((perPage * page) - perPage)
     .limit(perPage)
@@ -520,7 +520,7 @@ exports.deleteAdminAccount = async (req, res) => {
 
 exports.trashAdminAccount = async (req, res) => {
   let perPage = 10
-  let page = req.params.page || 1
+  let page = req.query.page || 1
   Admin.find({ deleted: true })
     .skip((perPage * page) - perPage)
     .limit(perPage)
