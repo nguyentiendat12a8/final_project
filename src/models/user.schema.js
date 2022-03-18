@@ -1,7 +1,4 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
-const softDelete = require('mongoose-delete')
-mongoose.plugin(slug)
 
 exports.User = mongoose.model(
     'User',

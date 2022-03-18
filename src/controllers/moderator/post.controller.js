@@ -1,7 +1,7 @@
 const db = require('../../models/index')
 const Post = db.post
 
-exports.createPost = async (req, res) =>{
+exports.addPost = async (req, res) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -12,10 +12,10 @@ exports.createPost = async (req, res) =>{
     } else {
         req.body.photo = 'No photo'
     }
-    var post = new Post (req.body)
+    var post = new Post(req.body)
     post.moderatorID = req.accountID
-    await post.save(err =>{
-        if(err) return res.status(500).send({
+    await post.save(err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -26,20 +26,24 @@ exports.createPost = async (req, res) =>{
     })
 }
 
-exports.editPost = (req, res) =>{
-    Post.findOne({_id: req.params.postID, moderatorID: req.accountID}, (err, post) =>{
-        if(err) return res.status(500).send({
+exports.editPost = (req, res) => {
+    Post.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
+        const postEdit = {
+            postText: post.postText,
+            photo: post.photo,
+        }
         return res.status(200).send({
             errorCode: 0,
-            data: post
+            data: postEdit
         })
     })
 }
 
-exports.updatePost = (req, res) =>{
+exports.updatePost = (req, res) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -50,13 +54,11 @@ exports.updatePost = (req, res) =>{
     } else {
         req.body.photo = 'No photo'
     }
-    Post.findOneAndUpdate({_id: req.params.postID, moderatorID: req.accountID}, {
-        postTitle: req.body.postTitle,
+    Post.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, {
         postText: req.body.postText,
         photo: req.body.photo,
-        address: req.body.address,
-    }, {new: true} ,err =>{
-        if(err) return res.status(500).send({
+    }, { new: true }, err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -67,9 +69,9 @@ exports.updatePost = (req, res) =>{
     })
 }
 
-exports.deletePost = (req, res) =>{
-    Post.findOneAndDelete({_id: req.params.postID, moderatorID: req.accountID}, err =>{
-        if(err) return res.status(500).send({
+exports.deletePost = (req, res) => {
+    Post.findOneAndDelete({ slug: req.params.slug, moderatorID: req.accountID }, err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -80,35 +82,48 @@ exports.deletePost = (req, res) =>{
     })
 }
 
-exports.listPost = async (req, res) =>{
+exports.listPost = async (req, res) => {
     let perPage = 10
     let page = req.query.page || 1
-    Post.find({moderatorID: req.accountID})
-    .skip((perPage*page) - perPage)
-    .limit(perPage)
-    .exec( async (err, list) =>{
-        if(err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        await Post.countDocuments({moderatorID: req.accountID}, (err, count)=>{
-            if(err) return res.status(500).send({
+    Post.find({ moderatorID: req.accountID })
+        .skip((perPage * page) - perPage)
+        .limit(perPage)
+        .exec(async (err, list) => {
+            if (err) return res.status(500).send({
                 errorCode: 500,
                 message: err
             })
-            return res.status(200).send({
-                errorCode: 0,
-                data: list,
-                current: page,
-                pages: Math.ceil(count/perPage)
-            })
+            Post.countDocuments({ moderatorID: req.accountID })
+                .then(count => {
+                    var listShow = []
+                    list.forEach(e => {
+                        var show = {
+                            address: e.address,
+                            postTitle: e.postTitle,
+                            photo: e.photo,
+                            createdAt: e.createdAt
+                        }
+                        listShow.push(show)
+                    })
+                    return res.status(200).send({
+                        errorCode: 0,
+                        data: listShow,
+                        current: page,
+                        pages: Math.ceil(count / perPage)
+                    })
+                })
+                .catch(err => {
+                    if (err) return res.status(500).send({
+                        errorCode: 500,
+                        message: err
+                    })
+                })
         })
-    })
 }
 
-exports.detailPost = (req, res) =>{
-    Post.findOne({_id: req.params.postID, moderatorID: req.accountID}, (err, post) =>{
-        if(err) return res.status(500).send({
+exports.detailPost = (req, res) => {
+    Post.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -119,4 +134,31 @@ exports.detailPost = (req, res) =>{
     })
 }
 
-//search
+//search wwith address
+exports.searchPost = async (req, res) => {
+    let perPage = 10
+    let page = req.query.page || 1
+    const listPost = await Post.find({ moderatorID: req.accountID })
+    var search = req.query.search
+    var dataSearch = listPost.filter(r => r.postTitle.toLowerCase().includes(search.toLowerCase()))
+    var count = 0
+    dataSearch.forEach(() => count++)
+    const data = dataSearch.slice(((perPage * page) - perPage), (perPage * page))
+    console.log(data)
+    var listShow = []
+    data.forEach(e => {
+        var show = {
+            address: e.address,
+            postTitle: e.postTitle,
+            photo: e.photo,
+            createdAt: e.createdAt
+        }
+        listShow.push(show)
+    })
+    return res.status(200).send({
+        errorCode: 0,
+        data: listShow,
+        current: page,
+        pages: Math.ceil(count / perPage)
+    })
+}

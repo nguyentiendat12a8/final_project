@@ -1,6 +1,4 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
-mongoose.plugin(slug)
 
 exports.Tour = mongoose.model(
     'Tour',

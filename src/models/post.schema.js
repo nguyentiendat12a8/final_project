@@ -10,7 +10,8 @@ exports.Post = mongoose.model(
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
-        }]
+        }],
+        slug: {type: String, slug: 'postTitle', unique: true}
     }, {
         timestamps: true
     })
