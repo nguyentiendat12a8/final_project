@@ -27,6 +27,7 @@ exports.addTour = async (req, res, next) => {
             price: req.body.price,
             picture: req.body.picture,
             address: req.body.address,
+            startingPoint: req.body.startingPoint,
             description: {
                 vehicle: req.body.vehicle,
                 timeDecription: req.body.timeDecription
@@ -152,8 +153,10 @@ exports.listTour = (req, res, next) => {
                     var tour = {
                         tourName: e.tourName,
                         startDate: e.startDate,
+                        time: e.time,
                         price: e.price,
                         address: e.address,
+                        startingPoint: e.startingPoint,
                         slug: e.slug
                     }
                     show.push(tour)
@@ -190,6 +193,7 @@ exports.detailTour = async (req, res) => {
             price: tour.price,
             time: tour.time,
             address: tour.address,
+            startingPoint: tour.startingPoint,
             description: {
                 vehicle: tour.description,
                 timeDecription: tour.timeDecription,
@@ -231,8 +235,10 @@ exports.searchTour = async (req, res) => {
                 var tour = {
                     tourName: e.tourName,
                     startDate: e.startDate,
+                    time: e.time,
                     price: e.price,
                     address: e.address,
+                    startingPoint: e.startingPoint,
                     slug: e.slug
                 }
                 show.push(tour)
@@ -263,8 +269,10 @@ exports.filterASCTour = async (req, res) => {
             var tour = {
                 tourName: e.tourName,
                 startDate: e.startDate,
+                time: e.time,
                 price: e.price,
                 address: e.address,
+                startingPoint: e.startingPoint,
                 slug: e.slug
             }
             show.push(tour)
@@ -295,8 +303,10 @@ exports.filterDESTour = async (req, res) => {
             var tour = {
                 tourName: e.tourName,
                 startDate: e.startDate,
+                time: e.time,
                 price: e.price,
                 address: e.address,
+                startingPoint: e.startingPoint,
                 slug: e.slug
             }
             show.push(tour)

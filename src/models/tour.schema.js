@@ -8,6 +8,7 @@ exports.Tour = mongoose.model(
         price: {type: Number, required: true},
         picture: {type: String, required: true},
         address: {type: String, required: true},
+        startingPoint: {type: String, required: true},
         description: {
             vehicle: {type: String},
             timeDecription: {type: String}

@@ -1,16 +1,16 @@
 const mongoose = require('mongoose')
 
-exports.Rate = mongoose.model(
-    'Rate',
+exports.RateTour = mongoose.model(
+    'RateTour',
     new mongoose.Schema({
         point: {type: Number, required: true},
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }],
-        moderatorID: [{
+        tourID: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Moderator'
+            ref: 'Tour'
         }]
     },
     {

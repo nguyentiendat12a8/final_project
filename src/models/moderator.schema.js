@@ -12,7 +12,6 @@ exports.Moderator = mongoose.model(
         phone: {type: String, required: true},
         avatar: {type: String},
         organizationName: {type: String, required: true},
-        numberOfRates: {type: Number, default: 0},
         dueDate: {type: String},
         tourCustomStatus: {type: Boolean},
         deleted: {type: Boolean, default: false},
