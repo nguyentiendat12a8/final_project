@@ -6,7 +6,7 @@ exports.HotelRoom = mongoose.model(
     'HotelRoom',
     new mongoose.Schema({
         roomName: {type: String, required: true},
-        price: {type: String, required: true},
+        price: {type: Number, required: true},
         bedroom: {
             singleBed: {type: Number, default: 0},
             doubleBed: {type: Number, default: 0},
@@ -22,6 +22,7 @@ exports.HotelRoom = mongoose.model(
         photo: {type: String, required: true},
         description: {type: String, required: true},
         address: {type: String, required: true},
+        deleted: {type: Boolean, default: false},
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'

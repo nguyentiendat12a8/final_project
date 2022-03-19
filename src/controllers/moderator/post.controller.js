@@ -32,9 +32,16 @@ exports.editPost = (req, res) => {
             errorCode: 500,
             message: err
         })
+        if(post == null){
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Invalid link'
+            })
+        }
         const postEdit = {
             postText: post.postText,
             photo: post.photo,
+            slug: post.slug
         }
         return res.status(200).send({
             errorCode: 0,
@@ -101,7 +108,8 @@ exports.listPost = async (req, res) => {
                             address: e.address,
                             postTitle: e.postTitle,
                             photo: e.photo,
-                            createdAt: e.createdAt
+                            createdAt: e.createdAt,
+                            slug: e.slug
                         }
                         listShow.push(show)
                     })
@@ -127,6 +135,12 @@ exports.detailPost = (req, res) => {
             errorCode: 500,
             message: err
         })
+        if(post == null){
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Invalid link'
+            })
+        }
         return res.status(200).send({
             errorCode: 0,
             data: post
@@ -136,29 +150,39 @@ exports.detailPost = (req, res) => {
 
 //search wwith address
 exports.searchPost = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    const listPost = await Post.find({ moderatorID: req.accountID })
-    var search = req.query.search
-    var dataSearch = listPost.filter(r => r.postTitle.toLowerCase().includes(search.toLowerCase()))
-    var count = 0
-    dataSearch.forEach(() => count++)
-    const data = dataSearch.slice(((perPage * page) - perPage), (perPage * page))
-    console.log(data)
-    var listShow = []
-    data.forEach(e => {
-        var show = {
-            address: e.address,
-            postTitle: e.postTitle,
-            photo: e.photo,
-            createdAt: e.createdAt
-        }
-        listShow.push(show)
-    })
-    return res.status(200).send({
-        errorCode: 0,
-        data: listShow,
-        current: page,
-        pages: Math.ceil(count / perPage)
-    })
+    try {
+        let perPage = 10
+        let page = req.query.page || 1
+        const listPost = await Post.find({ moderatorID: req.accountID })
+        //search data
+        var search = req.query.search
+        var dataSearch = listPost.filter(r => r.postTitle.toLowerCase().includes(search.toLowerCase()))
+        var count = 0
+        dataSearch.forEach(()=>count++)
+        //slice page
+        const data = dataSearch.slice(((perPage * page) - perPage), (perPage * page))
+        var listShow = []
+        data.forEach(e => {
+            var show = {
+                address: e.address,
+                postTitle: e.postTitle,
+                photo: e.photo,
+                createdAt: e.createdAt,
+                slug: e.slug
+            }
+            listShow.push(show)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listShow,
+            current: page,
+            pages: Math.ceil(count / perPage)
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: error
+        })
+    }
+
 }

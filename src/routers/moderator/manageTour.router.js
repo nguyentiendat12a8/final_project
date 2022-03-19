@@ -13,7 +13,7 @@ router.get('/detail-tour/:slug', [verifyToken, isModerator], detailTour)
 
 //bill tour
 router.get('/list-bill-tour', [verifyToken, isModerator],listBillTour) //chưa có bill để test
-router.patch('/delete-bill-tour/:billTourID', [verifyToken, isModerator], deleteBillTour) // chưa test, xóa mềm
+//router.patch('/delete-bill-tour/:billTourID', [verifyToken, isModerator], deleteBillTour) // chưa test, xóa mềm
 
 //search tour, filter price
 router.get('/search', [verifyToken,isModerator], searchTour)

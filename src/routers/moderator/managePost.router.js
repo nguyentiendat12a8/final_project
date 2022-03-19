@@ -11,6 +11,6 @@ router.get('/edit-post/:slug', [verifyToken,isModerator], editPost)
 router.patch('/update-post/:slug',  [verifyToken,isModerator, upload.array('photo')], updatePost)
 router.delete('/delete-post/:slug',  [verifyToken,isModerator], deletePost)
 
-router.get('/search', searchPost) // đang lỗi
+router.get('/search',[verifyToken, isModerator], searchPost)
 
 module.exports = router
