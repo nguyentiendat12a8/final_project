@@ -13,6 +13,7 @@ exports.Tour = mongoose.model(
             vehicle: {type: String},
             timeDecription: {type: String}
         },
+        hotel: {type: String},
         mode: {type: Boolean, default: true},
         deleted: {type: Boolean, default: false},
         moderatorID: [{
