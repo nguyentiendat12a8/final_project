@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
-const slug = require('mongoose-slug-generator')
-mongoose.plugin(slug)
+
 
 exports.Moderator = mongoose.model(
     'Moderator',

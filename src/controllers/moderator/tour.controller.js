@@ -31,6 +31,7 @@ exports.addTour = async (req, res, next) => {
             startingPoint: req.body.startingPoint,
             hotel: req.body.hotel,
             description: {
+                content: req.body.content,
                 vehicle: req.body.vehicle,
                 timeDecription: req.body.timeDecription
             },
@@ -74,6 +75,7 @@ exports.editTour = (req, res, next) => {
                 price: tour.price,
                 time: tour.time,
                 description: {
+                    content: tour.description.content,
                     vehicle: tour.description.vehicle,
                     timeDecription: tour.description.timeDecription,
                 },
@@ -106,6 +108,7 @@ exports.updateTour = async (req, res, next) => {
         private: req.body.private,
         hotel: req.body.hotel,
         description: {
+            content: req.body.content,
             vehicle: req.body.vehicle,
             timeDecription: req.body.timeDecription
         },
@@ -195,8 +198,9 @@ exports.detailTour = async (req, res) => {
             numberOfRate: e.rate.numberOfRate,
             numberOfStar: e.rate.numberOfStar,
             description: {
-                vehicle: tour.description,
-                timeDecription: tour.timeDecription,
+                content: tour.description.content,
+                vehicle: tour.description.vehicle,
+                timeDecription: tour.description.timeDecription,
             },
             private: tour.private,
             categoryName: category.categoryName,

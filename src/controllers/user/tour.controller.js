@@ -67,6 +67,7 @@ exports.detailTour = (req, res, next) => {
             numberOfRate: tour.rate.numberOfRate,
             numberOfStar: tour.rate.numberOfStar,
             description: {
+                content: tour.description.content,
                 vehicle: tour.description.vehicle,
                 timeDecription: tour.description.timeDecription,
             },

@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
 exports.Tour = mongoose.model(
     'Tour',
@@ -11,6 +13,7 @@ exports.Tour = mongoose.model(
         address: {type: String, required: true},
         startingPoint: {type: String, required: true},
         description: {
+            content: {type: String},
             vehicle: {type: String},
             timeDecription: {type: String}
         },

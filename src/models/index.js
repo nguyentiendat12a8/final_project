@@ -19,12 +19,9 @@ const { ResetPassword } = require('./resetPassword.schema')
 const { RateTour } = require('./rateTour.schema')
 const { TourDraft } = require('./tourDraft.schema')
 const { TourDraftStatus } = require('./tourDraftStatus.schema')
+const slug = require('mongoose-slug-generator')
+mongoose.plugin(slug)
 
-
-mongoose.plugin(softDelete, {
-    deleteAt: true,
-    overrideMethods : 'all'
-})
 
 const db = {}
 
