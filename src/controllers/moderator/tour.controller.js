@@ -25,6 +25,7 @@ exports.addTour = async (req, res, next) => {
             tourName: req.body.tourName,
             startDate: req.body.startDate,
             price: req.body.price,
+            time: req.body.time,
             picture: req.body.picture,
             address: req.body.address,
             startingPoint: req.body.startingPoint,
