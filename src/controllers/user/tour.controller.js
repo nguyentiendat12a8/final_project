@@ -1,25 +1,133 @@
+const db = require('../../models/index')
+const Tour = db.tour
+const Rate = db.rateTour
+const Moderator = db.moderator
+const BillTour =db.billTour
+const User = db.user
 
 exports.listTour = (req, res, next) => {
-
+    Tour.find({deleted: false, private: false}, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var show = []
+        list.forEach(async e => {
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                slug: e.slug
+            }
+            show.push(tour)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
 }
 
 exports.detailTour = (req, res, next) => {
-
+    Tour.findOne({ slug: req.query.slug, deleted: false , private: e.private,},async (err, tour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if(!tour) res.status(400).send({
+            errorCode: 400,
+            message: 'invalid link!'
+        })
+        const mod = await Moderator.findById(tour.moderatorID)
+        if (!mod) return res.status(400).send({
+            errorCode: 400,
+            message: 'Tour is error'
+        })
+        var tour = {
+            tourName: tour.tourName,
+            startDate: tour.startDate,
+            price: tour.price,
+            picture: tour.picture,
+            time: tour.time,
+            address: tour.address,
+            startingPoint: tour.startingPoint,
+            hotel: tour.hotel,
+            numberOfRate: e.rate.numberOfRate,
+            numberOfStar: e.rate.numberOfStar,
+            description: {
+                vehicle: tour.description,
+                timeDecription: tour.timeDecription,
+            },
+            categoryName: category.categoryName,
+            createdAt: tour.createdAt,
+            modName: mod.modName,
+            avatar: mod.avatar,
+            email: mod.email,
+            slug: tour.slug
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: tour
+        })
+    })
 }
 
 exports.bookTour = (req, res, next) => {
 
 }
 
+// need update
 exports.listBillTour = (req, res, next) => {
+    BillTour.find({userID: req.accountID, deleted: false}, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var show = []
+        list.forEach(async e => {
+            var tour = await Tour.findById(e.tourID)
+            if(!user || !tour) return res.status(500).send({
+                errorCode: 500,
+                message: 'Bill tour is error'
+            })
+            var detail = {
+                bookedDate: e.bookedDate,
+                tourName: tour.tourName,
+                startDate: tour.startDate,
 
+            }
+            show.push(detail)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
 }
 
 exports.detailBillTour = (req, res, next) => {
 
 }
 
-exports.addCustomTour = (req,res) =>{
+//rate tour
+//cần check time rate -- qua ngày xuất phát mới được rate
+//cần check người này đã từng đánh giá trước đó hay chưa, nếu rồi thì sẽ update rate mới.
+
+
+
+
+
+
+
+
+
+exports.addCustomTour = (req, res) => {
 
 }
 

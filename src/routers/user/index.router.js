@@ -1,9 +1,10 @@
 const account = require('./manageAccount.router')
+const post = require('./post.router')
 
 function route(app){
     app.use('/user/account',account)
-    //app.use('/admin/tour', tour)
-    // app.use('/admin/', tour)
+    //app.use('/user/tour', tour)
+    app.use('/user/post', post)
 }
 
 

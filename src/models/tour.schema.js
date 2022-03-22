@@ -13,8 +13,12 @@ exports.Tour = mongoose.model(
             vehicle: {type: String},
             timeDecription: {type: String}
         },
+        rate: {
+            numberOfStar: {type: Number, default: 0},
+            numberOfRate: {type: Number, default: 0}
+        },
         hotel: {type: String},
-        mode: {type: Boolean, default: true},
+        private: {type: Boolean, default: false},
         deleted: {type: Boolean, default: false},
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,

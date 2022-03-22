@@ -32,7 +32,7 @@ exports.editPost = (req, res) => {
             errorCode: 500,
             message: err
         })
-        if(post == null){
+        if (post == null) {
             return res.status(400).send({
                 errorCode: 400,
                 message: 'Invalid link'
@@ -90,43 +90,27 @@ exports.deletePost = (req, res) => {
 }
 
 exports.listPost = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    Post.find({ moderatorID: req.accountID })
-        .skip((perPage * page) - perPage)
-        .limit(perPage)
-        .exec(async (err, list) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            Post.countDocuments({ moderatorID: req.accountID })
-                .then(count => {
-                    var listShow = []
-                    list.forEach(e => {
-                        var show = {
-                            address: e.address,
-                            postTitle: e.postTitle,
-                            photo: e.photo,
-                            createdAt: e.createdAt,
-                            slug: e.slug
-                        }
-                        listShow.push(show)
-                    })
-                    return res.status(200).send({
-                        errorCode: 0,
-                        data: listShow,
-                        current: page,
-                        pages: Math.ceil(count / perPage)
-                    })
-                })
-                .catch(err => {
-                    if (err) return res.status(500).send({
-                        errorCode: 500,
-                        message: err
-                    })
-                })
+    Post.find({ moderatorID: req.accountID }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
         })
+        var listShow = []
+        list.forEach(e => {
+            var show = {
+                address: e.address,
+                postTitle: e.postTitle,
+                photo: e.photo,
+                createdAt: e.createdAt,
+                slug: e.slug
+            }
+            listShow.push(show)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listShow,
+        })
+    })
 }
 
 exports.detailPost = (req, res) => {
@@ -135,7 +119,7 @@ exports.detailPost = (req, res) => {
             errorCode: 500,
             message: err
         })
-        if(post == null){
+        if (post == null) {
             return res.status(400).send({
                 errorCode: 400,
                 message: 'Invalid link'
@@ -150,19 +134,15 @@ exports.detailPost = (req, res) => {
 
 //search wwith address
 exports.searchPost = async (req, res) => {
-    try {
-        let perPage = 10
-        let page = req.query.page || 1
-        const listPost = await Post.find({ moderatorID: req.accountID })
-        //search data
+    Post.find({ moderatorID: req.accountID }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
         var search = req.query.search
-        var dataSearch = listPost.filter(r => r.postTitle.toLowerCase().includes(search.toLowerCase()))
-        var count = 0
-        dataSearch.forEach(()=>count++)
-        //slice page
-        const data = dataSearch.slice(((perPage * page) - perPage), (perPage * page))
+        var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))
         var listShow = []
-        data.forEach(e => {
+        dataSearch.forEach(e => {
             var show = {
                 address: e.address,
                 postTitle: e.postTitle,
@@ -175,14 +155,6 @@ exports.searchPost = async (req, res) => {
         return res.status(200).send({
             errorCode: 0,
             data: listShow,
-            current: page,
-            pages: Math.ceil(count / perPage)
         })
-    } catch (error) {
-        return res.status(500).send({
-            errorCode: 500,
-            message: error
-        })
-    }
-
+    })
 }

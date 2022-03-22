@@ -1,5 +1,5 @@
 const express = require('express')
-const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, deleteBillTour, searchTour, filterASCTour, filterDESTour } = require('../../controllers/moderator/tour.controller')
+const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -7,7 +7,7 @@ const router = express.Router()
 router.post('/add-tour', [verifyToken, isModerator, upload.array('picture')], addTour)
 router.get('/edit-tour/:slug',[verifyToken, isModerator], editTour)
 router.patch('/update-tour/:slug', [verifyToken, isModerator, upload.array('picture')], updateTour)
-router.patch('/delete-tour/:slug', [verifyToken, isModerator], deleteTour)
+//router.patch('/delete-tour/:slug', [verifyToken, isModerator], deleteTour)
 router.get('/list-tour', [verifyToken, isModerator], listTour)
 router.get('/detail-tour/:slug', [verifyToken, isModerator], detailTour)
 
@@ -17,7 +17,6 @@ router.get('/list-bill-tour', [verifyToken, isModerator],listBillTour) //chưa c
 
 //search tour, filter price
 router.get('/search', [verifyToken,isModerator], searchTour)
-router.get('/filter-ASC', [verifyToken, isModerator], filterASCTour)
-router.get('/filter-DES', [verifyToken, isModerator], filterDESTour)
+router.get('/filter-tour', [verifyToken, isModerator], filterTour)
 
 module.exports = router

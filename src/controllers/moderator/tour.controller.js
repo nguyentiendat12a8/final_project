@@ -60,7 +60,7 @@ exports.editTour = (req, res, next) => {
                 errorCode: 500,
                 message: err
             })
-            if(tour == null){
+            if (tour == null) {
                 return res.status(400).send({
                     errorCode: 400,
                     message: 'Invalid link'
@@ -76,7 +76,7 @@ exports.editTour = (req, res, next) => {
                     vehicle: tour.description.vehicle,
                     timeDecription: tour.description.timeDecription,
                 },
-                mode: tour.mode,
+                private: tour.private,
                 hotel: tour.hotel,
                 categoryName: category.categoryName,
                 slug: tour.slug
@@ -102,7 +102,7 @@ exports.updateTour = async (req, res, next) => {
         picture: req.body.picture,
         address: req.body.address,
         time: req.body.time,
-        mode: req.body.mode,
+        private: req.body.private,
         hotel: req.body.hotel,
         description: {
             vehicle: req.body.vehicle,
@@ -121,66 +121,58 @@ exports.updateTour = async (req, res, next) => {
     })
 }
 
-exports.deleteTour = (req, res, next) => {
-    Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
+// exports.deleteTour = (req, res, next) => {
+//     Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
+//         if (err) return res.status(500).send({
+//             errorCode: 500,
+//             message: err
+//         })
+//         return res.status(200).send({
+//             errorCode: 0,
+//             message: 'delete tour successfully!'
+//         })
+//     })
+// }
+
+
+//list tour according moderator 
+exports.listTour = (req, res, next) => {
+    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
+        let show = []
+        list.forEach(e => {
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar,
+                private: e.private,
+                slug: e.slug
+            }
+            show.push(tour)
+        })
         return res.status(200).send({
             errorCode: 0,
-            message: 'delete tour successfully!'
+            data: show,
         })
     })
 }
 
-//list tour according moderator 
-exports.listTour = (req, res, next) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    Tour.find({ moderatorID: req.accountID, deleted: false })
-        .skip((perPage * page) - perPage)
-        .limit(perPage)
-        .exec(async (err, list) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            Tour.countDocuments({ moderatorID: req.accountID, deleted: false }, (err, count) => {
-                if (err) return res.status(500).send({
-                    errorCode: 500,
-                    message: err
-                })
-                let show = []
-                list.forEach(e => {
-                    var tour = {
-                        tourName: e.tourName,
-                        startDate: e.startDate,
-                        time: e.time,
-                        price: e.price,
-                        address: e.address,
-                        startingPoint: e.startingPoint,
-                        slug: e.slug
-                    }
-                    show.push(tour)
-                })
-                return res.status(200).send({
-                    errorCode: 0,
-                    data: show,
-                    current: page,
-                    pages: Math.ceil(count / perPage)
-                })
-            })
-        })
-}
-
 exports.detailTour = async (req, res) => {
-    Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted:false }, async (err, tour) => {
+    Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, async (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        if(tour == null){
+        if (tour == null) {
             return res.status(400).send({
                 errorCode: 400,
                 message: 'Invalid link'
@@ -194,17 +186,20 @@ exports.detailTour = async (req, res) => {
             tourName: tour.tourName,
             startDate: tour.startDate,
             price: tour.price,
+            picture: tour.picture,
             time: tour.time,
             address: tour.address,
             startingPoint: tour.startingPoint,
             hotel: tour.hotel,
+            numberOfRate: e.rate.numberOfRate,
+            numberOfStar: e.rate.numberOfStar,
             description: {
                 vehicle: tour.description,
                 timeDecription: tour.timeDecription,
             },
-            mode: tour.mode,
+            private: tour.private,
             categoryName: category.categoryName,
-            createAt: day + '/' + month + '/' + year,
+            createdAt: day + '/' + month + '/' + year,
             slug: tour.slug
         }
         return res.status(200).send({
@@ -216,26 +211,46 @@ exports.detailTour = async (req, res) => {
 
 //search, filter
 exports.searchTour = async (req, res) => {
-    const listTour = await Tour.find({ moderatorID: req.accountID,deleted: false })
-    var search = req.query.search
-    var dataSearch = listTour.filter(r => r.tourName.toLowerCase().includes(search.toLowerCase()))
-    var count = 0
-    dataSearch.forEach(() => count++)
+    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var search = req.query.address
+        var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))
+        var show = []
+        dataSearch.forEach(e => {
+            var tour = {
+                tourName: e.tourName,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar,
+                private: e.private,
+                slug: e.slug
+            }
+            show.push(tour)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show,
+        })
+    })
+}
 
-    let perPage = 10
-    let page = req.query.page || 1
-    Tour.find({ moderatorID: req.accountID, deleted: false })
-        .skip((perPage * page) - perPage)
-        .limit(perPage)
-        .exec(async (err, list) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            var search = req.query.search
-            var dataSearch = list.filter(r => r.tourName.toLowerCase().includes(search.toLowerCase()))
+exports.filterTour = async (req, res) => {
+    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if (req.query.filter === 'ASC') {
+            var dataSortASC = list.sort((a, b) => a.price - b.price)
             var show = []
-            dataSearch.forEach(e => {
+            dataSortASC.forEach(e => {
                 var tour = {
                     tourName: e.tourName,
                     startDate: e.startDate,
@@ -243,6 +258,9 @@ exports.searchTour = async (req, res) => {
                     price: e.price,
                     address: e.address,
                     startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar,
+                    private: e.private,
                     slug: e.slug
                 }
                 show.push(tour)
@@ -250,77 +268,30 @@ exports.searchTour = async (req, res) => {
             return res.status(200).send({
                 errorCode: 0,
                 data: show,
-                current: page,
-                pages: Math.ceil(count / perPage)
             })
-        })
-}
-
-exports.filterASCTour = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    const listTour = await Tour.find({ moderatorID: req.accountID, deleted: false })
-    var dataSort = listTour.sort((a, b) => a.price - b.price)
-    const data = dataSort.slice(((perPage * page) - perPage), (perPage * page))
-
-    Tour.countDocuments({ moderatorID: req.accountID, deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        var show = []
-        data.forEach(e => {
-            var tour = {
-                tourName: e.tourName,
-                startDate: e.startDate,
-                time: e.time,
-                price: e.price,
-                address: e.address,
-                startingPoint: e.startingPoint,
-                slug: e.slug
-            }
-            show.push(tour)
-        })
-        return res.status(200).send({
-            errorCode: 0,
-            data: show,
-            current: page,
-            pages: Math.ceil(count / perPage)
-        })
-    })
-}
-
-exports.filterDESTour = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    const listTour = await Tour.find({ moderatorID: req.accountID, deleted: false })
-    var dataSort = listTour.sort((a, b) => b.price - a.price)
-    const data = dataSort.slice(((perPage * page) - perPage), (perPage * page))
-
-    Tour.countDocuments({ moderatorID: req.accountID, deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        var show = []
-        data.forEach(e => {
-            var tour = {
-                tourName: e.tourName,
-                startDate: e.startDate,
-                time: e.time,
-                price: e.price,
-                address: e.address,
-                startingPoint: e.startingPoint,
-                slug: e.slug
-            }
-            show.push(tour)
-        })
-        return res.status(200).send({
-            errorCode: 0,
-            data: show,
-            current: page,
-            pages: Math.ceil(count / perPage)
-        })
+        } else if (req.query.filter === 'DES') {
+            var dataSortDES = list.sort((a, b) => b.price - a.price)
+            var show = []
+            dataSortDES.forEach(e => {
+                var tour = {
+                    tourName: e.tourName,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar,
+                    private: e.private,
+                    slug: e.slug
+                }
+                show.push(tour)
+            })
+            return res.status(200).send({
+                errorCode: 0,
+                data: show,
+            })
+        }
     })
 }
 
@@ -337,13 +308,12 @@ exports.listBillTour = async (req, res, next) => {
             let listBill = []
             let listDetail = []
             listTour.forEach(async e => {
-                BillTour.find({ tourID: e._id }, (err, bill) => {
+                BillTour.find({ tourID: e._id , deleted: false}, (err, bill) => {
                     if (err) return res.status(500).send({
                         errorCode: 500,
                         message: err
                     })
-
-                    listBill.append(bill)
+                    listBill.push(bill)
                 })
             })
             listBill.forEach(async e => {
@@ -354,7 +324,7 @@ exports.listBillTour = async (req, res, next) => {
                     tourName: tour.tourName,
                     userID: user.userName,
                 }
-                listDetail.append(detail)
+                listDetail.push(detail)
             })
             return res.status(200).send({
                 errorCode: 0,
@@ -404,4 +374,8 @@ exports.listBillTour = async (req, res, next) => {
 
 
 //custom tour
+
+exports.viewTourCustom = async (req, res) => {
+    //var tourDraft = await 
+}
 

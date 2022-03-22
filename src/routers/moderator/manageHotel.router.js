@@ -1,5 +1,6 @@
 const express = require('express')
-const { addHotelRoom, editHotelRoom, updateHotelRoom, deleteHotelRoom, listHotelRoom, detailHotelRoom, listBillHotelRoom, deleteBillHotelRoom, searchHotelRoom, filterASCHotelRoom, filterDESHotelRoom } = require('../../controllers/moderator/hotel.controller')
+const { addHotelRoom, editHotelRoom, updateHotelRoom, deleteHotelRoom, listHotelRoom, detailHotelRoom,
+     listBillHotelRoom, searchHotelRoom, filterHotelRoom } = require('../../controllers/moderator/hotel.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -17,7 +18,6 @@ router.get('/detail-hotel-room/:slug', [verifyToken, isModerator], detailHotelRo
 
 // //search hotel-room, filter price
 router.get('/search', [verifyToken,isModerator], searchHotelRoom)
-router.get('/filter-ASC', [verifyToken, isModerator], filterASCHotelRoom)
-router.get('/filter-DES', [verifyToken, isModerator], filterDESHotelRoom)
+router.get('/filter-hotel-room', [verifyToken, isModerator], filterHotelRoom)
 
 module.exports = router

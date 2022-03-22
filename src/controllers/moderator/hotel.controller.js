@@ -3,7 +3,7 @@ const HotelRoom = db.hotelRoom
 const BillHotelRoom = db.billHotelRoom
 const User = db.user
 
-exports.addHotelRoom = (req, res) =>{
+exports.addHotelRoom = (req, res) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -15,7 +15,7 @@ exports.addHotelRoom = (req, res) =>{
         req.body.photo = 'No photo'
     }
     const room = new HotelRoom({
-        roomName: req.body.roomName ,
+        roomName: req.body.roomName,
         price: req.body.price,
         bedroom: {
             singleBed: req.body.singleBed,
@@ -26,7 +26,7 @@ exports.addHotelRoom = (req, res) =>{
         utilities: {
             parking: req.body.parking,
             wifi: req.body.wifi,
-            pool:req.body.pool,
+            pool: req.body.pool,
             smoking: req.body.smoking,
         },
         photo: req.body.photo,
@@ -34,8 +34,8 @@ exports.addHotelRoom = (req, res) =>{
         address: req.body.address,
         moderatorID: req.accountID
     })
-    room.save(err=>{
-        if(err) return res.status(500).send({
+    room.save(err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -46,13 +46,13 @@ exports.addHotelRoom = (req, res) =>{
     })
 }
 
-exports.editHotelRoom = (req, res) =>{
+exports.editHotelRoom = (req, res) => {
     HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, async (err, room) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        if(room == null){
+        if (room == null) {
             return res.status(400).send({
                 errorCode: 400,
                 message: 'Invalid link'
@@ -69,7 +69,7 @@ exports.editHotelRoom = (req, res) =>{
             utilities: {
                 parking: room.utilities.parking,
                 wifi: room.utilities.wifi,
-                pool:room.utilities.pool,
+                pool: room.utilities.pool,
                 smoking: room.utilities.smoking,
             },
             photo: room.photo,
@@ -83,7 +83,7 @@ exports.editHotelRoom = (req, res) =>{
     })
 }
 
-exports.updateHotelRoom = (req, res) =>{
+exports.updateHotelRoom = (req, res) => {
     if (req.files) {
         let path = ''
         req.files.forEach((files, index, arr) => {
@@ -94,7 +94,7 @@ exports.updateHotelRoom = (req, res) =>{
     } else {
         req.body.photo = 'No photo'
     }
-    HotelRoom.findOneAndUpdate({slug: req.params.slug, moderatorID: req.accountID, deleted: false}, {
+    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, {
         price: req.body.price,
         bedroom: {
             singleBed: req.body.singleBed,
@@ -105,13 +105,13 @@ exports.updateHotelRoom = (req, res) =>{
         utilities: {
             parking: req.body.parking,
             wifi: req.body.wifi,
-            pool:req.body.pool,
+            pool: req.body.pool,
             smoking: req.body.smoking,
         },
         photo: req.body.photo,
         description: req.body.description,
-    }, {new: true} ,err =>{
-        if(err) return res.status(500).send({
+    }, { new: true }, err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -122,7 +122,7 @@ exports.updateHotelRoom = (req, res) =>{
     })
 }
 
-exports.deleteHotelRoom = (req, res) =>{
+exports.deleteHotelRoom = (req, res) => {
     HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,
@@ -135,49 +135,33 @@ exports.deleteHotelRoom = (req, res) =>{
     })
 }
 
-exports.listHotelRoom = (req, res) =>{
-    let perPage = 10
-    let page = req.query.page || 1
-    HotelRoom.find({moderatorID: req.accountID, deleted: false})
-    .skip((perPage*page) - perPage)
-    .limit(perPage)
-    .exec((err, list) =>{
-        if(err) return res.status(500).send({
+exports.listHotelRoom = (req, res) => {
+    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        HotelRoom.countDocuments({moderatorID: req.accountID, deleted: false})
-        .then(count =>{
-            var listDetail = []
-            list.forEach(e=>{
-                var detail ={
-                    roomName: e.roomName,
-                    price: e.price,
-                    photo: e.photo,
-                    address: e.address,
-                    slug: e.slug
-                }
-                listDetail.push(detail)
-            })
-            return res.status(200).send({
-                errorCode: 0,
-                data: listDetail,
-                current: page,
-                pages: Math.ceil(count/perPage)
-            })
+        var listDetail = []
+        list.forEach(e => {
+            var detail = {
+                roomName: e.roomName,
+                price: e.price,
+                photo: e.photo,
+                address: e.address,
+                slug: e.slug
+            }
+            listDetail.push(detail)
         })
-        .catch(err =>{
-            return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listDetail,
         })
     })
 }
 
-exports.detailHotelRoom = (req, res) =>{
-    HotelRoom.findOne({slug: req.params.slug, moderatorID: req.accountID, deleted: false}, (err, post) =>{
-        if(err) return res.status(500).send({
+exports.detailHotelRoom = (req, res) => {
+    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, (err, post) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
@@ -188,7 +172,7 @@ exports.detailHotelRoom = (req, res) =>{
     })
 }
 
-exports.listBillHotelRoom = (req, res) =>{
+exports.listBillHotelRoom = (req, res) => {
     try {
         HotelRoom.find({ moderatorID: req.accountID }, (err, listHotelRoom) => {
             if (err) return res.status(500).send({
@@ -211,13 +195,13 @@ exports.listBillHotelRoom = (req, res) =>{
                 var user = await User.findById(e.userID)
                 var room = await HotelRoom.findById(e.hotelRoomID)
                 var detail = {
-                    checkIn : e.checkIn,
-                    checkOut : checkOut,
+                    checkIn: e.checkIn,
+                    checkOut: checkOut,
                     bookedDate: e.createdAt,
                     HotelRoomName: room.roomName,
                     userID: user.userName
                 }
-                listDetail.append(detail)
+                listDetail.push(detail)
             })
             return res.status(200).send({
                 errorCode: 0,
@@ -254,7 +238,7 @@ exports.listBillHotelRoom = (req, res) =>{
 //                         })
 //                     })
 //                 }
-    
+
 //             })
 //         })
 //     } catch (error) {
@@ -267,91 +251,16 @@ exports.listBillHotelRoom = (req, res) =>{
 
 //search, filter
 
-exports.searchHotelRoom = async (req,res) =>{
-    const listHotelRoom = await HotelRoom.find({ moderatorID: req.accountID,deleted: false })
-    var search = req.query.search
-    var dataSearch = listHotelRoom.filter(r => r.roomName.toLowerCase().includes(search.toLowerCase()))
-    var count = 0
-    dataSearch.forEach(() => count++)
-
-    let perPage = 10
-    let page = req.query.page || 1
-    HotelRoom.find({ moderatorID: req.accountID, deleted: false })
-        .skip((perPage * page) - perPage)
-        .limit(perPage)
-        .exec(async (err, list) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            var search = req.query.search
-            var dataSearch = list.filter(r => r.roomName.toLowerCase().includes(search.toLowerCase()))
-            var show = []
-            dataSearch.forEach(e => {
-                var room = {
-                    roomName: e.roomName,
-                    price: e.price,
-                    photo: e.photo,
-                    address: e.address,
-                    slug: e.slug
-                }
-                show.push(room)
-            })
-            return res.status(200).send({
-                errorCode: 0,
-                data: show,
-                current: page,
-                pages: Math.ceil(count / perPage)
-            })
-        })
-}
-
-exports.filterASCHotelRoom = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    const listHotelRoom = await HotelRoom.find({ moderatorID: req.accountID, deleted: false })
-    var dataSort = listHotelRoom.sort((a, b) => a.price - b.price)
-    const data = dataSort.slice(((perPage * page) - perPage), (perPage * page))
-
-    HotelRoom.countDocuments({ moderatorID: req.accountID, deleted: false }, (err, count) => {
+exports.searchHotelRoom = async (req, res) => {
+    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
+        var search = req.query.address
+        var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))
         var show = []
-        data.forEach(e => {
-            var tour = {
-                roomName: e.roomName,
-                    price: e.price,
-                    photo: e.photo,
-                    address: e.address,
-                    slug: e.slug
-            }
-            show.push(tour)
-        })
-        return res.status(200).send({
-            errorCode: 0,
-            data: show,
-            current: page,
-            pages: Math.ceil(count / perPage)
-        })
-    })
-}
-
-exports.filterDESHotelRoom = async (req, res) => {
-    let perPage = 10
-    let page = req.query.page || 1
-    const listHotelRoom = await HotelRoom.find({ moderatorID: req.accountID, deleted: false })
-    var dataSort = listHotelRoom.sort((a, b) => b.price - a.price)
-    const data = dataSort.slice(((perPage * page) - perPage), (perPage * page))
-
-    HotelRoom.countDocuments({ moderatorID: req.accountID, deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        var show = []
-        data.forEach(e => {
+        dataSearch.forEach(e => {
             var room = {
                 roomName: e.roomName,
                 price: e.price,
@@ -364,8 +273,51 @@ exports.filterDESHotelRoom = async (req, res) => {
         return res.status(200).send({
             errorCode: 0,
             data: show,
-            current: page,
-            pages: Math.ceil(count / perPage)
         })
+    })
+}
+
+exports.filterHotelRoom = async (req, res) => {
+    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if (req.query.filter === 'ASC') {
+            var dataSort = list.sort((a, b) => a.price - b.price)
+            var show = []
+            dataSort.forEach(e => {
+                var tour = {
+                    roomName: e.roomName,
+                    price: e.price,
+                    photo: e.photo,
+                    address: e.address,
+                    slug: e.slug
+                }
+                show.push(tour)
+            })
+            return res.status(200).send({
+                errorCode: 0,
+                data: show,
+            })
+        } else if (req.query.filter === 'DES') {
+            var dataSort = list.sort((a, b) => b.price - a.price)
+            var show = []
+            dataSort.forEach(e => {
+                var tour = {
+                    roomName: e.roomName,
+                    price: e.price,
+                    photo: e.photo,
+                    address: e.address,
+                    slug: e.slug
+                }
+                show.push(tour)
+            })
+            return res.status(200).send({
+                errorCode: 0,
+                data: show,
+            })
+        }
+
     })
 }

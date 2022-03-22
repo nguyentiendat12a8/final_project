@@ -14,10 +14,11 @@ const { Like } = require('./like.schema')
 const { Moderator } = require('./moderator.schema')
 const { Post } = require('./post.schema')
 const { PostExperience } = require('./postExperience.schema')
-const { Rate } = require('./rateTour.schema')
 const { User } = require('./user.schema')
 const { ResetPassword } = require('./resetPassword.schema')
 const { RateTour } = require('./rateTour.schema')
+const { TourDraft } = require('./tourDraft.schema')
+const { TourDraftStatus } = require('./tourDraftStatus.schema')
 
 
 mongoose.plugin(softDelete, {
@@ -41,11 +42,12 @@ db.like = Like
 db.moderator = Moderator
 db.post = Post
 db.postExperience = PostExperience
-db.rate = Rate
 db.tourCustom = TourCustom
 db.user = User
 db.resetPassword = ResetPassword
 db.rateTour = RateTour 
+db.tourDraft = TourDraft
+db.tourDraftStatus = TourDraftStatus
 db.ROLES = ['user', 'admin', 'moderator']
 
 module.exports = db
