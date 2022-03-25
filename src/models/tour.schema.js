@@ -32,9 +32,7 @@ exports.Tour = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'CategoryTour'
         }],
-        slug: {type: String, slug: 'tourName', unique: true }
-    },
-    {
-        timestamps: true
+        slug: {type: String, slug: 'tourName', unique: true },
+        createdAt: { type: String, default: new Date() },
     })
 )

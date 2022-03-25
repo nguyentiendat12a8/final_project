@@ -15,8 +15,6 @@ exports.Moderator = mongoose.model(
         tourCustomStatus: {type: Boolean},
         deleted: {type: Boolean, default: false},
         slug: {type: String, slug: 'modName', unique: true },
-    },
-    {
-        timestamps: true
+        createdAt: { type: String, default: new Date() },
     })
 )

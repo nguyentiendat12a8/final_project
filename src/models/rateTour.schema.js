@@ -4,6 +4,7 @@ exports.RateTour = mongoose.model(
     'RateTour',
     new mongoose.Schema({
         point: {type: Number, required: true},
+        createdAt: { type: String, default: new Date() },
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
@@ -12,8 +13,5 @@ exports.RateTour = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Tour'
         }]
-    },
-    {
-        timestamps: true
     })
 )

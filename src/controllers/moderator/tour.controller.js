@@ -17,7 +17,7 @@ exports.addTour = async (req, res, next) => {
             path = path.substring(0, path.lastIndexOf(','))
             req.body.picture = path
         } else {
-            req.body.picture = 'No photo'
+            req.body.picture = ''
         }
         const category = await CategoryTour.findOne({ categoryName: req.query.categoryName })
         const moderator = await Moderator.findById(req.accountID)

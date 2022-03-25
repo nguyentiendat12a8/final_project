@@ -9,7 +9,6 @@ exports.PaypalInfo = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }],
-    }, {
-        timestamps: true
+        createdAt: { type: String, default: new Date() },
     })
 )

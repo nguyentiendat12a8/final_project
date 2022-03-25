@@ -23,13 +23,11 @@ exports.HotelRoom = mongoose.model(
         description: {type: String, required: true},
         address: {type: String, required: true},
         deleted: {type: Boolean, default: false},
+        createdAt: { type: String, default: new Date() },
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }],
         slug: {type: String, slug: 'roomName', unique: true }
-    },
-    {
-        timestamps: true
     })
 )

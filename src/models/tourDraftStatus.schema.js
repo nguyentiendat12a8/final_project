@@ -11,9 +11,7 @@ exports.TourDraftStatus = mongoose.model(
         tourID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Tour'
-        }]
-    },
-    {
-        timestamps: true
+        }],
+        createdAt: { type: String, default: new Date() },
     })
 )

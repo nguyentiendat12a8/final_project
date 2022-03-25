@@ -11,8 +11,7 @@ exports.Post = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }],
-        slug: {type: String, slug: 'postTitle', unique: true}
-    }, {
-        timestamps: true
+        slug: {type: String, slug: 'postTitle', unique: true},
+        createdAt: { type: String, default: new Date() },
     })
 )
