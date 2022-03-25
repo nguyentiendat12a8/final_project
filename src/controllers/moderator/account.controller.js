@@ -8,6 +8,7 @@ const Admin = db.admin
 const ResetPassword = db.resetPassword
 const User = db.user
 const Moderator = db.moderator
+const PaypalInfo = db.paypalInfo
 
 exports.signup = async (req, res) => {
   const user = new Moderator({
@@ -219,4 +220,75 @@ exports.confirmLink = async (req, res) => {
     res.send("An error occured")
     console.log(error);
   }
+}
+
+
+
+// payment online
+exports.configPaypal = async (req, res) => {
+  const paypalInfo = new PaypalInfo({
+    clientID: req.body.clientID,
+    secret: req.body.secret,
+    moderatorID: req.accountID
+  })
+  await paypalInfo.save(err => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Config paypal successfully'
+    })
+  })
+}
+
+exports.viewPaypal = async (req, res) => {
+  PaypalInfo.findOne({ moderatorID: req.accountID }, (err, paypal) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    var show = {
+      clientID: paypal.clientID,
+      secret:paypal.secret
+    }
+    return res.status(200).send({
+      errorCode: 0,
+      data: show
+    })
+  })
+}
+
+exports.editPaypal = async (req, res) => {
+  PaypalInfo.findOne({ moderatorID: req.accountID }, (err, paypal) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    var show = {
+      clientID: paypal.clientID,
+      secret:paypal.secret
+    }
+    return res.status(200).send({
+      errorCode: 0,
+      data: show
+    })
+  })
+}
+
+exports.updatePaypal = async (req, res) => {
+  PaypalInfo.findOneAndUpdate({ moderatorID: req.accountID }, {
+    clientID: req.body.clientID,
+    secret: req.body.secret
+  }, {new: true}, (err) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Update paypal information successfully!'
+    })
+  })
 }

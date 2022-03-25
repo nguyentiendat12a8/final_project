@@ -20,4 +20,7 @@ router.get('/detail-hotel-room/:slug', [verifyToken, isModerator], detailHotelRo
 router.get('/search', [verifyToken,isModerator], searchHotelRoom)
 router.get('/filter-hotel-room', [verifyToken, isModerator], filterHotelRoom)
 
+
+
+
 module.exports = router

@@ -1,13 +1,16 @@
+const paypal = require('paypal-rest-sdk')
 const db = require('../../models/index')
 const Tour = db.tour
 const Rate = db.rateTour
 const Moderator = db.moderator
-const BillTour =db.billTour
+const BillTour = db.billTour
 const User = db.user
 const Category = db.categoryTour
+const PaypalInfo = db.paypalInfo
+
 
 exports.listTour = (req, res, next) => {
-    Tour.find({deleted: false}, (err, list) => { // theem dieu kien , private: false
+    Tour.find({ deleted: false }, (err, list) => { // theem dieu kien , private: false
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -36,12 +39,12 @@ exports.listTour = (req, res, next) => {
 }
 
 exports.detailTour = (req, res, next) => {
-    Tour.findOne({ slug: req.query.slug, deleted: false },async (err, tour) => { //them dieu kien , private: false
+    Tour.findOne({ slug: req.query.slug, deleted: false }, async (err, tour) => { //them dieu kien , private: false
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        if(tour === null) res.status(400).send({
+        if (tour === null) res.status(400).send({
             errorCode: 400,
             message: 'invalid link!'
         })
@@ -91,7 +94,7 @@ exports.bookTour = (req, res, next) => {
 
 // need update
 exports.listBillTour = (req, res, next) => {
-    BillTour.find({userID: req.accountID, deleted: false}, (err, list) => {
+    BillTour.find({ userID: req.accountID, deleted: false }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -99,7 +102,7 @@ exports.listBillTour = (req, res, next) => {
         var show = []
         list.forEach(async e => {
             var tour = await Tour.findById(e.tourID)
-            if(!user || !tour) return res.status(500).send({
+            if (!user || !tour) return res.status(500).send({
                 errorCode: 500,
                 message: 'Bill tour is error'
             })
@@ -138,120 +141,124 @@ exports.addCustomTour = (req, res) => {
 
 }
 
-const paypal = require('paypal-rest-sdk')
-// payment online
+
+
 // paypal.configure({
 //     'mode': 'sandbox', //sandbox or live
-//     'client_id': 'AW08gKdTJAStrt0PenCcUa-EPaqphhipPcMNjtWKfIoRSHWBt-YRM5bea51ZAiv16baUZQLO2BNCKETw',
-//     'client_secret': 'EF-_jU1cTmNx1UQHkyl7nq3puKAd2JSAvFSbHxgfGeoNgiXsaW4eQ-PalxcQ5hZHcGJ5kD3sfB-21w7L'
+//     'client_id': 'ARkQd3S2gMmWjLlh-qL3RezQieuKnvp82VNjBTGhyByjFxelP-rz7RMjl8f_Kf2EuGM-NOr7i_I0BjfE',
+//     'client_secret': 'EAif1EqBp_b7lwx0bpGB5lJkXxSUaMP7vWQyNTnNBVO_dOLQ7h15Sr1kYwAcbKd7caEEGa0dDHhIpSMa'
 // });
-
-
 // //book tour la chuc nang cua user
-// exports.paymentTour = async (req, res) => {
-//     await Tour.findById(req.params.tourID)
-//         .then(tour => {
-//             tourName = tour.tourName
-//             price = tour.price
-//             number = 2
-//             total = price * number
-//         })
-//         .catch(err => {
-//             console.log(err)
-//         })
-//     const create_payment_json = {
-//         "intent": "sale",
-//         "payer": {
-//             "payment_method": "paypal"
-//         },
-//         "redirect_urls": {
-//             "return_url": "http://localhost:1001/tour/success",
-//             "cancel_url": "http://localhost:1001/tour/cancel"
-//         },
-//         "transactions": [{
-//             "item_list": {
-//                 "items": [{
-//                     "name": `Tour: ${tourName}`,
-//                     //"sku": "001",
-//                     "price": `${price}`,
-//                     "currency": "USD",
-//                     "quantity": `${number}`
-//                 }]
-//             },
-//             "amount": {
-//                 "currency": "USD",
-//                 "total": `${total}`
-//             },
-//             "description": "book tour tien loi"
-//         }]
-//     };
+exports.paymentTour = async (req, res) => {
+    const tour = await Tour.findById(req.params.tourID)
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
+
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
+    const create_payment_json = {
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": `http://localhost:4000/user/tour/success/${req.params.tourID}`,
+            "cancel_url": "http://localhost:4000/user/tour/cancel"
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": `Tour: ${tour.tourName}`,
+                    //"sku": "001",
+                    "price": `${tour.price}`,
+                    "currency": "USD",
+                    "quantity": 1
+                }]
+            },
+            "amount": {
+                "currency": "USD",
+                "total": `${tour.price}`
+            },
+            "description": "book tour tien loi"
+        }]
+    };
 
 
-//     paypal.payment.create(create_payment_json, function (error, payment) {
-//         if (error) {
-//             throw error;
-//         } else {
-//             for (let i = 0; i < payment.links.length; i++) {
-//                 if (payment.links[i].rel === 'approval_url') {
-//                     res.redirect(payment.links[i].href);
-//                 }
-//             }
+    paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+            throw error;
+        } else {
+            for (let i = 0; i < payment.links.length; i++) {
+                if (payment.links[i].rel === 'approval_url') {
+                    res.redirect(payment.links[i].href);
+                }
+            }
 
-//         }
-//     });
-// }
+        }
+    });
+}
 
-// exports.success = async (req, res, next) => {
-//     await Tour.findById({ _id: '6210a649b7ccdfb4c06cd388' })
-//         .then(tour => {
-//             price = tour.price
-//             number = 2
-//             total = price * number
-//             console.log(total)
-//         })
-//         .catch(err => {
-//             console.log(err)
-//         })
+exports.success = async (req, res, next) => {
+    const tour = await Tour.findById(req.params.tourID)
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
 
-//     const payerId = req.query.PayerID;
-//     const paymentId = req.query.paymentId;
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
 
-//     const execute_payment_json = {
-//         "payer_id": payerId,
-//         "transactions": [{
-//             "amount": {
-//                 "currency": "USD",
-//                 "total": `${total}`
-//             }
-//         }]
-//     };
-//     paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
-//         if (error) {
-//             console.log(error.response);
-//             throw error;
-//         } else {
-//             const billTour = new BillTour({
-//                 accountId: '62090db6bd7ef1e7c3f98332', //req.userId
-//                 tourId: '6210a649b7ccdfb4c06cd388', //req.params.tourId
-//                 bookedDate: Date.now()
-//             })
-//             billTour.save()
-//                 .then(() => {
-//                     return res.status(200).send({
-//                         errorCode: 0,
-//                         message: 'save booked tour successfully'
-//                     })
-//                 })
-//                 .catch(err => {
-//                     console.log(err)
-//                 })
-//             // console.log(JSON.stringify(payment));
-//             // res.send('Success (Mua hàng thành công)');
-//         }
-//     });
-// }
+    const payerId = req.query.PayerID;
+    const paymentId = req.query.paymentId;
 
-// exports.cancel = (req, res) => {
-//     res.send('Cancelled (Đơn hàng đã hủy)')
-//     return
-// }
+    const execute_payment_json = {
+        "payer_id": payerId,
+        "transactions": [{
+            "amount": {
+                "currency": "USD",
+                "total": `${tour.price}`
+            }
+        }]
+    };
+    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+        if (error) {
+            console.log(error.response);
+            throw error;
+        } else {
+            const billTour = new BillTour({
+                userID: req.accountID, //req.userId
+                tourID: req.params.tourID, //req.params.tourId
+                bookedDate: Date.now()
+            })
+            billTour.save()
+                .then(() => {
+                    return res.status(200).send({
+                        errorCode: 0,
+                        message: 'save booked tour successfully'
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
+    });
+}
+
+exports.cancel = (req, res) => {
+    res.send('Cancelled (Đơn hàng đã hủy)')
+    return
+}

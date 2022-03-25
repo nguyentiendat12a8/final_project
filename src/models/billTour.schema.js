@@ -13,9 +13,5 @@ exports.BillTour = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Tour'
         }],
-        tourCustomID: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'TourCustom'
-        }],
     })
 )

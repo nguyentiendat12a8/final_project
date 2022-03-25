@@ -1,6 +1,6 @@
 const express = require('express')
 const { checkDuplicateMod } = require('../../middlewares/verifySignUp.middleware')
-const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailResetPass, confirmLink,
+const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailResetPass, confirmLink, configPaypal, viewPaypal, editPaypal, updatePaypal,
     } = require('../../controllers/moderator/account.controller')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
 const {uploadAvatar} = require('../../middlewares/uploadFile.middleware')
@@ -14,5 +14,11 @@ router.get('/edit-account',[verifyToken, isModerator], editAccount)
 router.patch('/update-account',[verifyToken, isModerator, uploadAvatar.single('avatar')], updateAccount)
 router.post('/forgot-password', sendEmailResetPass)
 router.patch('/update-forgotten-password/:accountID/:token', confirmLink)
+
+//add payment method
+router.post('/config-paypal', [verifyToken, isModerator], configPaypal)
+router.get('/view-paypal', [verifyToken, isModerator], viewPaypal)
+router.get('/edit-paypal',  [verifyToken, isModerator], editPaypal)
+router.patch('/update-paypal',  [verifyToken, isModerator], updatePaypal)
 
 module.exports = router
