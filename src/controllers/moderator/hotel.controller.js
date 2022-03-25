@@ -122,18 +122,18 @@ exports.updateHotelRoom = (req, res) => {
     })
 }
 
-exports.deleteHotelRoom = (req, res) => {
-    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        return res.status(200).send({
-            errorCode: 0,
-            message: 'delete room successfully!'
-        })
-    })
-}
+// exports.deleteHotelRoom = (req, res) => {
+//     HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
+//         if (err) return res.status(500).send({
+//             errorCode: 500,
+//             message: err
+//         })
+//         return res.status(200).send({
+//             errorCode: 0,
+//             message: 'delete room successfully!'
+//         })
+//     })
+// }
 
 exports.listHotelRoom = (req, res) => {
     HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {

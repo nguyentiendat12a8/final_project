@@ -88,67 +88,6 @@ exports.detailTour = (req, res, next) => {
     })
 }
 
-exports.bookTour = (req, res, next) => {
-
-}
-
-// need update
-exports.listBillTour = (req, res, next) => {
-    BillTour.find({ userID: req.accountID, deleted: false }, (err, list) => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
-        var show = []
-        list.forEach(async e => {
-            var tour = await Tour.findById(e.tourID)
-            if (!user || !tour) return res.status(500).send({
-                errorCode: 500,
-                message: 'Bill tour is error'
-            })
-            var detail = {
-                bookedDate: e.bookedDate,
-                tourName: tour.tourName,
-                startDate: tour.startDate,
-
-            }
-            show.push(detail)
-        })
-        return res.status(200).send({
-            errorCode: 0,
-            data: show
-        })
-    })
-}
-
-exports.detailBillTour = (req, res, next) => {
-
-}
-
-//rate tour
-//cần check time rate -- qua ngày xuất phát mới được rate
-//cần check người này đã từng đánh giá trước đó hay chưa, nếu rồi thì sẽ update rate mới.
-
-
-
-
-
-
-
-
-
-exports.addCustomTour = (req, res) => {
-
-}
-
-
-
-// paypal.configure({
-//     'mode': 'sandbox', //sandbox or live
-//     'client_id': 'ARkQd3S2gMmWjLlh-qL3RezQieuKnvp82VNjBTGhyByjFxelP-rz7RMjl8f_Kf2EuGM-NOr7i_I0BjfE',
-//     'client_secret': 'EAif1EqBp_b7lwx0bpGB5lJkXxSUaMP7vWQyNTnNBVO_dOLQ7h15Sr1kYwAcbKd7caEEGa0dDHhIpSMa'
-// });
-// //book tour la chuc nang cua user
 exports.paymentTour = async (req, res) => {
     const tour = await Tour.findById(req.params.tourID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
@@ -262,3 +201,92 @@ exports.cancel = (req, res) => {
     res.send('Cancelled (Đơn hàng đã hủy)')
     return
 }
+// need update
+exports.listBillTour = (req, res, next) => {
+    BillTour.find({ userID: req.accountID, deleted: false }, async (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var show = []
+        for (i = 0; i < list.length; i++) {
+            var tour = await Tour.findById(list[i].tourID)
+            if (!tour) return res.status(500).send({
+                errorCode: 500,
+                message: 'Bill tour is error'
+            })
+            var detail = {
+                bookedDate: list[i].bookedDate,
+                tourName: tour.tourName,
+                startDate: tour.startDate,
+                _id: list[i]._id
+            }
+            show.push(detail)
+        }
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
+
+exports.detailBillTour = (req, res, next) => {
+    BillTour.findOne({ _id: req.params.billTourID, userID: req.accountID, deleted: false }, async (err, billTour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var tour = await Tour.findById(billTour.tourID)
+                if (!tour) return res.status(500).send({
+                    errorCode: 500,
+                    message: 'Bill tour is error'
+                })
+                const moderator = await Moderator.findById(tour.moderatorID)
+                var detail = {
+                    bookedDate: billTour.bookedDate,
+                    tourName: tour.tourName,
+                    startDate: tour.startDate,
+                    price: tour.price,
+                    picture: tour.picture,
+                    time: tour.time,
+                    address: tour.address,
+                    startingPoint: tour.startingPoint,
+                    description: {
+                        content: tour.description.content,
+                        vehicle: tour.description.vehicle,
+                        timeDecription: tour.description.timeDecription
+                    },
+                    rate: {
+                        numberOfStar: tour.rate.numberOfStar,
+                        numberOfRate: tour.rate.numberOfRate
+                    },
+                    hotel: tour.hotel,
+                    moderatorName: moderator.modName,
+                    moderatorEmail: moderator.email,
+                    moderatorPhone: moderator.phone
+                }
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: detail
+        })
+    })
+}
+
+
+//rate tour
+//cần check time rate -- qua ngày xuất phát mới được rate
+//cần check người này đã từng đánh giá trước đó hay chưa, nếu rồi thì sẽ update rate mới.
+
+
+
+
+
+
+// paypal.configure({
+//     'mode': 'sandbox', //sandbox or live
+//     'client_id': 'ARkQd3S2gMmWjLlh-qL3RezQieuKnvp82VNjBTGhyByjFxelP-rz7RMjl8f_Kf2EuGM-NOr7i_I0BjfE',
+//     'client_secret': 'EAif1EqBp_b7lwx0bpGB5lJkXxSUaMP7vWQyNTnNBVO_dOLQ7h15Sr1kYwAcbKd7caEEGa0dDHhIpSMa'
+// });
+// //book tour la chuc nang cua user

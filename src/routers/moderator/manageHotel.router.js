@@ -8,7 +8,7 @@ const router = express.Router()
 router.post('/add-hotel-room', [verifyToken, isModerator, upload.array('photo')], addHotelRoom )
 router.get('/edit-hotel-room/:slug',[verifyToken, isModerator], editHotelRoom)
 router.patch('/update-hotel-room/:slug', [verifyToken, isModerator, upload.array('photo')], updateHotelRoom)
-router.patch('/delete-hotel-room/:slug', [verifyToken, isModerator], deleteHotelRoom)
+//router.patch('/delete-hotel-room/:slug', [verifyToken, isModerator], deleteHotelRoom)
 router.get('/list-hotel-room', [verifyToken, isModerator], listHotelRoom)
 router.get('/detail-hotel-room/:slug', [verifyToken, isModerator], detailHotelRoom)
 
