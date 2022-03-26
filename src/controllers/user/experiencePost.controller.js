@@ -175,12 +175,26 @@ exports.commentExperiencePost = async (req, res) => {
     }
 }
 
-exports.listCommentExperiencePost = (req, res) => {
-    Comment.find({postExperienceID: req.params.postExperienceID}, (err, list) => {
+exports.listCommentExperiencePost =  (req, res) => {
+    Comment.find({postExperienceID: req.params.postExperienceID},async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        
+        var show = []
+        for(i =0; i<list.length; i++){
+            var user = await User.findById(list[i].userID)
+            var comment = {
+                commentText: list[i].commentText,
+                createdAt: list[i].createdAt,
+                userName: user.userName,
+                avatar: user.avatar
+            }
+            show.push(comment)
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
     })
 }

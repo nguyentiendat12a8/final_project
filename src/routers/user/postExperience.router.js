@@ -1,5 +1,5 @@
 const express = require('express')
-const { addExperiencePost, editExperiencePost, updateExperiencePost, deleteExperiencePost, listExperiencePost, likeExperiencePost, myPost } = require('../../controllers/user/experiencePost.controller')
+const { addExperiencePost, editExperiencePost, updateExperiencePost, deleteExperiencePost, listExperiencePost, likeExperiencePost, myPost, commentExperiencePost, listCommentExperiencePost } = require('../../controllers/user/experiencePost.controller')
 const { checkLike } = require('../../middlewares/checkLike.middleware')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
@@ -13,6 +13,8 @@ router.get('/view-list-post-experience', [verifyToken], listExperiencePost)
 router.get('/my-post', [verifyToken], myPost)
 
 router.post('/like-post-experience/:postExperienceID', [verifyToken, checkLike], likeExperiencePost)
+router.post('/comment-post-experience/:postExperienceID', [verifyToken], commentExperiencePost)
+router.get('/list-comment-post-experience/:postExperienceID', [verifyToken], listCommentExperiencePost)
 
 
 

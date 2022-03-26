@@ -28,8 +28,12 @@ exports.addHotelRoom = (req, res) => {
             wifi: req.body.wifi,
             pool: req.body.pool,
             smoking: req.body.smoking,
+            TV: req.body.TV,
+            kitchen: req.body.kitchen,
+            bathtub: req.body.bathtub,
         },
         photo: req.body.photo,
+        acreage: req.body.acreage,
         description: req.body.description,
         address: req.body.address,
         moderatorID: req.accountID
@@ -71,6 +75,9 @@ exports.editHotelRoom = (req, res) => {
                 wifi: room.utilities.wifi,
                 pool: room.utilities.pool,
                 smoking: room.utilities.smoking,
+                TV: room.utilities.TV,
+                kitchen: room.utilities.kitchen,
+                bathtub: room.utilities.bathtub,
             },
             photo: room.photo,
             description: room.description,
@@ -107,6 +114,9 @@ exports.updateHotelRoom = (req, res) => {
             wifi: req.body.wifi,
             pool: req.body.pool,
             smoking: req.body.smoking,
+            TV: req.body.TV,
+            kitchen: req.body.kitchen,
+            bathtub: req.body.bathtub,
         },
         photo: req.body.photo,
         description: req.body.description,
@@ -147,6 +157,7 @@ exports.listHotelRoom = (req, res) => {
                 roomName: e.roomName,
                 price: e.price,
                 photo: e.photo,
+                acreage: e.acreage,
                 address: e.address,
                 slug: e.slug
             }
@@ -265,6 +276,7 @@ exports.searchHotelRoom = async (req, res) => {
                 roomName: e.roomName,
                 price: e.price,
                 photo: e.photo,
+                acreage: e.acreage,
                 address: e.address,
                 slug: e.slug
             }
@@ -291,6 +303,7 @@ exports.filterHotelRoom = async (req, res) => {
                     roomName: e.roomName,
                     price: e.price,
                     photo: e.photo,
+                    acreage: e.acreage,
                     address: e.address,
                     slug: e.slug
                 }
