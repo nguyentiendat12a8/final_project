@@ -5,7 +5,7 @@ exports.BillTour = mongoose.model(
     new mongoose.Schema({
         bookedDate: {type: String, default: new Date},
         
-        deleted: {type: Boolean, default: false},
+        //deleted: {type: Boolean, default: false},
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

@@ -26,7 +26,7 @@ exports.HotelRoom = mongoose.model(
         acreage: {type: String, required: true},
         description: {type: String, required: true},
         address: {type: String, required: true},
-        deleted: {type: Boolean, default: false},
+        //deleted: {type: Boolean, default: false},
         createdAt: { type: String, default: new Date() },
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,

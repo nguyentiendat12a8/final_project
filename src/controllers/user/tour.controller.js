@@ -10,7 +10,7 @@ const PaypalInfo = db.paypalInfo
 
 
 exports.listTour = (req, res, next) => {
-    Tour.find({ deleted: false }, (err, list) => { // theem dieu kien , private: false
+    Tour.find({}, (err, list) => { // theem dieu kien , private: false
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -39,7 +39,7 @@ exports.listTour = (req, res, next) => {
 }
 
 exports.detailTour = (req, res, next) => {
-    Tour.findOne({ slug: req.query.slug, deleted: false }, async (err, tour) => { //them dieu kien , private: false
+    Tour.findOne({ slug: req.query.slug}, async (err, tour) => { //them dieu kien , private: false
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -203,7 +203,7 @@ exports.cancel = (req, res) => {
 }
 // need update
 exports.listBillTour = (req, res, next) => {
-    BillTour.find({ userID: req.accountID, deleted: false }, async (err, list) => {
+    BillTour.find({ userID: req.accountID}, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -232,7 +232,7 @@ exports.listBillTour = (req, res, next) => {
 }
 
 exports.detailBillTour = (req, res, next) => {
-    BillTour.findOne({ _id: req.params.billTourID, userID: req.accountID, deleted: false }, async (err, billTour) => {
+    BillTour.findOne({ _id: req.params.billTourID, userID: req.accountID}, async (err, billTour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err

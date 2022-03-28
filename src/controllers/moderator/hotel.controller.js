@@ -51,7 +51,7 @@ exports.addHotelRoom = (req, res) => {
 }
 
 exports.editHotelRoom = (req, res) => {
-    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, async (err, room) => {
+    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID}, async (err, room) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -101,7 +101,7 @@ exports.updateHotelRoom = (req, res) => {
     } else {
         req.body.photo = 'No photo'
     }
-    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, {
+    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID}, {
         price: req.body.price,
         bedroom: {
             singleBed: req.body.singleBed,
@@ -146,7 +146,7 @@ exports.updateHotelRoom = (req, res) => {
 // }
 
 exports.listHotelRoom = (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -171,7 +171,7 @@ exports.listHotelRoom = (req, res) => {
 }
 
 exports.detailHotelRoom = (req, res) => {
-    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, (err, post) => {
+    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID}, (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -263,7 +263,7 @@ exports.listBillHotelRoom = (req, res) => {
 //search, filter
 
 exports.searchHotelRoom = async (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -290,7 +290,7 @@ exports.searchHotelRoom = async (req, res) => {
 }
 
 exports.filterHotelRoom = async (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err

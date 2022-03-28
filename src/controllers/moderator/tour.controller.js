@@ -57,7 +57,7 @@ exports.addTour = async (req, res, next) => {
 
 exports.editTour = (req, res, next) => {
     try {
-        Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, async (err, tour) => {
+        Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID}, async (err, tour) => {
             if (err) return res.status(500).send({
                 errorCode: 500,
                 message: err
@@ -99,7 +99,7 @@ exports.editTour = (req, res, next) => {
 
 exports.updateTour = async (req, res, next) => {
     const category = CategoryTour.findOne({ categoryName: req.body.categoryName })
-    Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, {
+    Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID}, {
         startDate: req.body.startDate,
         price: req.body.price,
         picture: req.body.picture,
@@ -141,7 +141,7 @@ exports.updateTour = async (req, res, next) => {
 
 //list tour according moderator 
 exports.listTour = (req, res, next) => {
-    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    Tour.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -171,7 +171,7 @@ exports.listTour = (req, res, next) => {
 }
 
 exports.detailTour = async (req, res) => {
-    Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID, deleted: false }, async (err, tour) => {
+    Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID}, async (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -216,7 +216,7 @@ exports.detailTour = async (req, res) => {
 
 //search, filter
 exports.searchTour = async (req, res) => {
-    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    Tour.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -247,7 +247,7 @@ exports.searchTour = async (req, res) => {
 }
 
 exports.filterTour = async (req, res) => {
-    Tour.find({ moderatorID: req.accountID, deleted: false }, (err, list) => {
+    Tour.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -313,7 +313,7 @@ exports.listBillTour = async (req, res, next) => {
             let listBill = []
             let listDetail = []
             listTour.forEach(async e => {
-                BillTour.find({ tourID: e._id , deleted: false}, (err, bill) => {
+                BillTour.find({ tourID: e._id}, (err, bill) => {
                     if (err) return res.status(500).send({
                         errorCode: 500,
                         message: err

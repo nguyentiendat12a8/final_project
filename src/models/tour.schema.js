@@ -23,7 +23,7 @@ exports.Tour = mongoose.model(
         },
         hotel: {type: String},
         private: {type: Boolean, default: false},
-        deleted: {type: Boolean, default: false},
+        //deleted: {type: Boolean, default: false},
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
