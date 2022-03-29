@@ -203,14 +203,14 @@ exports.confirmLink = async (req, res) => {
     const user = await Moderator.findById(req.params.accountID);
     if (!user) return res.status(400).send({
       errorCode: 400,
-      message: "invalid link or expired"
+      message: "invalid link or expired 1"
     })
 
     const token = await ResetPassword.findOne({
       accountID: user._id,
       token: req.params.token,
     })
-    if (!token) return res.status(400).send("Invalid link or expired")
+    if (!token) return res.status(400).send("Invalid link or expired 2")
 
     user.password = bcrypt.hashSync(req.body.password, 8)
     await user.save()

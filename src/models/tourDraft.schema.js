@@ -3,7 +3,14 @@ const mongoose = require('mongoose')
 exports.TourDraft = mongoose.model(
     'TourDraft',
     new mongoose.Schema({
-        point: {type: Number, required: true},
+        tourName: {type: String, required: true},
+        destination: {
+            address: {type: String, required: true},
+            mainActivities: {type: String, required: true}
+        },
+        startingPoint: {},
+        picture: {},
+        
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

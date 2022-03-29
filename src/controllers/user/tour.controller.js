@@ -7,6 +7,7 @@ const BillTour = db.billTour
 const User = db.user
 const Category = db.categoryTour
 const PaypalInfo = db.paypalInfo
+const RateTour = db.rateTour
 
 
 exports.listTour = (req, res, next) => {
@@ -147,7 +148,7 @@ exports.paymentTour = async (req, res) => {
 
 exports.success = async (req, res, next) => {
     const tour = await Tour.findById(req.params.tourID)
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -201,7 +202,7 @@ exports.cancel = (req, res) => {
     res.send('Cancelled (Đơn hàng đã hủy)')
     return
 }
-// need update
+
 exports.listBillTour = (req, res, next) => {
     BillTour.find({ userID: req.accountID}, async (err, list) => {
         if (err) return res.status(500).send({
@@ -278,15 +279,55 @@ exports.detailBillTour = (req, res, next) => {
 //rate tour
 //cần check time rate -- qua ngày xuất phát mới được rate
 //cần check người này đã từng đánh giá trước đó hay chưa, nếu rồi thì sẽ update rate mới.
+exports.rateTour = (req,res) =>{
+    try {
+        BillTour.findById(req.params.billTourID, (err,bill) =>{
+            if(err) return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
+            const rate = new RateTour({
+                point: req.body.point,
+                comment: req.body.comment,
+                userID: req.accountID,
+                tourID: bill.tourID,
+                billTourID: bill._id
+            })
+            rate.save(async err =>{
+                if(err) return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
+                var sum = 0
+                var point = await RateTour.find({tourID: bill.tourID})
+                for(i = 0; i<point.length ; i++){
+                    sum+=point[i].point
+                }
+                await Tour.findByIdAndUpdate(bill.tourID, {rate:{
+                    numberOfStar: sum/point.length,
+                    numberOfRate: point.length
+                }}, {new: true})
+                return res.status(200).send({
+                    errorCode: 0,
+                    message: 'Rating tour successfully!'
+                })
+            })
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+
+//Tour custom
+exports.addTourDraft = (req,res) =>{
+    
+}
 
 
 
 
 
 
-// paypal.configure({
-//     'mode': 'sandbox', //sandbox or live
-//     'client_id': 'ARkQd3S2gMmWjLlh-qL3RezQieuKnvp82VNjBTGhyByjFxelP-rz7RMjl8f_Kf2EuGM-NOr7i_I0BjfE',
-//     'client_secret': 'EAif1EqBp_b7lwx0bpGB5lJkXxSUaMP7vWQyNTnNBVO_dOLQ7h15Sr1kYwAcbKd7caEEGa0dDHhIpSMa'
-// });
-// //book tour la chuc nang cua user
+

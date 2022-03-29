@@ -3,10 +3,10 @@ const mongoose = require("mongoose");
 exports.ResetPassword = mongoose.model(
     'ResetPassword',
     new mongoose.Schema({
-        accountID: {
-            type: mongoose.Schema.Types.ObjectId,
+        accountID: { type: String,
+            //type: mongoose.Schema.Types.ObjectId,
             required: true,
-            ref: "Account",
+            //ref: "User",
         },
         token: {
             type: String,
