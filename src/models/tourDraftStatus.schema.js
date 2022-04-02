@@ -3,15 +3,14 @@ const mongoose = require('mongoose')
 exports.TourDraftStatus = mongoose.model(
     'TourDraftStatus',
     new mongoose.Schema({
-        point: {type: Number, required: true},
-        userID: [{
+        moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'Moderator'
         }],
-        tourID: [{
+        tourDraftID: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Tour'
+            ref: 'TourDraft'
         }],
-        createdAt: { type: String, default: new Date() },
+        createdAt: { type: String, default: new Date(), expires: 36000, } //10h
     })
 )

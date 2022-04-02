@@ -8,17 +8,29 @@ exports.TourDraft = mongoose.model(
             address: {type: String, required: true},
             mainActivities: {type: String, required: true}
         },
-        startingPoint: {},
-        picture: {},
-        
+        startingPoint: {type: String, required: true},
+        picture: {type: String, required: true},
+        vehicle: {type: String, required: true},
+        startDate: {type: String, required: true},
+        time: {type: String, required: true},
+        hotel: {type: String},
+        //private: {type: Boolean, required: true, default: false},
+        numberOfPeople: {type: String},
+        information: {type: String, required: true},
+
         userID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }],
-        tourID: [{
+        categoryTourID: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Tour'
+            ref: 'CategoryTour'
         }],
+        // tourDraftStatusID: [{
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'TourDraftStatus'
+        // }],
+        slug: {type: String, slug: 'tourName', unique: true },
         createdAt: { type: String, default: new Date() },
     })
 )

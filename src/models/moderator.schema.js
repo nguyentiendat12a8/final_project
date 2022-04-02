@@ -12,7 +12,7 @@ exports.Moderator = mongoose.model(
         avatar: {type: String},
         organizationName: {type: String, required: true},
         dueDate: {type: String},
-        tourCustomStatus: {type: Boolean},
+        tourCustomStatus: {type: Boolean, default: false},
         deleted: {type: Boolean, default: false},
         slug: {type: String, slug: 'modName', unique: true },
         createdAt: { type: String, default: new Date() },

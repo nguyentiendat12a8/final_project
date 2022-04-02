@@ -103,8 +103,8 @@ exports.listExperiencePost = (req, res) => {
             }
             show.push(post)
         }
-        return res.status(500).send({
-            errorCode: 500,
+        return res.status(200).send({
+            errorCode: 0,
             data: show
         })
     })
@@ -142,13 +142,20 @@ exports.likeExperiencePost = async (req, res) => {
             postExperienceID: req.params.postExperienceID,
             userID: req.accountID
         })
-        await like.save()
-        const number = await Like.find({ postExperienceID: req.params.postExperienceID, like: true })
-        await PostExperience.findOneAndUpdate({ _id: req.params.postExperienceID }, { numberOfLike: number.length }, { new: true })
-        return res.status(200).send({
-            errorCode: 0,
-            message: 'number of like update successfully'
+        await Promise.all([like.save(),Like.find({ postExperienceID: req.params.postExperienceID, like: true })])
+        .then(async([like, number]) =>{
+            await PostExperience.findOneAndUpdate({ _id: req.params.postExperienceID }, { numberOfLike: number.length }, { new: true })
+            return res.status(200).send({
+                errorCode: 0,
+                message: 'number of like update successfully'
+            })
         })
+        .catch(error => {
+            return res.status(500).send({
+                errorCode: 500,
+                message: 'Like server is error'
+            })
+        })        
     }
     catch (err) {
         console.log(err)
@@ -162,13 +169,20 @@ exports.commentExperiencePost = async (req, res) => {
             postExperienceID: req.params.postExperienceID,
             userID: req.accountID
         })
-        await comment.save()
-        const number = await Comment.find({ postExperienceID: req.params.postExperienceID})
-        await PostExperience.findOneAndUpdate({ _id: req.params.postExperienceID }, { numberOfComment: number.length }, { new: true })
-        return res.status(200).send({
-            errorCode: 0,
-            message: 'number of Comment upload successfully'
+        await Promise.all([comment.save(),Comment.find({ postExperienceID: req.params.postExperienceID})])
+        .then(async([comment, number])=>{
+            await PostExperience.findOneAndUpdate({ _id: req.params.postExperienceID }, { numberOfComment: number.length }, { new: true })
+            return res.status(200).send({
+                errorCode: 0,
+                message: 'number of Comment upload successfully'
+            })
         })
+        .catch(error => {
+            return res.status(500).send({
+                errorCode: 500,
+                message: 'Comment server is error'
+            })
+        }) 
     }
     catch (err) {
         console.log(err)

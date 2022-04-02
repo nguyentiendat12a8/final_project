@@ -1,5 +1,6 @@
 const paypal = require('paypal-rest-sdk')
 const db = require('../../models/index')
+const sendEmail = require('../../util/sendEmail')
 const Tour = db.tour
 const Rate = db.rateTour
 const Moderator = db.moderator
@@ -8,6 +9,9 @@ const User = db.user
 const Category = db.categoryTour
 const PaypalInfo = db.paypalInfo
 const RateTour = db.rateTour
+const TourDraft = db.tourDraft
+const TourDraftStatus = db.tourDraftStatus
+const TourCustom = db.tourCustom
 
 
 exports.listTour = (req, res, next) => {
@@ -318,13 +322,164 @@ exports.rateTour = (req,res) =>{
     }
 }
 
-
-
 //Tour custom
-exports.addTourDraft = (req,res) =>{
+exports.addTourDraft =async (req,res) =>{
+    try {
+        const draft = await TourDraft.findOne({userID: req.accountID})
+        if(!draft){
+            if (req.files) {
+                let path = ''
+                req.files.forEach(files => {
+                    path = path + files.path + ','
+                });
+                path = path.substring(0, path.lastIndexOf(','))
+                req.body.picture = path
+            } else {
+                req.body.picture = ''
+            }
+            const tourDraft = new TourDraft({
+                tourName: req.body.tourName,
+                destination: {
+                    address: req.body.address,
+                    mainActivities: req.body.mainActivities
+                },
+                startingPoint: req.body.startingPoint,
+                picture: req.body.picture,
+                vehicle: req.body.vehicle,
+                startDate: req.body.startDate,
+                time: req.body.time,
+                hotel: req.body.hotel,
+                //private: req.body.private,
+                numberOfPeople: req.body.numberOfPeople,
+                information: req.body.information,
+        
+                userID: req.accountID,
+            })
+            tourDraft.save(err => {
+                if(err) return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
+                return res.status(200).send({
+                    errorCode: 0,
+                    message: 'Tour draft add successfully!'
+                })
+            })
+        } else {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Only 1 tour can be created per user!'
+            })
+        }
+        
+    } catch (error) {
+        console.log(error)
+    }
     
 }
 
+exports.listOrganization = (req,res) => {
+    Moderator.find({tourCustomStatus: true}, (err, list) =>{
+        if(err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+
+        var show = []
+        list.forEach(e=> {
+            var mod = {
+                tourDraftID: req.params.tourDraftID,
+                organizationName: e.organizationName,
+                //phone: e.phone,
+                email: e.email,
+                _id: e._id
+            }
+            show.push(mod)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
+
+exports.sendTourDraft = async (req,res) => {
+    const send = new TourDraftStatus ({
+        tourDraftID: req.params.tourDraftID,
+        moderatorID: req.params.moderatorID
+    })
+    await Promise.all([send.save(), Moderator.findById(req.params.moderatorID)])
+    .then(async ([send, moderator]) =>{
+        var email = moderator.email
+        var view =`${process.env.BASE_URL}`
+        await sendEmail(email, "Have new custom tour sent to you", view)
+        return res.status(200).send({
+            errorCode: 0,
+            message: 'send draft tour to moderator successfully!'
+        })
+    })
+}
+
+exports.viewTourDraft = (req,res) => {
+    TourDraft.findOne({userID: req.accountID},async (err, tour) =>{
+        if(err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+
+        var check
+        const status = await TourDraftStatus.findOne({tourDraftID: tour._id})
+        if(!status) check = 'Unsent'
+        else check = 'Sent' // Nếu là sent thì sẽ true nút view để dẫn đến || thông báo chưa có tour nếu mod chưa tạo
+        return res.status(200).send({
+            errorCode: 0,
+            data: tour,
+            check
+        })
+    })
+}
+
+exports.viewTourDraftToMod = (req,res) => {
+    TourCustom.findOne({tourDraftID: req.params.tourDraftID},async (err, tour) => {
+        if(err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if(!tour) return res.status(400).send({
+            errorCode: 400,
+            message: 'The tour has not been created from a moderator or the link is not valid'
+        })
+        const mod = await Moderator.findById(tour.moderatorID)
+        if (!mod) return res.status(400).send({
+            errorCode: 400,
+            message: 'Tour is error'
+        })
+        var show = {
+            tourName: tour.tourName,
+            startDate: tour.startDate,
+            price: tour.price,
+            picture: tour.picture,
+            time: tour.time,
+            address: tour.address,
+            startingPoint: tour.startingPoint,
+            hotel: tour.hotel,
+            description: {
+                content: tour.description.content,
+                vehicle: tour.description.vehicle,
+                timeDecription: tour.description.timeDecription,
+            },
+            createdAt: tour.createdAt,
+            modName: mod.modName,
+            avatar: mod.avatar,
+            email: mod.email,
+            slug: tour.slug
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
 
 
 

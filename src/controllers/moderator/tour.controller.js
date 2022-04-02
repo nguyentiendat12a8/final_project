@@ -4,8 +4,10 @@ const CategoryTour = db.categoryTour
 const BillTour = db.billTour
 const Moderator = db.moderator
 const User = db.user
+const TourDraft = db.tourDraft
+const TourDraftStatus = db.tourDraftStatus
+const TourCustom = db.tourCustom
 const paypal = require('paypal-rest-sdk')
-const { HotelRoom } = require('../../models/hotelRoom.schema')
 
 exports.addTour = async (req, res, next) => {
     try {
@@ -40,14 +42,17 @@ exports.addTour = async (req, res, next) => {
         })
         tour.save()
             .then(() => {
-                res.status(200).send({
+                return res.status(200).send({
                     errorCode: 0,
                     message: 'upload successfully!'
                 })
             })
             .catch(error => {
                 console.log(error)
-                res.status(500).send({ message: error })
+                return res.status(500).send({ 
+                    errorCode: 500,
+                    message: error 
+                })
             })
     } catch (error) {
         console.log(error)
@@ -302,7 +307,6 @@ exports.filterTour = async (req, res) => {
 
 //booked tour
 
-
 exports.listBillTour = async (req, res, next) => {
     try {
         Tour.find({ moderatorID: req.accountID }, (err, listTour) => {
@@ -345,42 +349,175 @@ exports.listBillTour = async (req, res, next) => {
     }
 }
 
-// exports.deleteBillTour = async (req, res) => {
-//     try {
-//         Tour.find({ moderatorID: req.accountID }, (err, list) => {
-//             if (err) return res.status(500).send({
-//                 errorCode: 500,
-//                 message: err
-//             })
-//             list.forEach(async (e) => {
-//                 const bill = await BillTour.findById(req.params.billTourID)
-//                 if (bill.tourID === e._id) {
-//                     await BillTour.findByIdAndUpdate(req.params.billTourID, { deleted: true }, { new: true }, err => {
-//                         if (err) return res.status(500).send({
-//                             errorCode: 500,
-//                             message: err
-//                         })
-//                         return res.status(200).send({
-//                             errorCode: 0,
-//                             message: 'Delete bill tour successfully!'
-//                         })
-//                     })
-//                 }
 
-//             })
-//         })
-//     } catch (error) {
-//         return res.status(500).send({
-//             errorCode: 500,
-//             message: error
-//         })
-//     }
-// }
+//TOUR CUSTOM
+exports.addTourCustom =async (req,res) => {
+    try {
+        if (req.files) {
+            let path = ''
+            req.files.forEach(files => {
+                path = path + files.path + ','
+            });
+            path = path.substring(0, path.lastIndexOf(','))
+            req.body.picture = path
+        } else {
+            req.body.picture = ''
+        }
+        const moderator = await Moderator.findById(req.accountID)
+        const tour = new TourCustom({
+            tourName: req.body.tourName,
+            startDate: req.body.startDate,
+            price: req.body.price,
+            time: req.body.time,
+            picture: req.body.picture,
+            address: req.body.address,
+            startingPoint: req.body.startingPoint,
+            hotel: req.body.hotel,
+            description: {
+                content: req.body.content,
+                vehicle: req.body.vehicle,
+                timeDecription: req.body.timeDecription
+            },
+            moderatorID: moderator._id,
+            tourDraftID: req.params.tourDraftID
+        })
+        tour.save()
+            .then(() => {
+                return res.status(200).send({
+                    errorCode: 0,
+                    message: 'upload successfully!'
+                })
+            })
+            .catch(error => {
+                console.log(error)
+                return res.status(500).send({ 
+                    errorCode: 500,
+                    message: error 
+                })
+            })
+    } catch (error) {
+        return res.status(500).send({ 
+            errorCode: 500,
+            message: error 
+        })
+    }
 
-
-//custom tour
-
-exports.viewTourCustom = async (req, res) => {
-    //var tourDraft = await 
 }
 
+exports.viewListTourCustomToUser = async (req, res) => {
+    // 1. trỏ đến bảng tourdraftstatus để lấy ra các bản ghi có modid
+    // 2. bản ghi .foreach để lấy ra các draftTour sau đó push vào show
+    TourDraftStatus.find({moderatorID: req.accountID}, (err, listTour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if(!listTour) return res.status(200).send({
+            errorCode: 0,
+            message: 'There are no documents listed here'
+        })
+        var listShow = []
+        listTour.forEach(async e => {
+            var tour = await TourDraft.findById(e._id)
+            if (!tour) return res.status(500).send({
+                errorCode: 500,
+                message: 'Tour custom đã bị xóa hoặc lỗi phía máy chủ'
+            })
+            var show = {
+                createdAt: e.createdAt,
+                tourName: tour.tourName,
+                address: tour.destination.address,
+                startDate: tour.startDate,
+                numberOfPeople: tour.numberOfPeople,
+                _id: tour._id,
+            }
+            listShow.push(show)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: listShow
+        })
+    }) 
+}
+
+exports.viewAndAddTourCustom = (req, res) => {
+    TourDraft.findById({_id: req.params.tourDraftID}, (err, tour) =>{
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if(!tour) return res.status(400).send({
+            errorCode: 400,
+            message: 'The tour has been deleted by the user, please try again!'
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: tour
+        })
+    })
+}
+
+exports.viewListCustomTour = (req,res) =>{
+    TourCustom.find({moderatorID: req.accountID}, (err, list) =>{
+        if(err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if(!list) return res.status(400).send({
+            errorCode: 400,
+            message: 'There are no documents listed here'
+        })
+        var show =[]
+        list.forEach(e=> {
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                slug: e.slug
+            }
+            show.push(tour)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
+
+exports.viewDetailCustomTour = (req,res) => {
+    TourCustom.findOne({ slug: req.params.slug, moderatorID: req.accountID}, (err, tour) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        if (!tour) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Invalid link'
+            })
+        }
+        const tourDetail = {
+            tourName: tour.tourName,
+            startDate: tour.startDate,
+            price: tour.price,
+            picture: tour.picture,
+            time: tour.time,
+            address: tour.address,
+            startingPoint: tour.startingPoint,
+            hotel: tour.hotel,
+            description: {
+                content: tour.description.content,
+                vehicle: tour.description.vehicle,
+                timeDecription: tour.description.timeDecription,
+            },
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: tourDetail
+        })
+    })
+}

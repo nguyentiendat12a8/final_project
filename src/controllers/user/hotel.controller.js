@@ -91,7 +91,7 @@ exports.paymentHotelRoom = async (req, res) => {
         })
     }
     
-    quantity = 2 // req.b
+    var quantity = req.body.numberOfDay // req.b
     var total = room.price * quantity
     //console.log(req.body.date1)
 
@@ -143,7 +143,8 @@ exports.paymentHotelRoom = async (req, res) => {
 }
 
 exports.success = async (req, res, next) => {
-    const room = await HotelRoom.findById(req.params.hotelRoomID)
+
+    const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: room.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
@@ -160,7 +161,7 @@ exports.success = async (req, res, next) => {
 
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    var quantity = 2 // req.b
+    var quantity = req.body.numberOfDay // req.b
     var total = room.price * quantity
 
     const execute_payment_json = {
@@ -178,8 +179,10 @@ exports.success = async (req, res, next) => {
             throw error;
         } else {
             const billRoom = new BillHotelRoom({
+                checkIn: req.body.numberOfDay,
+                checkOut: req.body.numberOfDay,
                 userID: req.accountID, //req.userId
-                tourID: req.params.tourID, //req.params.tourId
+                tourID: '6235737a17ac4ec96eef2243', //req.params.tourId
                 bookedDate: Date.now()
             })
             billRoom.save()

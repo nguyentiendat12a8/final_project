@@ -1,5 +1,5 @@
 const express = require('express')
-const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour } = require('../../controllers/moderator/tour.controller')
+const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -18,5 +18,13 @@ router.get('/list-bill-tour', [verifyToken, isModerator],listBillTour) //chưa c
 //search tour, filter price
 router.get('/search', [verifyToken,isModerator], searchTour)
 router.get('/filter-tour', [verifyToken, isModerator], filterTour)
+
+
+//tour custom chưa test
+router.get('/view-list-tour-custom-to-user', [verifyToken,isModerator], viewListTourCustomToUser)
+router.get('/view-tour-custom-and-add/:tourDraftID', [verifyToken,isModerator], viewAndAddTourCustom)
+router.post('/add-tour-custom/:tourDraftID', [verifyToken, isModerator], addTourCustom)
+router.get('/view-list-custom-tour', [verifyToken,isModerator], viewListCustomTour)
+router.get('/view-detail-custom-tour/:slug', [verifyToken,isModerator], viewDetailCustomTour)
 
 module.exports = router

@@ -74,6 +74,7 @@ exports.signin = async (req, res, next) => {
       return res.status(200).json({
         errorCode: 0,
         token: token,
+        role: 'moderator',
         refreshToken: refreshToken,
         data: userInfo
       })

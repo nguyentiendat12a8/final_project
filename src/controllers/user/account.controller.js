@@ -71,6 +71,7 @@ exports.signin = async (req, res, next) => {
         errorCode: 0,
         token: token,
         refreshToken: refreshToken,
+        role: 'user',
         data: userInfo
       })
     } else {

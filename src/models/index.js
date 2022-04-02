@@ -19,6 +19,7 @@ const { ResetPassword } = require('./resetPassword.schema')
 const { RateTour } = require('./rateTour.schema')
 const { TourDraft } = require('./tourDraft.schema')
 const { TourDraftStatus } = require('./tourDraftStatus.schema')
+const { TourCustom } = require('./tourCustom.schema')
 const { PaypalInfo } = require('./paypalInfo.schema')
 const slug = require('mongoose-slug-generator')
 mongoose.plugin(slug)
@@ -46,6 +47,7 @@ db.resetPassword = ResetPassword
 db.rateTour = RateTour 
 db.tourDraft = TourDraft
 db.tourDraftStatus = TourDraftStatus
+db.tourCustom = TourCustom
 db.paypalInfo = PaypalInfo
 db.ROLES = ['user', 'admin', 'moderator']
 
