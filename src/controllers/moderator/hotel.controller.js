@@ -132,19 +132,6 @@ exports.updateHotelRoom = (req, res) => {
     })
 }
 
-// exports.deleteHotelRoom = (req, res) => {
-//     HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
-//         if (err) return res.status(500).send({
-//             errorCode: 500,
-//             message: err
-//         })
-//         return res.status(200).send({
-//             errorCode: 0,
-//             message: 'delete room successfully!'
-//         })
-//     })
-// }
-
 exports.listHotelRoom = (req, res) => {
     HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
         if (err) return res.status(500).send({
@@ -228,38 +215,6 @@ exports.listBillHotelRoom = (req, res) => {
     }
 }
 
-// exports.deleteBillHotelRoom = (req, res) =>{
-//     try {
-//         HotelRoom.find({moderatorID: req.accountID}, (err, list)=>{
-//             if (err) return res.status(500).send({
-//                 errorCode: 500,
-//                 message: err
-//             })
-//             list.forEach(async e=>{
-//                 const bill = await BillHotelRoom.findOne({_id: req.params.billHotelRoomID, deleted: false })
-//                 if(bill.hotelRoomID === e._id){
-//                     await BillHotelRoom.findByIdAndUpdate(req.params.billHotelRoomID, {deleted: true}, {new: true}, err =>{
-//                         if (err) return res.status(500).send({
-//                             errorCode: 500,
-//                             message: err
-//                         })
-//                         return res.status(200).send({
-//                             errorCode: 0,
-//                             message: 'Delete bill hotel successfully!'
-//                         })
-//                     })
-//                 }
-
-//             })
-//         })
-//     } catch (error) {
-//         return res.status(500).send({
-//             errorCode: 500,
-//             message: error
-//         })
-//     }
-// }
-
 //search, filter
 
 exports.searchHotelRoom = async (req, res) => {
@@ -333,4 +288,22 @@ exports.filterHotelRoom = async (req, res) => {
         }
 
     })
+}
+
+
+//ads 
+exports.paymentAdsHoterRoom = (req,res) =>{
+
+}
+
+exports.successAdsHoterRoom = (req,res) =>{
+    
+}
+
+exports.cancleAdsHoterRoom = (req,res) =>{
+    
+}
+
+exports.listAdsHoterRoom = (req,res) =>{
+    
 }

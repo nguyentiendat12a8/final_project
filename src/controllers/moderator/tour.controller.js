@@ -7,6 +7,9 @@ const User = db.user
 const TourDraft = db.tourDraft
 const TourDraftStatus = db.tourDraftStatus
 const TourCustom = db.tourCustom
+const Ads = db.ads
+const TourAds = db.tourAds
+const PaypalInfo = db.paypalInfo
 const paypal = require('paypal-rest-sdk')
 const sendEmail = require('../../util/sendEmail')
 
@@ -442,8 +445,6 @@ exports.viewListTourCustomToUser = async (req, res) => {
     })
 }
 
-
-
 exports.viewAndAddTourCustom = (req, res) => {
     TourDraft.findById({ _id: req.params.tourDraftID }, (err, tour) => {
         if (err) return res.status(500).send({
@@ -525,3 +526,127 @@ exports.viewDetailCustomTour = (req, res) => {
         })
     })
 }
+
+
+//ads
+exports.paymentAdsTour = async (req,res) =>{
+    const ads = await Ads.findOne({})
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID })
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
+
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
+    const create_payment_json = {
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": `http://localhost:4000/user/tour/successPayAds/${req.params.tourID}`,
+            "cancel_url": "http://localhost:4000/user/tour/cancelPayAds"
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": `Payment ads`,
+                    //"sku": "001",
+                    "price": `${ads.price}`,
+                    "currency": "USD",
+                    "quantity": 1
+                }]
+            },
+            "amount": {
+                "currency": "USD",
+                "total": `${ads.price}`
+            },
+            "description": "Ads payment"
+        }]
+    };
+
+
+    paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+            throw error;
+        } else {
+            for (let i = 0; i < payment.links.length; i++) {
+                if (payment.links[i].rel === 'approval_url') {
+                    res.redirect(payment.links[i].href);
+                }
+            }
+
+        }
+    });
+}
+
+exports.successAdsTour = async (req,res) =>{
+    const ads = await Ads.findOne({})
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID })
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
+
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
+
+    const payerId = req.query.PayerID;
+    const paymentId = req.query.paymentId;
+
+    const execute_payment_json = {
+        "payer_id": payerId,
+        "transactions": [{
+            "amount": {
+                "currency": "USD",
+                "total": `${ads.price}`
+            }
+        }]
+    };
+    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+        if (error) {
+            console.log(error.response);
+            throw error;
+        } else {
+            const tourAds = new TourAds({
+                tourID: req.params.tourID
+            })
+            billTour.save()
+                .then(() => {
+                    return res.status(200).send({
+                        errorCode: 0,
+                        message: 'save booked tour custom successfully'
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
+    });
+}
+
+exports.cancleAdsTour = (req,res) =>{
+    res.send('Cancelled (Đơn hàng đã hủy)')
+    return
+}
+
+exports.listAdsTour = (req,res) =>{
+    Tour.find({moderatorID: req.accountID}, (err, list) =>{
+        if(err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+
+    })
+} ////// not done

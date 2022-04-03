@@ -9,6 +9,10 @@ exports.PaypalInfo = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
         }],
+        adminID: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Admin'
+        }],
         createdAt: { type: String, default: new Date() },
     })
 )

@@ -8,6 +8,7 @@ const Admin = db.admin
 const ResetPassword = db.resetPassword
 const User = db.user
 const Moderator = db.moderator
+const PaypalInfo =db.paypalInfo
 
 exports.signup = async (req, res) => {
   const user = new Admin({
@@ -577,6 +578,81 @@ exports.forceDeleteAdminAccount = async (req, res) => {
     return res.status(200).send({
       errorCode: 0,
       message: 'Force delete Admin account successfully'
+    })
+  })
+}
+
+
+// payment method
+exports.configPaypal = async (req, res) => {
+  const check = await PaypalInfo.findOne({adminID: req.accountID})
+  if(check) return res.status(400).send({
+    errorCode: 400,
+    message: 'Only 1 payment account per person!'
+  })
+  const paypalInfo = new PaypalInfo({
+    clientID: req.body.clientID,
+    secret: req.body.secret,
+    adminID: req.accountID
+  })
+  await paypalInfo.save(err => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Config paypal successfully'
+    })
+  })
+}
+
+exports.viewPaypal = async (req, res) => {
+  PaypalInfo.findOne({ adminID: req.accountID }, (err, paypal) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    var show = {
+      clientID: paypal.clientID,
+      secret:paypal.secret
+    }
+    return res.status(200).send({
+      errorCode: 0,
+      data: show
+    })
+  })
+}
+
+exports.editPaypal = async (req, res) => {
+  PaypalInfo.findOne({ adminID: req.accountID }, (err, paypal) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    var show = {
+      clientID: paypal.clientID,
+      secret:paypal.secret
+    }
+    return res.status(200).send({
+      errorCode: 0,
+      data: show
+    })
+  })
+}
+
+exports.updatePaypal = async (req, res) => {
+  PaypalInfo.findOneAndUpdate({ adminID: req.accountID }, {
+    clientID: req.body.clientID,
+    secret: req.body.secret
+  }, {new: true}, (err) => {
+    if (err) return res.status(500).send({
+      errorCode: 500,
+      message: err
+    })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Update paypal information successfully!'
     })
   })
 }

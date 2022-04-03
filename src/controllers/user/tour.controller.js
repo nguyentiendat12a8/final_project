@@ -530,7 +530,7 @@ exports.paymentTourCustom = async (req, res) =>{
             }
 
         }
-    });
+    })
 }
 
 exports.successPayCustom = async (req, res, next) => {
@@ -582,7 +582,7 @@ exports.successPayCustom = async (req, res, next) => {
                     console.log(err)
                 })
         }
-    });
+    })
 }
 
 exports.cancelPayCustom = (req, res) => {

@@ -1,6 +1,5 @@
-
 const express = require('express');
-const { addCategory,listCategory, editCategory, updateCategory, deleteCategory } = require('../../controllers/admin/tour.controller');
+const { addCategory,listCategory, editCategory, updateCategory, deleteCategory } = require('../../controllers/admin/manageTour.controller');
 const { verifyToken, isAdmin } = require('../../middlewares/jwt.middleware');
 const router = express.Router()
 

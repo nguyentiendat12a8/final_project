@@ -225,8 +225,13 @@ exports.confirmLink = async (req, res) => {
 
 
 
-// payment online
+// payment method
 exports.configPaypal = async (req, res) => {
+  const check = await PaypalInfo.findOne({moderatorID: req.accountID})
+  if(check) return res.status(400).send({
+    errorCode: 400,
+    message: 'Only 1 payment account per person!'
+  })
   const paypalInfo = new PaypalInfo({
     clientID: req.body.clientID,
     secret: req.body.secret,

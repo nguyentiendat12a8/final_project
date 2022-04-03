@@ -3,7 +3,8 @@ const { checkDuplicateAdmin } = require('../../middlewares/verifySignUp.middlewa
 const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailResetPass, confirmLink,
      listUserAccount, detailUserAccount, deleteUserAccount, trashUserAccount, forceDeleteUserAccount, restoreUserAccount,
      listModAccount, detailModAccount, deleteModAccount, trashModAccount, forceDeleteModAccount, restoreModAccount,
-     listAdminAccount, detailAdminAccount, deleteAdminAccount, trashAdminAccount, forceDeleteAdminAccount, restoreAdminAccount
+     listAdminAccount, detailAdminAccount, deleteAdminAccount, trashAdminAccount, forceDeleteAdminAccount, restoreAdminAccount,
+     configPaypal, viewPaypal, editPaypal, updatePaypal
     } = require('../../controllers/admin/account.controller')
 const { verifyToken, isAdmin } = require('../../middlewares/jwt.middleware')
 const { uploadAvatar } = require('../../middlewares/uploadFile.middleware')
@@ -40,5 +41,12 @@ router.patch('/delete-admin-account/:adminID',[verifyToken, isAdmin], deleteAdmi
 router.get('/trash-admin-account',[verifyToken, isAdmin], trashAdminAccount)
 router.patch('/restore-admin-account/:adminID',[verifyToken, isAdmin], restoreAdminAccount )
 router.delete('/force-delete-admin-account/:adminID', [verifyToken, isAdmin], forceDeleteAdminAccount)
+
+
+//route paypal info
+router.post('/config-paypal', [verifyToken, isAdmin], configPaypal)
+router.get('/view-paypal', [verifyToken, isAdmin], viewPaypal)
+router.get('/edit-paypal',  [verifyToken, isAdmin], editPaypal)
+router.patch('/update-paypal',  [verifyToken, isAdmin], updatePaypal)
 
 module.exports = router
