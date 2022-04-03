@@ -21,6 +21,8 @@ const { TourDraft } = require('./tourDraft.schema')
 const { TourDraftStatus } = require('./tourDraftStatus.schema')
 const { TourCustom } = require('./tourCustom.schema')
 const { PaypalInfo } = require('./paypalInfo.schema')
+const { TourAds } = require('./tourAds.schema')
+const { RoomAds } = require('./roomAds.schema')
 const slug = require('mongoose-slug-generator')
 mongoose.plugin(slug)
 
@@ -48,6 +50,8 @@ db.rateTour = RateTour
 db.tourDraft = TourDraft
 db.tourDraftStatus = TourDraftStatus
 db.tourCustom = TourCustom
+db.roomAds = RoomAds
+db.tourAds = TourAds
 db.paypalInfo = PaypalInfo
 db.ROLES = ['user', 'admin', 'moderator']
 

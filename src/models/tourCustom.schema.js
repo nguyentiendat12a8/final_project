@@ -24,7 +24,7 @@ exports.TourCustom = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'TourDraft'
         }],
-        slug: {type: String, slug: 'TourCustomName', unique: true },
+        slug: {type: String, slug: 'tourName', unique: true },
         createdAt: { type: String, default: new Date() },
     })
 )
