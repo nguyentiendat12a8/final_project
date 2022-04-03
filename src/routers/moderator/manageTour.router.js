@@ -20,10 +20,10 @@ router.get('/search', [verifyToken,isModerator], searchTour)
 router.get('/filter-tour', [verifyToken, isModerator], filterTour)
 
 
-//tour custom chưa test
+//tour custom
 router.get('/view-list-tour-custom-to-user', [verifyToken,isModerator], viewListTourCustomToUser)
 router.get('/view-tour-custom-and-add/:tourDraftID', [verifyToken,isModerator], viewAndAddTourCustom)
-router.post('/add-tour-custom/:tourDraftID', [verifyToken, isModerator], addTourCustom)
+router.post('/add-tour-custom/:tourDraftID', [verifyToken, isModerator, upload.array('picture')], addTourCustom)
 router.get('/view-list-custom-tour', [verifyToken,isModerator], viewListCustomTour)
 router.get('/view-detail-custom-tour/:slug', [verifyToken,isModerator], viewDetailCustomTour)
 
