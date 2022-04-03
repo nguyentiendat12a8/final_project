@@ -76,7 +76,8 @@ exports.bookHotel = (req, res) => {
 }
 
 exports.paymentHotelRoom = async (req, res) => {
-    const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')//req.params.hotelRoomID
+    try {
+        const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')//req.params.hotelRoomID
         if (room === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -90,8 +91,7 @@ exports.paymentHotelRoom = async (req, res) => {
             message: 'The manager of the tour you booked does not have an online payment method'
         })
     }
-    
-    var quantity = req.body.numberOfDay // req.b
+    var quantity = req.query.numberOfDay // req.query.numberOfDay, 2
     var total = room.price * quantity
     //console.log(req.body.date1)
 
@@ -140,6 +140,10 @@ exports.paymentHotelRoom = async (req, res) => {
 
         }
     });
+    } catch (error) {
+        console.log(error)
+    }
+    
 }
 
 exports.success = async (req, res, next) => {
