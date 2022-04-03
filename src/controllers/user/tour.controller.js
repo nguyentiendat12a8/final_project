@@ -186,7 +186,7 @@ exports.success = async (req, res, next) => {
             const billTour = new BillTour({
                 userID: req.accountID, //req.userId
                 tourID: req.params.slug, //req.params.tourId
-                bookedDate: Date.now()
+                //bookedDate: Date.now()
             })
             billTour.save()
                 .then(() => {
@@ -477,8 +477,8 @@ exports.viewTourDraftToMod = (req, res) => {
 }
 
 exports.paymentTourCustom = async (req, res) =>{
-    const tour = await TourCustom.findOne({slug: req.params.slug})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
+    const tour = await TourCustom.findById(req.params.tourCustomID)
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -497,7 +497,7 @@ exports.paymentTourCustom = async (req, res) =>{
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/user/tour/successPayCustom/${req.params.slug}`,
+            "return_url": `http://localhost:4000/user/tour/successPayCustom/${req.params.tourCustomID}`,
             "cancel_url": "http://localhost:4000/user/tour/cancelPayCustom"
         },
         "transactions": [{
@@ -534,7 +534,7 @@ exports.paymentTourCustom = async (req, res) =>{
 }
 
 exports.successPayCustom = async (req, res, next) => {
-    const tour = await Tour.findById(req.params.slug)
+    const tour = await TourCustom.findById(req.params.tourCustomID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
@@ -567,9 +567,9 @@ exports.successPayCustom = async (req, res, next) => {
             throw error;
         } else {
             const billTour = new BillTour({
-                userID: req.accountID, //req.userId
-                tourID: req.params.slug, //req.params.tourId
-                bookedDate: Date.now()
+                userID: req.accountID, //'622daaa81d06d9205fab2525'
+                tourCustomID: req.params.tourCustomID, //req.params.tourId
+                //bookedDate: Date.now()
             })
             billTour.save()
                 .then(() => {

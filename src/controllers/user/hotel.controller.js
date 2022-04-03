@@ -187,7 +187,7 @@ exports.success = async (req, res, next) => {
                 checkOut: req.body.numberOfDay,
                 userID: req.accountID, //req.userId
                 tourID: '6235737a17ac4ec96eef2243', //req.params.tourId
-                bookedDate: Date.now()
+                //bookedDate: Date.now()
             })
             billRoom.save()
                 .then(() => {

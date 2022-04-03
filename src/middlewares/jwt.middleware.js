@@ -7,14 +7,23 @@ const Moderator = db.moderator
 exports.verifyToken = async (req, res, next) => {
     let token = req.body.token || req.query.token ||req.headers["x-access-token"];
     if(!token){
-       return res.status(401).send("token is required!")
+       return res.status(401).send({
+           errorCode: 401,
+           message: "token is required!"
+       })
     }
     jwt.verify(token, config.TOKEN_KEY, (err,decoded)=>{
         if(err){
             if(err.name === 'JsonWebTokenError'){
-                return res.status(401).send({message:'Unauthorized!'})
+                return res.status(401).send({
+                    errorCode: 401,
+                    message:'Unauthorized!'
+                })
             }
-            return res.status(401).send({message: err.message})
+            return res.status(401).send({
+                errorCode: 401,
+                message: err.message
+            })
         }
         req.accountID = decoded.id
         next()
@@ -45,7 +54,10 @@ exports.verifyRefreshToken = (req, res, next) => {
 exports.isAdmin = (req, res, next) => {
     Admin.findById(req.userId).exec((err, user) => {
         if (err) {
-            return res.status(500).send({ message: err })
+            return res.status(500).send({
+                errorCode: 500,
+                 message: err 
+                })
         }
         next()
     })
@@ -54,7 +66,10 @@ exports.isAdmin = (req, res, next) => {
 exports.isModerator = (req, res, next) => {
     Moderator.findById(req.userId).exec(err => {
         if (err) {
-            return res.status(500).send({ message: err })
+            return res.status(500).send({ 
+                errorCode: 500,
+                message: err 
+            })
         }
         next()
     })
