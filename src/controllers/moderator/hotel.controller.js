@@ -2,6 +2,10 @@ const db = require('../../models/index')
 const HotelRoom = db.hotelRoom
 const BillHotelRoom = db.billHotelRoom
 const User = db.user
+const Ads = db.ads
+const RoomAds = db.roomAds
+const PaypalInfo = db.paypalInfo
+const paypal = require('paypal-rest-sdk')
 
 exports.addHotelRoom = (req, res) => {
     if (req.files) {
@@ -292,18 +296,114 @@ exports.filterHotelRoom = async (req, res) => {
 
 
 //ads 
-exports.paymentAdsHoterRoom = (req,res) =>{
+exports.paymentAdsHotelRoom = async (req,res) =>{
+    const ads = await Ads.findOne({})
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) // '622dbfb2fcdc11b7a3fcd5af'
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
 
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
+    const create_payment_json = {
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": `http://localhost:4000/moderator/hotel/success-ads-hotel-room/${req.params.hotelRoomID}`,//
+            "cancel_url": "http://localhost:4000/moderator/hotel/cancel-ads-hotel-room"
+        },
+        "transactions": [{
+            "item_list": {
+                "items": [{
+                    "name": `Payment ads`,
+                    //"sku": "001",
+                    "price": `${ads.price}`,
+                    "currency": "USD",
+                    "quantity": 1
+                }]
+            },
+            "amount": {
+                "currency": "USD",
+                "total": `${ads.price}`
+            },
+            "description": "Ads payment"
+        }]
+    };
+
+
+    paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
+            throw error;
+        } else {
+            for (let i = 0; i < payment.links.length; i++) {
+                if (payment.links[i].rel === 'approval_url') {
+                    res.redirect(payment.links[i].href);
+                }
+            }
+
+        }
+    });
 }
 
-exports.successAdsHoterRoom = (req,res) =>{
-    
+exports.successAdsHotelRoom = async (req,res) =>{
+    const ads = await Ads.findOne({})
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
+    if (paypalInfo === null) {
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'The manager of the tour you booked does not have an online payment method'
+        })
+    }
+
+    paypal.configure({
+        'mode': 'sandbox', //sandbox or live
+        'client_id': paypalInfo.clientID,
+        'client_secret': paypalInfo.secret
+    });
+
+    const payerId = req.query.PayerID;
+    const paymentId = req.query.paymentId;
+
+    const execute_payment_json = {
+        "payer_id": payerId,
+        "transactions": [{
+            "amount": {
+                "currency": "USD",
+                "total": `${ads.price}`
+            }
+        }]
+    };
+    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+        if (error) {
+            console.log(error.response);
+            throw error;
+        } else {
+            const roomAds = new RoomAds({
+                hotelRoomID: req.params.hotelRoomID
+            })
+            roomAds.save()
+                .then(() => {
+                    return res.status(200).send({
+                        errorCode: 0,
+                        message: 'save booked ads hotel successfully'
+                    })
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        }
+    });
 }
 
-exports.cancleAdsHoterRoom = (req,res) =>{
-    
-}
-
-exports.listAdsHoterRoom = (req,res) =>{
-    
+exports.cancelAdsHotelRoom = (req,res) =>{
+    res.send('Cancelled (Đơn hàng đã hủy)')
+    return
 }

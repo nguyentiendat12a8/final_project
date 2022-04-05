@@ -1,6 +1,6 @@
 const express = require('express')
 const { addHotelRoom, editHotelRoom, updateHotelRoom, deleteHotelRoom, listHotelRoom, detailHotelRoom,
-     listBillHotelRoom, searchHotelRoom, filterHotelRoom } = require('../../controllers/moderator/hotel.controller')
+     listBillHotelRoom, searchHotelRoom, filterHotelRoom, paymentAdsHotelRoom, successAdsHotelRoom, cancelAdsHotelRoom } = require('../../controllers/moderator/hotel.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -21,7 +21,9 @@ router.get('/search', [verifyToken,isModerator], searchHotelRoom)
 router.get('/filter-hotel-room', [verifyToken, isModerator], filterHotelRoom)
 
 //book ads
-
+router.get('/payment-ads-hotel-room/:hotelRoomID', [verifyToken, isModerator], paymentAdsHotelRoom )
+router.get('/success-ads-hotel-room/:hotelRoomID', [verifyToken,isModerator], successAdsHotelRoom)
+router.get('/cancel-ads-tour', [verifyToken, isModerator], cancelAdsHotelRoom )
 
 
 module.exports = router
