@@ -11,11 +11,11 @@ router.put('/update-ads',[verifyToken, isAdmin], updateAds)
 //ads tour
 router.get('/list-tour-ads',[verifyToken, isAdmin], listTourAds)
 router.delete('/delete-tour-ads/:tourAdsID',[verifyToken, isAdmin], deleteTourAds)
-router.get('/show-tour-ads',[verifyToken, isAdmin], showTourAds)
+router.get('/show-tour-ads', showTourAds)
 
 //ads hotel
 router.get('/list-hotel-room-ads',[verifyToken, isAdmin], listRoomAds)
 router.delete('/delete-hotel-room-ads/:roomAdsID',[verifyToken, isAdmin], deleteRoomAds)
-router.get('/show-hotel-room-ads',[verifyToken, isAdmin], showRoomAds)
+router.get('/show-hotel-room-ads', showRoomAds)
 
 module.exports = router;

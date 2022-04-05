@@ -11,6 +11,6 @@ exports.TourDraftStatus = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'TourDraft'
         }],
-        createdAt: { type: String, default: new Date(), expires: 36000, } //10h
+        createdAt: { type: Date, default: new Date(), expires: 172800, } // 2 days
     })
 )

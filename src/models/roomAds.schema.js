@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 exports.RoomAds = mongoose.model(
     'RoomAds',
     new mongoose.Schema({
-        timeEnd: { type: String, default: new Date(), expires: 60 },
+        timeEnd: { type: Date, default: new Date(), expires: 604800 }, //7days
         hotelRoomID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'HotelRoom'

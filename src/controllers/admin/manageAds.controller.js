@@ -79,19 +79,19 @@ exports.listRoomAds = (req, res) => {
 
         var listShow = []
         async function getRoom(hotelRoom) {
-            var room = await HotelRoom.findById(hotelRoom)
+            var room = await HotelRoom.findById(hotelRoom.hotelRoomID)
             if (!room) return res.status(400).send({
                 errorCode: 400,
                 message: 'This room has been deleted or an error has occurred, please try again!'
             })
             var show = {
-                roomName: room.name,
-                createdAt: hotelRoom.createdAt,
+                roomName: room.roomName,
+                timeEnd: hotelRoom.timeEnd,
                 _id: hotelRoom._id
             }
             return listShow.push(show)
         }
-        await Promise.all(list.map((hotelRoom) => { getRoom(hotelRoom) }))
+        await Promise.all(list.map((hotelRoom) => getRoom(hotelRoom)))
 
         return res.status(200).send({
             errorCode: 0,
@@ -122,7 +122,7 @@ exports.showRoomAds = (req, res) => {
 
         var listShow = []
         async function getRoom(hotelRoom) {
-            var room = await HotelRoom.findById(hotelRoom)
+            var room = await HotelRoom.findById(hotelRoom.hotelRoomID)
             if (!room) return res.status(400).send({
                 errorCode: 400,
                 message: 'This room has been deleted or an error has occurred, please try again!'
@@ -135,7 +135,7 @@ exports.showRoomAds = (req, res) => {
             }
             return listShow.push(show)
         }
-        await Promise.all(list.map((hotelRoom) => { getRoom(hotelRoom) }))
+        await Promise.all(list.map((hotelRoom) =>  getRoom(hotelRoom) ))
 
         return res.status(200).send({
             errorCode: 0,
@@ -156,23 +156,25 @@ exports.listTourAds = (req, res) => {
 
         var listShow = []
         async function getTour(tour) {
-            var tourDetail = await Tour.findById(tour)
-            if (!tourDetail) return res.status(400).send({
-                errorCode: 400,
-                message: 'This tour has been deleted or an error has occurred, please try again!'
-            })
+            var tourDetail = await Tour.findById(tour.tourID)
+            if (!tourDetail) {
+                return res.status(400).send({
+                    errorCode: 400,
+                    message: 'This tour has been deleted or an error has occurred, please try again!'
+                })
+            }
             var show = {
                 roomName: tourDetail.roomName,
-                createdAt: tour.createdAt,
+                timeEnd: tour.timeEnd,
                 _id: tour._id
             }
             return listShow.push(show)
         }
-        await Promise.all(list.map((tour) => { getTour(tour) }))
+        await Promise.all(list.map((tour) => getTour(tour)))
 
         return res.status(200).send({
             errorCode: 0,
-            data: listShow
+            data: list
         })
     })
 }
@@ -199,11 +201,12 @@ exports.showTourAds = (req, res) => {
 
         var listShow = []
         async function getTour(tour) {
-            var tourDetail = await Tour.findById(tour._id)
+            var tourDetail = await Tour.findById(tour.tourID)
             if (!tourDetail) return res.status(400).send({
                 errorCode: 400,
                 message: 'This tour has been deleted or an error has occurred, please try again!'
             })
+            console.log(tourDetail)
             var show = {
                 _id: tourDetail._id,
                 roomName: tourDetail.tourName,
@@ -212,7 +215,7 @@ exports.showTourAds = (req, res) => {
             }
             return listShow.push(show)
         }
-        await Promise.all(list.map((tour) => { getTour(tour) }))
+        await Promise.all(list.map((tour) => getTour(tour)))
 
         return res.status(200).send({
             errorCode: 0,
