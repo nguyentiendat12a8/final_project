@@ -150,28 +150,52 @@ exports.updateTour = async (req, res, next) => {
 
 //list tour according moderator 
 exports.listTour = (req, res, next) => {
-    Tour.find({ moderatorID: req.accountID }, (err, list) => {
+    Tour.find({ moderatorID: req.accountID }, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
-        let show = []
-        list.forEach(e => {
-            var tour = {
-                tourName: e.tourName,
-                picture: e.picture,
-                startDate: e.startDate,
-                time: e.time,
-                price: e.price,
-                address: e.address,
-                startingPoint: e.startingPoint,
-                numberOfRate: e.rate.numberOfRate,
-                numberOfStar: e.rate.numberOfStar,
-                private: e.private,
-                slug: e.slug
+        var show = []
+
+        async function getDetail(detail) {
+            var ads = await TourAds.findOne({tourID: detail._id})
+            if(!ads) {
+                var tour = {
+                    tourName: detail.tourName,
+                    picture: detail.picture,
+                    startDate: detail.startDate,
+                    time: detail.time,
+                    price: detail.price,
+                    address: detail.address,
+                    startingPoint:detail.startingPoint,
+                    numberOfRate: detail.rate.numberOfRate,
+                    numberOfStar: detail.rate.numberOfStar,
+                    private: detail.private,
+                    slug: detail.slug,
+                    ads: null
+                }
+                return show.push(tour)
+            } else {
+                var tour = {
+                    tourName: detail.tourName,
+                    picture: detail.picture,
+                    startDate: detail.startDate,
+                    time: detail.time,
+                    price: detail.price,
+                    address: detail.address,
+                    startingPoint: detail.startingPoint,
+                    numberOfRate: detail.rate.numberOfRate,
+                    numberOfStar: detail.rate.numberOfStar,
+                    private: detail.private,
+                    slug: detail.slug,
+                    ads: ads.timeEnd
+                }
+                return show.push(tour)
             }
-            show.push(tour)
-        })
+        }
+
+        await Promise.all(list.map(detail => getDetail(detail)))
+
         return res.status(200).send({
             errorCode: 0,
             data: show,
@@ -531,7 +555,7 @@ exports.viewDetailCustomTour = (req, res) => {
 //ads
 exports.paymentAdsTour = async (req,res) =>{
     const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID })
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID}) //'622dbfb2fcdc11b7a3fcd5af'  
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -550,8 +574,8 @@ exports.paymentAdsTour = async (req,res) =>{
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/user/tour/successPayAds/${req.params.tourID}`,
-            "cancel_url": "http://localhost:4000/user/tour/cancelPayAds"
+            "return_url": `http://localhost:4000/moderator/tour/success-ads-tour/${req.params.tourID}`,
+            "cancel_url": "http://localhost:4000/moderator/tour/cancel-ads-tour"
         },
         "transactions": [{
             "item_list": {
@@ -588,7 +612,7 @@ exports.paymentAdsTour = async (req,res) =>{
 
 exports.successAdsTour = async (req,res) =>{
     const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID })
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -622,7 +646,7 @@ exports.successAdsTour = async (req,res) =>{
             const tourAds = new TourAds({
                 tourID: req.params.tourID
             })
-            billTour.save()
+            tourAds.save()
                 .then(() => {
                     return res.status(200).send({
                         errorCode: 0,
@@ -636,17 +660,17 @@ exports.successAdsTour = async (req,res) =>{
     });
 }
 
-exports.cancleAdsTour = (req,res) =>{
+exports.cancelAdsTour = (req,res) =>{
     res.send('Cancelled (Đơn hàng đã hủy)')
     return
 }
 
-exports.listAdsTour = (req,res) =>{
-    Tour.find({moderatorID: req.accountID}, (err, list) =>{
-        if(err) return res.status(500).send({
-            errorCode: 500,
-            message: err
-        })
+// exports.listAdsTour = (req,res) =>{
+//     Tour.find({moderatorID: req.accountID}, (err, list) =>{
+//         if(err) return res.status(500).send({
+//             errorCode: 500,
+//             message: err
+//         })
 
-    })
-} ////// not done
+//     })
+// } ////// not done

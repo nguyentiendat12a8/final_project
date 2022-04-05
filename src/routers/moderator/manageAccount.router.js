@@ -19,6 +19,6 @@ router.patch('/update-forgotten-password/:accountID/:token', confirmLink)
 router.post('/config-paypal', [verifyToken, isModerator], configPaypal)
 router.get('/view-paypal', [verifyToken, isModerator], viewPaypal)
 router.get('/edit-paypal',  [verifyToken, isModerator], editPaypal)
-router.patch('/update-paypal',  [verifyToken, isModerator], updatePaypal)
+router.put('/update-paypal',  [verifyToken, isModerator], updatePaypal)
 
 module.exports = router

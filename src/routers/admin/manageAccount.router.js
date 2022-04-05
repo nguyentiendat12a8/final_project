@@ -47,6 +47,6 @@ router.delete('/force-delete-admin-account/:adminID', [verifyToken, isAdmin], fo
 router.post('/config-paypal', [verifyToken, isAdmin], configPaypal)
 router.get('/view-paypal', [verifyToken, isAdmin], viewPaypal)
 router.get('/edit-paypal',  [verifyToken, isAdmin], editPaypal)
-router.patch('/update-paypal',  [verifyToken, isAdmin], updatePaypal)
+router.put('/update-paypal',  [verifyToken, isAdmin], updatePaypal)
 
 module.exports = router

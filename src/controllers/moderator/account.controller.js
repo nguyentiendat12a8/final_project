@@ -255,6 +255,10 @@ exports.viewPaypal = async (req, res) => {
       errorCode: 500,
       message: err
     })
+    if(!paypal) return res.status(200).send({
+      errorCode: 0,
+      message: 'The account does not have paypal payment information!'
+    })
     var show = {
       clientID: paypal.clientID,
       secret:paypal.secret
@@ -271,6 +275,10 @@ exports.editPaypal = async (req, res) => {
     if (err) return res.status(500).send({
       errorCode: 500,
       message: err
+    })
+    if(!paypal) return res.status(400).send({
+      errorCode: 400,
+      message: 'The account does not have paypal payment information!'
     })
     var show = {
       clientID: paypal.clientID,

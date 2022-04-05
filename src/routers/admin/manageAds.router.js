@@ -6,7 +6,7 @@ const router = express.Router()
 router.post('/add-ads',[verifyToken, isAdmin], addAds)
 router.get('/view-ads', [verifyToken, isAdmin], viewAds)
 router.get('/edit-ads', [verifyToken, isAdmin], editAds)
-router.patch('/update-ads',[verifyToken, isAdmin], updateAds)
+router.put('/update-ads',[verifyToken, isAdmin], updateAds)
 
 //ads tour
 router.get('/list-tour-ads',[verifyToken, isAdmin], listTourAds)

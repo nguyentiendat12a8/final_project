@@ -8,7 +8,7 @@ const Ads = db.ads
 
 exports.addAds = async (req, res) => {
     const count = await Ads.countDocuments({})
-    if (count = 1) {
+    if (count === 1) {
         return res.status(400).send({
             errorCode: 400,
             message: 'Can only add 1 document ads!'

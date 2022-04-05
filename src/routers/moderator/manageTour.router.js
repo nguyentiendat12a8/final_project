@@ -1,5 +1,5 @@
 const express = require('express')
-const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour } = require('../../controllers/moderator/tour.controller')
+const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -26,5 +26,11 @@ router.get('/view-tour-custom-and-add/:tourDraftID', [verifyToken,isModerator], 
 router.post('/add-tour-custom/:tourDraftID', [verifyToken, isModerator, upload.array('picture')], addTourCustom)
 router.get('/view-list-custom-tour', [verifyToken,isModerator], viewListCustomTour)
 router.get('/view-detail-custom-tour/:slug', [verifyToken,isModerator], viewDetailCustomTour)
+
+//book ads
+router.get('/payment-ads-tour/:tourID', [verifyToken, isModerator], paymentAdsTour )
+router.get('/success-ads-tour/:tourID', [verifyToken,isModerator], successAdsTour)
+router.get('/cancel-ads-tour', [verifyToken, isModerator], cancelAdsTour )
+
 
 module.exports = router
