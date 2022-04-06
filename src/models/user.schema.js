@@ -11,7 +11,14 @@ exports.User = mongoose.model(
         avatar: {type: String},
         deleted: {type: Boolean, default: false},
         slug: {type: String, slug: 'userName', unique: true },
-        createdAt: { type: String, default: new Date() },
+        //createdAt: { type: String, default: new Date() },
+
+    },
+    {
+        timestamps: {
+            createdAt: 'createdAt',
+            //updatedAt: 'updatedAt'
+        }
     })
 )
 
