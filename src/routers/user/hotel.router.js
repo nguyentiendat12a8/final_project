@@ -7,7 +7,7 @@ const router = express.Router()
 router.get('/list-hotel-room', listHotelRoom)
 router.get('/detail-hotel-room/:slug', detailHotelRoom)
 router.get('/payment-hotel-room', paymentHotelRoom)
-router.get('/success/:hotelID',[verifyToken], success) 
+router.get('/success/:hotelRoomID/:quantity',[verifyToken], success) 
 router.get('/cancel',[verifyToken], cancel)
 
 module.exports = router

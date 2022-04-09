@@ -44,7 +44,7 @@ exports.listTour = (req, res, next) => {
 }
 
 exports.detailTour = (req, res, next) => {
-    Tour.findOne({ slug: req.query.slug }, async (err, tour) => { 
+    Tour.findOne({ slug: req.query.slug }, async (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -281,8 +281,6 @@ exports.detailBillTour = (req, res, next) => {
 
 
 //rate tour
-//cần check time rate -- qua ngày xuất phát mới được rate
-//cần check người này đã từng đánh giá trước đó hay chưa, nếu rồi thì sẽ update rate mới.
 exports.rateTour = (req, res) => {
     try {
         BillTour.findById(req.params.billTourID, (err, bill) => {
@@ -322,6 +320,28 @@ exports.rateTour = (req, res) => {
     } catch (error) {
         console.log(error)
     }
+}
+
+exports.viewRateTour = (req, res) => {
+    Rate.find({ tourID: req.params.tourID }, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'Rate server is error!'
+        })
+        var show = []
+        for (i = 0; i < list.length; i++) {
+            var rate = {
+                point: list[i].point,
+                comment: list[i].comment,
+                createdAt: list[i].createdAt
+            }
+            show.push(rate)
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
 }
 
 //Tour custom
@@ -425,7 +445,7 @@ exports.viewTourDraft = (req, res) => {
         var check
         const status = await TourDraftStatus.findOne({ tourDraftID: tour._id })
         if (!status) check = 'Unsent'
-        else check = 'Sent' 
+        else check = 'Sent'
         return res.status(200).send({
             errorCode: 0,
             data: listTour,
@@ -476,7 +496,7 @@ exports.viewTourDraftToMod = (req, res) => {
     })
 }
 
-exports.paymentTourCustom = async (req, res) =>{
+exports.paymentTourCustom = async (req, res) => {
     const tour = await TourCustom.findById(req.params.tourCustomID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour.moderatorID })
     if (paypalInfo === null) {
@@ -591,5 +611,264 @@ exports.cancelPayCustom = (req, res) => {
 }
 
 
+//filter
+exports.searchTour = (req, res) => {
+    Tour.find({}, (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        const search = req.query.address
+        var dataSearch = list.filter(e => e.address.toLowerCase().includes(search.toLowerCase()))
+        if (!dataSearch) {
+            return res.status(200).send({
+                errorCode: 0,
+                data: ''
+            })
+        }
+        var show = []
+        dataSearch.forEach(async e => {
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                slug: e.slug
+            }
+            show.push(tour)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
 
+exports.filterTour = async (req, res) => {
+    const categoryName = req.query.categoryName
+    var star = req.query.star
+    const filterPrice = req.query.filterPrice
+    if (categoryName && !star && !filterPrice) {
+        const category = await Category.findOne({ categoryName: req.query.categoryName })
+        if (!category) return res.status(500).send({
+            errorCode: 500,
+            message: 'Category server is error!'
+        })
+        const list = await Tour.find({ categoryTourID: category._id })
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        var show = []
+        list.forEach(async e => {
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                slug: e.slug
+            }
+            show.push(tour)
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+
+    } else if (categoryName && star && !filterPrice) {
+        const category = await Category.findOne({ categoryName: req.query.categoryName })
+        if (!category) return res.status(500).send({
+            errorCode: 500,
+            message: 'Category server is error!'
+        })
+
+        const list = await Tour.find({ categoryTourID: category._id})
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        var show = []
+        list.forEach(e => {
+            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+                var tour = {
+                    tourName: e.tourName,
+                    picture: e.picture,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                    slug: e.slug
+                }
+                show.push(tour)
+            }
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+
+    } else if (categoryName && star && filterPrice) {
+        const category = await Category.findOne({ categoryName: req.query.categoryName })
+        if (!category) return res.status(500).send({
+            errorCode: 500,
+            message: 'Category server is error!'
+        })
+
+        const list = await Tour.find({ categoryTourID: category._id})
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        if (filterPrice === 'ASC') {
+            list.sort((a, b) => {
+                return a.price - b.price
+            })
+        } else {
+            list.sort((a, b) => {
+                return b.price - a.price
+            })
+        }
+        var show = []
+        list.forEach(e => {
+            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+                var tour = {
+                    tourName: e.tourName,
+                    picture: e.picture,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                    slug: e.slug
+                }
+                show.push(tour)
+            }
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    } else if (!categoryName && star && !filterPrice) {
+        const list = await Tour.find({})
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        
+        var show = []
+        list.forEach(e => {
+            if( e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+                var tour = {
+                    tourName: e.tourName,
+                    picture: e.picture,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                    slug: e.slug
+                }
+                show.push(tour)
+            }
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    } else if (!categoryName && star && filterPrice) {
+        const list = await Tour.find({})
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        if (filterPrice === 'ASC') {
+            list.sort((a, b) => {
+                return a.price - b.price
+            })
+        } else {
+            list.sort((a, b) => {
+                return b.price - a.price
+            })
+        }
+        var show = []
+        list.forEach(e => {
+            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+                var tour = {
+                    tourName: e.tourName,
+                    picture: e.picture,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                    slug: e.slug
+                }
+                show.push(tour)
+            }
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    } else if (!categoryName && !star && filterPrice) {
+        const list = await Tour.find({})
+        if (!list) return res.status(500).send({
+            errorCode: 500,
+            message: 'Tour server is error!'
+        })
+        if (filterPrice === 'ASC') {
+            list.sort((a, b) => {
+                return a.price - b.price
+            })
+        } else {
+            list.sort((a, b) => {
+                return b.price - a.price
+            })
+        }
+        var show = []
+        list.forEach(e => {
+                var tour = {
+                    tourName: e.tourName,
+                    picture: e.picture,
+                    startDate: e.startDate,
+                    time: e.time,
+                    price: e.price,
+                    address: e.address,
+                    startingPoint: e.startingPoint,
+                    numberOfRate: e.rate.numberOfRate,
+                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                    slug: e.slug
+                }
+                show.push(tour)
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    }
+}
 

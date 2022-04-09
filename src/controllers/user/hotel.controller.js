@@ -106,7 +106,7 @@ exports.paymentHotelRoom = async (req, res) => {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/user/hotel/success/${req.params.hotelRoomID}`,
+            "return_url": `http://localhost:4000/user/hotel/success/6235737a17ac4ec96eef2243/${quantity}`, //${req.params.hotelRoomID}
             "cancel_url": "http://localhost:4000/user/tour/cancel"
         },
         "transactions": [{
@@ -148,7 +148,7 @@ exports.paymentHotelRoom = async (req, res) => {
 
 exports.success = async (req, res, next) => {
 
-    const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')
+    const room = await HotelRoom.findById(req.params.hotelRoomID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: room.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
@@ -165,7 +165,7 @@ exports.success = async (req, res, next) => {
 
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    var quantity = req.body.numberOfDay // req.b
+    var quantity = req.params.quantity // req.b
     var total = room.price * quantity
 
     const execute_payment_json = {
@@ -244,4 +244,34 @@ exports.detailBillHotel = (req, res) => {
 }
 
 //filter
-// tìm kiếm theo số lượng người đi
+exports.filterHotelRoom = async (req,res) => {
+    // ngay từ đầu phải kiểm tra đầu vào xem là filter cái gì
+    // xét từng trường trường hợp truyền vào. Như ở đây sẽ là xét trường hợp của 5 cái truyền vào
+    //điều kiện đầu vào address luôn có trước khi nhập
+    const address = req.query.address
+    const checkIn = req.query.checkIn
+    const checkOut = req.query.checkOut
+    const numberOfPeople = req.query.numberOfPeople
+    if(checkIn && !checkOut && !numberOfPeople) {
+        const listBill = await BillHotelRoom.find({})
+        if(!listBill) {
+            return res.status(500).send({
+                errorCode: 500,
+                message: 'Bill Hotel Room server is error!'
+            })
+        }
+        listBill.forEach(e => {
+            //if(new Date() < new Date(checkIn))
+        })
+    } else if (checkIn && checkOut && !numberOfPeople) {
+
+    } else if (checkIn && checkOut && numberOfPeople) {
+
+    } else if (!checkIn && checkOut && !numberOfPeople) {
+
+    } else if (!checkIn && checkOut && numberOfPeople) {
+
+    } else if (!checkIn && !checkOut && numberOfPeople) {
+
+    }
+}
