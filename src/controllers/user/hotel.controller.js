@@ -71,10 +71,6 @@ exports.detailHotelRoom = (req, res) => {
     })
 }
 
-exports.bookHotel = (req, res) => {
-
-}
-
 exports.paymentHotelRoom = async (req, res) => {
     try {
         const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')//req.params.hotelRoomID
@@ -130,7 +126,10 @@ exports.paymentHotelRoom = async (req, res) => {
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error
+            })
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
@@ -150,7 +149,7 @@ exports.paymentHotelRoom = async (req, res) => {
     
 }
 
-exports.success = async (req, res, next) => {
+exports.successHotelRoom = async (req, res, next) => {
 
     const room = await HotelRoom.findById(req.params.hotelRoomID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: room.moderatorID })
@@ -183,12 +182,14 @@ exports.success = async (req, res, next) => {
     };
     paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
         if (error) {
-            console.log(error.response);
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error.response
+            })
         } else {
             const billRoom = new BillHotelRoom({
-                checkIn: req.body.numberOfDay,
-                checkOut: req.body.numberOfDay,
+                checkIn: req.params.quantity,
+                checkOut: req.params.quantity,
                 userID: req.accountID, //req.userId
                 tourID: '6235737a17ac4ec96eef2243', //req.params.tourId
                 //bookedDate: Date.now()
@@ -207,9 +208,11 @@ exports.success = async (req, res, next) => {
     });
 }
 
-exports.cancel = (req, res) => {
-    res.send('Cancelled (Đơn hàng đã hủy)')
-    return
+exports.cancelHotelRoom = (req, res) => {
+    return res.status(200).send({
+        errorCode: 0,
+        message: 'Cancel payment hotel room successfully!'
+    })
 }
 
 

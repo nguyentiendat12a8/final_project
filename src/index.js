@@ -31,7 +31,7 @@ routeAdmin(app)
 //test payment
 const ejs = require('ejs');
 app.set('view engine', 'ejs');
-app.get('/tour', (req, res) => res.render('index'));
+app.get('/', (req, res) => res.render('index'));
 
 
 app.listen(port, () => {

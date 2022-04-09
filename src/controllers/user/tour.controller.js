@@ -13,7 +13,6 @@ const TourDraft = db.tourDraft
 const TourDraftStatus = db.tourDraftStatus
 const TourCustom = db.tourCustom
 
-
 exports.listTour = (req, res, next) => {
     Tour.find({}, (err, list) => { // theem dieu kien , private: false
         if (err) return res.status(500).send({
@@ -138,11 +137,18 @@ exports.paymentTour = async (req, res) => {
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error
+            })
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
-                    res.redirect(payment.links[i].href);
+                    //res.redirect(payment.links[i].href);
+                    return res.status(200).send({
+                        errorCode: 0,
+                        data: payment.links[i].href
+                    })
                 }
             }
 
@@ -180,8 +186,10 @@ exports.success = async (req, res, next) => {
     };
     paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
         if (error) {
-            console.log(error.response);
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error.response
+            })
         } else {
             const billTour = new BillTour({
                 userID: req.accountID, //req.userId
@@ -203,8 +211,10 @@ exports.success = async (req, res, next) => {
 }
 
 exports.cancel = (req, res) => {
-    res.send('Cancelled (Đơn hàng đã hủy)')
-    return
+    return res.status(200).send({
+        errorCode: 0,
+        message: 'Cancel payment tour successfully!'
+    })
 }
 
 exports.listBillTour = (req, res, next) => {
@@ -541,11 +551,18 @@ exports.paymentTourCustom = async (req, res) => {
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error
+            })
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
-                    res.redirect(payment.links[i].href);
+                    //res.redirect(payment.links[i].href);
+                    return res.status(200).send({
+                        errorCode: 0,
+                        data: payment.links[i].href
+                    })
                 }
             }
 
@@ -583,8 +600,10 @@ exports.successPayCustom = async (req, res, next) => {
     };
     paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
         if (error) {
-            console.log(error.response);
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error.response
+            })
         } else {
             const billTour = new BillTour({
                 userID: req.accountID, //'622daaa81d06d9205fab2525'
@@ -606,8 +625,10 @@ exports.successPayCustom = async (req, res, next) => {
 }
 
 exports.cancelPayCustom = (req, res) => {
-    res.send('Cancelled (Đơn hàng đã hủy)')
-    return
+    return res.status(200).send({
+        errorCode: 0,
+        message: 'Cancel payment tour successfully!'
+    })
 }
 
 

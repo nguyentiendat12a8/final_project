@@ -598,11 +598,18 @@ exports.paymentAdsTour = async (req,res) =>{
 
     paypal.payment.create(create_payment_json, function (error, payment) {
         if (error) {
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error
+            })
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
-                    res.redirect(payment.links[i].href);
+                    //res.redirect(payment.links[i].href);
+                    return res.status(200).send({
+                        errorCode: 0,
+                        data: payment.links[i].href
+                    })
                 }
             }
 
@@ -640,8 +647,10 @@ exports.successAdsTour = async (req,res) =>{
     };
     paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
         if (error) {
-            console.log(error.response);
-            throw error;
+            return res.status(500).send({
+                errorCode: 500,
+                message: error.response
+            })
         } else {
             const tourAds = new TourAds({
                 tourID: req.params.tourID
@@ -661,8 +670,10 @@ exports.successAdsTour = async (req,res) =>{
 }
 
 exports.cancelAdsTour = (req,res) =>{
-    res.send('Cancelled (Đơn hàng đã hủy)')
-    return
+    return res.status(200).send({
+        errorCode: 0,
+        message: 'Cancel payment ads tour successfully!'
+    })
 }
 
 // exports.listAdsTour = (req,res) =>{
