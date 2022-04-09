@@ -134,7 +134,11 @@ exports.paymentHotelRoom = async (req, res) => {
         } else {
             for (let i = 0; i < payment.links.length; i++) {
                 if (payment.links[i].rel === 'approval_url') {
-                    res.redirect(payment.links[i].href);
+                    //res.redirect(payment.links[i].href);
+                    return res.status(200).send({
+                        errorCode: 0,
+                        data: payment.links[i].href
+                    })
                 }
             }
 
