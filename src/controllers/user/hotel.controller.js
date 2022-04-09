@@ -3,6 +3,7 @@ const HotelRoom = db.hotelRoom
 const BillHotelRoom = db.billHotelRoom
 const paypal = require('paypal-rest-sdk')
 const PaypalInfo = db.paypalInfo
+const Moderator = db.moderator
 
 exports.listHotelRoom = (req, res) => {
     HotelRoom.find({}, (err, list) => {
@@ -12,7 +13,7 @@ exports.listHotelRoom = (req, res) => {
         })
         var listDetail = []
         list.forEach(e => {
-            var numberOfPeople = e.bedroom.singleBed * 1 + e.bedroom.doubleBed * 2 + e.bedroom.queenSizeBed * 2 + e.bedroom.kingSizeBed * 2
+            //var numberOfPeople = e.bedroom.singleBed * 1 + e.bedroom.doubleBed * 2 + e.bedroom.queenSizeBed * 2 + e.bedroom.kingSizeBed * 2
             var detail = {
                 roomName: e.roomName,
                 price: e.price,
@@ -20,7 +21,7 @@ exports.listHotelRoom = (req, res) => {
                 acreage: e.acreage,
                 address: e.address,
                 bedroom: e.bedroom,
-                numberOfPeople,
+                //numberOfPeople,
                 slug: e.slug
             }
             listDetail.push(detail)
@@ -40,7 +41,7 @@ exports.detailHotelRoom = (req, res) => {
         })
         var numberOfPeople = room.bedroom.singleBed * 1 + room.bedroom.doubleBed * 2 + room.bedroom.queenSizeBed * 2 + room.bedroom.kingSizeBed * 2
         var roomDetail = {
-            roomName: room.roomName ,
+            roomName: room.roomName,
             price: room.price,
             bedroom: {
                 singleBed: room.bedroom.singleBed,
@@ -73,80 +74,81 @@ exports.detailHotelRoom = (req, res) => {
 
 exports.paymentHotelRoom = async (req, res) => {
     try {
-        const room = await HotelRoom.findById('6235737a17ac4ec96eef2243')//req.params.hotelRoomID
+        const room = await HotelRoom.findById(req.query.hotelRoomID)//req.params.hotelRoomID
         if (room === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'room err'
-        })
-    }
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: room.moderatorID })//tour._id
-    if (paypalInfo === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'The manager of the tour you booked does not have an online payment method'
-        })
-    }
-    var quantity = req.query.numberOfDay // req.query.numberOfDay, 2
-    var total = room.price * quantity
-    //console.log(req.body.date1)
-
-    paypal.configure({
-        'mode': 'sandbox', //sandbox or live
-        'client_id': paypalInfo.clientID,
-        'client_secret': paypalInfo.secret
-    });
-    const create_payment_json = {
-        "intent": "sale",
-        "payer": {
-            "payment_method": "paypal"
-        },
-        "redirect_urls": {
-            "return_url": `http://localhost:4000/user/hotel/success/6235737a17ac4ec96eef2243/${quantity}`, //${req.params.hotelRoomID}
-            "cancel_url": "http://localhost:4000/user/tour/cancel"
-        },
-        "transactions": [{
-            "item_list": {
-                "items": [{
-                    "name": `day(s): ${room.roomName}`,
-                    //"sku": "001",
-                    "price": `${room.price}`,
-                    "currency": "USD",
-                    "quantity":  `${quantity}`
-                }]
-            },
-            "amount": {
-                "currency": "USD",
-                "total": `${total}`
-            },
-            "description": "book tour tien loi"
-        }]
-    };
-
-
-    paypal.payment.create(create_payment_json, function (error, payment) {
-        if (error) {
-            return res.status(500).send({
-                errorCode: 500,
-                message: error
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'room err'
             })
-        } else {
-            for (let i = 0; i < payment.links.length; i++) {
-                if (payment.links[i].rel === 'approval_url') {
-                    //res.redirect(payment.links[i].href);
-                    return res.status(200).send({
-                        errorCode: 0,
-                        data: payment.links[i].href
-                    })
-                }
-            }
-
         }
-    });
+        const paypalInfo = await PaypalInfo.findOne({ moderatorID: room.moderatorID })
+        if (paypalInfo === null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'The manager of the tour you booked does not have an online payment method'
+            })
+        }
+        var checkIn = req.query.checkIn
+        var checkOut = req.query.checkOut
+        var quantity = new Date(new Date(checkOut) - new Date(checkIn)).getDate() - 1
+        var total = room.price * quantity
+
+        paypal.configure({
+            'mode': 'sandbox', //sandbox or live
+            'client_id': paypalInfo.clientID,
+            'client_secret': paypalInfo.secret
+        });
+        const create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": `http://localhost:4000/user/hotel/success/${req.query.hotelRoomID}/${req.query.checkIn}/${req.query.checkOut}`,
+                "cancel_url": "http://localhost:4000/user/tour/cancel"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": `day(s): ${room.roomName}`,
+                        //"sku": "001",
+                        "price": `${room.price}`,
+                        "currency": "USD",
+                        "quantity": `${quantity}`
+                    }]
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": `${total}`
+                },
+                "description": "book tour tien loi"
+            }]
+        };
+
+
+        paypal.payment.create(create_payment_json, function (error, payment) {
+            if (error) {
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: error
+                })
+            } else {
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        //res.redirect(payment.links[i].href);
+                        return res.status(200).send({
+                            errorCode: 0,
+                            data: payment.links[i].href
+                        })
+                    }
+                }
+
+            }
+        });
     } catch (error) {
         console.log(error)
     }
-    
+
 }
 
 exports.successHotelRoom = async (req, res, next) => {
@@ -168,7 +170,9 @@ exports.successHotelRoom = async (req, res, next) => {
 
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    var quantity = req.params.quantity // req.b
+    var checkIn = req.params.checkIn
+    var checkOut = req.params.checkOut
+    var quantity = new Date(new Date(checkOut) - new Date(checkIn)).getDate() - 1
     var total = room.price * quantity
 
     const execute_payment_json = {
@@ -188,11 +192,10 @@ exports.successHotelRoom = async (req, res, next) => {
             })
         } else {
             const billRoom = new BillHotelRoom({
-                checkIn: req.params.quantity,
-                checkOut: req.params.quantity,
-                userID: req.accountID, //req.userId
-                tourID: '6235737a17ac4ec96eef2243', //req.params.tourId
-                //bookedDate: Date.now()
+                checkIn,
+                checkOut,
+                userID: req.accountID,//'622daaa81d06d9205fab2525'
+                hotelRoomID: req.params.hotelRoomID,
             })
             billRoom.save()
                 .then(() => {
@@ -215,9 +218,8 @@ exports.cancelHotelRoom = (req, res) => {
     })
 }
 
-
 exports.listBillHotel = (req, res) => {
-    BillHotelRoom.find({ userID: req.accountID}, async (err, list) => {
+    BillHotelRoom.find({ userID: req.accountID }, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -247,38 +249,191 @@ exports.listBillHotel = (req, res) => {
 }
 
 exports.detailBillHotel = (req, res) => {
+    BillHotelRoom.findOne({ _id: req.params.billHotelRoomID, userID: req.accountID }, async (err, billRoom) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err
+        })
+        var room = await HotelRoom.findById(billRoom.hotelRoomID)
+        if (!room) return res.status(500).send({
+            errorCode: 500,
+            message: 'Bill hotel is error'
+        })
+        const moderator = await Moderator.findById(room.moderatorID)
+        var detail = {
+            checkIn: billRoom.checkIn,
+            checkOut: billRoom.checkOut,
+            bookedDate: billRoom.createdAt,
+            roomName: room.roomName,
+            price: room.price,
+            bedroom: {
+                singleBed: room.bedroom.singleBed,
+                doubleBed: room.bedroom.doubleBed,
+                queenSizeBed: room.bedroom.queenSizeBed,
+                kingSizeBed: room.bedroom.kingSizeBed,
+            },
+            utilities: {
+                parking: room.utilities.parking,
+                wifi: room.utilities.wifi,
+                pool: room.utilities.pool,
+                smoking: room.utilities.smoking,
+                TV: room.utilities.TV,
+                kitchen: room.utilities.kitchen,
+                bathtub: room.utilities.bathtub,
+            },
+            photo: room.photo,
+            acreage: room.acreage,
+            description: room.description,
+            address: room.address,
+            moderatorName: moderator.modName,
+            moderatorEmail: moderator.email,
+            moderatorPhone: moderator.phone
+        }
 
+        return res.status(200).send({
+            errorCode: 0,
+            data: detail
+        })
+    })
 }
 
 //filter
-exports.filterHotelRoom = async (req,res) => {
+exports.filterHotelRoom = async (req, res) => {
     // ngay từ đầu phải kiểm tra đầu vào xem là filter cái gì
     // xét từng trường trường hợp truyền vào. Như ở đây sẽ là xét trường hợp của 5 cái truyền vào
     //điều kiện đầu vào address luôn có trước khi nhập
+    try {
     const address = req.query.address
-    const checkIn = req.query.checkIn
-    const checkOut = req.query.checkOut
+    const checkIn = new Date(req.query.checkIn)
+    const checkOut = new Date (req.query.checkOut)
     const numberOfPeople = req.query.numberOfPeople
-    if(checkIn && !checkOut && !numberOfPeople) {
+    if (checkIn && checkOut && !numberOfPeople) {
         const listBill = await BillHotelRoom.find({})
-        if(!listBill) {
+        if (!listBill) {
             return res.status(500).send({
                 errorCode: 500,
                 message: 'Bill Hotel Room server is error!'
             })
         }
-        listBill.forEach(e => {
-            //if(new Date() < new Date(checkIn))
+        var roomFromBill = []
+        async function getRoomFromBill(room) {
+            var roomBill = await HotelRoom.findOne({_id: room.hotelRoomID, address})
+            return roomFromBill.push(roomBill)
+        }
+        await Promise.all(listBill.map(room => getRoomFromBill(room)))
+
+        var show = []
+        var showFromBill = []
+
+        const listRoom = await HotelRoom.find({address})
+        listRoom.forEach(e =>{
+            show.push(e._id)
         })
-    } else if (checkIn && checkOut && !numberOfPeople) {
+        //xử lý để show ra các room đã được book không trùng với ngày cần
+        if(roomFromBill.includes(!null)) {
+            roomFromBill.forEach(e => {
+                var formatCheckIn = new Date(e.checkIn)
+                var formatCheckOut = new Date(e.checkOut)
+                if(checkIn >= (formatCheckOut.setDate(formatCheckOut.getDate() + 1))){
+                    showFromBill.push(e.hotelRoomID)
+                } else if (checkOut <= (formatCheckIn.setDate(formatCheckIn.getDate() - 1))) {
+                    showFromBill.push(e.hotelRoomID)
+                } else {
+                    show.pop(e.hotelRoomID)
+                }
+            })
+        }
 
+        var showAll = show + ',' + showFromBill
+        var formatShowAll = new Object(showAll.split(','))
+        let unique = formatShowAll.filter((v, i) => formatShowAll.indexOf(v) === i)
+        var listDetail = []
+        async function getRoom (id) {
+            if(id === '') return
+            var room = await HotelRoom.find({_id: id})
+            return listDetail.push(room)
+        }
+        await Promise.all(unique.map(id => getRoom(id)))
+        return res.status(200).send({
+            errorCode: 0,
+            data: listDetail
+        })
     } else if (checkIn && checkOut && numberOfPeople) {
+        const listBill = await BillHotelRoom.find({})
+        if (!listBill) {
+            return res.status(500).send({
+                errorCode: 500,
+                message: 'Bill Hotel Room server is error!'
+            })
+        }
+        var roomFromBill = []
+        async function getRoomFromBill(room) {
+            var roomBill = await HotelRoom.findOne({_id: room.hotelRoomID, address})
+            return roomFromBill.push(roomBill)
+        }
+        await Promise.all(listBill.map(room => getRoomFromBill(room)))
 
-    } else if (!checkIn && checkOut && !numberOfPeople) {
+        var showList = []
+        var showFromBill = []
 
-    } else if (!checkIn && checkOut && numberOfPeople) {
+        const listRoom = await HotelRoom.find({address})
+        listRoom.forEach(e =>{
+            showList.push(e._id)
+        })
+        //xử lý để show ra các room đã được book không trùng với ngày cần
+        if(roomFromBill.includes(!null)) {
+            roomFromBill.forEach(e => {
+                var formatCheckIn = new Date(e.checkIn)
+                var formatCheckOut = new Date(e.checkOut)
+                if(checkIn >= (formatCheckOut.setDate(formatCheckOut.getDate() + 1))){
+                    showFromBill.push(e.hotelRoomID)
+                } else if (checkOut <= (formatCheckIn.setDate(formatCheckIn.getDate() - 1))) {
+                    showFromBill.push(e.hotelRoomID)
+                } else {
+                    showList.pop(e.hotelRoomID)
+                }
+            })
+        }
+
+        var showAll = showList + ',' + showFromBill
+        var formatShowAll = new Object(showAll.split(','))
+        let unique = formatShowAll.filter((v, i) => formatShowAll.indexOf(v) === i)
+        var listDetail = []
+        async function getRoom (id) {
+            if(id === '') return
+            var room = await HotelRoom.find({_id: id})
+            return listDetail.push(room)
+        }
+        await Promise.all(unique.map(id => getRoom(id)))
+        //filter number of people
+        var show = []
+        listDetail.forEach(e => {
+            e.forEach(i => {
+                if(numberOfPeople <= (i.bedroom.singleBed * 1 + i.bedroom.doubleBed * 2 + i.bedroom.queenSizeBed * 2 + i.bedroom.kingSizeBed * 2)){
+                    show.push(i)
+                }
+            })
+        })
+
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
 
     } else if (!checkIn && !checkOut && numberOfPeople) {
-
+        var show = []
+        const list = await HotelRoom.find({})
+        list.foreach(e => {
+            if(numberOfPeople <= (e.bedroom.singleBed * 1 + e.bedroom.doubleBed * 2 + e.bedroom.queenSizeBed * 2 + e.bedroom.kingSizeBed * 2)){
+                show.push(e)
+            }
+        })
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    } 
+    } catch (error) {
+        console.log(error)
     }
 }

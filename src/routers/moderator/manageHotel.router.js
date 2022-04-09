@@ -21,7 +21,7 @@ router.get('/search', [verifyToken,isModerator], searchHotelRoom)
 router.get('/filter-hotel-room', [verifyToken, isModerator], filterHotelRoom)
 
 //book ads
-router.get('/payment-ads-hotel-room/:hotelRoomID', [verifyToken, isModerator], paymentAdsHotelRoom )
+router.get('/payment-ads-hotel-room', [verifyToken, isModerator], paymentAdsHotelRoom )
 router.get('/success-ads-hotel-room/:hotelRoomID', [verifyToken,isModerator], successAdsHotelRoom)
 router.get('/cancel-ads-tour', [verifyToken, isModerator], cancelAdsHotelRoom )
 

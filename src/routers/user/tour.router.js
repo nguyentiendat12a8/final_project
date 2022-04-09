@@ -24,7 +24,7 @@ router.get('/list-organization/:tourDraftID', [verifyToken], listOrganization)
 router.post('/send-tour-draft/:tourDraftID/:moderatorID', [verifyToken], sendTourDraft)
 router.get('/view-tour-draft', [verifyToken], viewTourDraft)
 router.get('/view-tour-custom-to-mod/:tourDraftID', [verifyToken], viewTourDraftToMod)
-router.get('/payment-tour-custom/:tourCustomID',  [verifyToken], paymentTourCustom) 
+router.get('/payment-tour-custom',  [verifyToken], paymentTourCustom) 
 router.get('/successPayCustom/:tourCustomID',  [verifyToken],successPayCustom)/
 router.get('/cancle-pay-custom', [verifyToken], cancelPayCustom)
 

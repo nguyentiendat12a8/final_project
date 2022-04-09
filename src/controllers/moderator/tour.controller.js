@@ -164,12 +164,12 @@ exports.listTour = (req, res, next) => {
                     tourName: detail.tourName,
                     picture: detail.picture,
                     startDate: detail.startDate,
-                    time: detail.time,
+                    //time: detail.time,
                     price: detail.price,
                     address: detail.address,
-                    startingPoint:detail.startingPoint,
-                    numberOfRate: detail.rate.numberOfRate,
-                    numberOfStar: detail.rate.numberOfStar,
+                    //startingPoint:detail.startingPoint,
+                    //numberOfRate: detail.rate.numberOfRate,
+                    //numberOfStar: detail.rate.numberOfStar,
                     private: detail.private,
                     slug: detail.slug,
                     ads: null
@@ -180,12 +180,12 @@ exports.listTour = (req, res, next) => {
                     tourName: detail.tourName,
                     picture: detail.picture,
                     startDate: detail.startDate,
-                    time: detail.time,
+                    //time: detail.time,
                     price: detail.price,
                     address: detail.address,
-                    startingPoint: detail.startingPoint,
-                    numberOfRate: detail.rate.numberOfRate,
-                    numberOfStar: detail.rate.numberOfStar,
+                    // startingPoint: detail.startingPoint,
+                    // numberOfRate: detail.rate.numberOfRate,
+                    // numberOfStar: detail.rate.numberOfStar,
                     private: detail.private,
                     slug: detail.slug,
                     ads: ads.timeEnd
@@ -574,7 +574,7 @@ exports.paymentAdsTour = async (req,res) =>{
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/moderator/tour/success-ads-tour/${req.params.tourID}`,
+            "return_url": `http://localhost:4000/moderator/tour/success-ads-tour/${req.query.tourID}`,
             "cancel_url": "http://localhost:4000/moderator/tour/cancel-ads-tour"
         },
         "transactions": [{

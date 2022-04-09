@@ -507,7 +507,7 @@ exports.viewTourDraftToMod = (req, res) => {
 }
 
 exports.paymentTourCustom = async (req, res) => {
-    const tour = await TourCustom.findById(req.params.tourCustomID)
+    const tour = await TourCustom.findById(req.query.tourCustomID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour.moderatorID })
     if (paypalInfo === null) {
         return res.status(400).send({
@@ -527,7 +527,7 @@ exports.paymentTourCustom = async (req, res) => {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/user/tour/successPayCustom/${req.params.tourCustomID}`,
+            "return_url": `http://localhost:4000/user/tour/successPayCustom/${req.query.tourCustomID}`,
             "cancel_url": "http://localhost:4000/user/tour/cancelPayCustom"
         },
         "transactions": [{

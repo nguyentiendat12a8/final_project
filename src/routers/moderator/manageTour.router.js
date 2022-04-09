@@ -28,7 +28,7 @@ router.get('/view-list-custom-tour', [verifyToken,isModerator], viewListCustomTo
 router.get('/view-detail-custom-tour/:slug', [verifyToken,isModerator], viewDetailCustomTour)
 
 //book ads
-router.get('/payment-ads-tour/:tourID', [verifyToken, isModerator], paymentAdsTour )
+router.get('/payment-ads-tour', [verifyToken, isModerator], paymentAdsTour )
 router.get('/success-ads-tour/:tourID', [verifyToken,isModerator], successAdsTour)
 router.get('/cancel-ads-tour', [verifyToken, isModerator], cancelAdsTour )
 

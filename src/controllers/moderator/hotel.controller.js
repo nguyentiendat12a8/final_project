@@ -148,8 +148,8 @@ exports.listHotelRoom = (req, res) => {
                 roomName: e.roomName,
                 price: e.price,
                 photo: e.photo,
-                acreage: e.acreage,
-                address: e.address,
+                //acreage: e.acreage,
+                //address: e.address,
                 slug: e.slug
             }
             listDetail.push(detail)
@@ -317,7 +317,7 @@ exports.paymentAdsHotelRoom = async (req,res) =>{
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/moderator/hotel/success-ads-hotel-room/${req.params.hotelRoomID}`,//
+            "return_url": `http://localhost:4000/moderator/hotel/success-ads-hotel-room/${req.query.hotelRoomID}`,//
             "cancel_url": "http://localhost:4000/moderator/hotel/cancel-ads-hotel-room"
         },
         "transactions": [{
