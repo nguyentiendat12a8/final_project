@@ -1,5 +1,6 @@
 const db = require('../../models/index')
 const CategoryTour = db.categoryTour
+const Tour = db.tour
 
 
 //control category tour
@@ -64,9 +65,13 @@ exports.updateCategory = (req,res) =>{
     })
 }
 
-exports.deleteCategory = (req,res) =>{
-    const categoryID = req.params.categoryID
-    CategoryTour.findByIdAndDelete({_id: categoryID}, err=>{
+exports.deleteCategory = async (req,res) =>{
+    var check = await Tour.findOne({categoryTourID:req.params.categoryID })
+    if(check) return res.status(400).send({
+        errorCode: 400,
+        message: err
+    })
+    CategoryTour.findByIdAndDelete({_id: req.params.categoryID}, err=>{
         if(err) return res.status(500).send({
             errorCode: 500,
             message: err

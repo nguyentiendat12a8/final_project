@@ -164,7 +164,7 @@ exports.listTourAds = (req, res) => {
                 })
             }
             var show = {
-                roomName: tourDetail.tourName,
+                tourName: tourDetail.tourName,
                 timeEnd: tour.timeEnd,
                 _id: tour._id
             }
