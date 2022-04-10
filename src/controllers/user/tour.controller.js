@@ -93,7 +93,7 @@ exports.detailTour = (req, res, next) => {
 }
 
 exports.paymentTour = async (req, res) => {
-    const tour = await Tour.findById(req.params.slug)
+    const tour = await Tour.findById(req.params.tourID)
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: tour._id })
     if (paypalInfo === null) {
         return res.status(400).send({
@@ -113,7 +113,7 @@ exports.paymentTour = async (req, res) => {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:4000/user/tour/success/${req.params.slug}`,
+            "return_url": `http://localhost:4000/user/tour/success/${req.params.tourID}`,
             "cancel_url": "http://localhost:4000/user/tour/cancel"
         },
         "transactions": [{
@@ -192,8 +192,9 @@ exports.success = async (req, res, next) => {
             })
         } else {
             const billTour = new BillTour({
+                price: tour.price,
                 userID: req.accountID, //req.userId
-                tourID: req.params.slug, //req.params.tourId
+                tourID: req.params.tourID, //req.params.tourId
                 //bookedDate: Date.now()
             })
             billTour.save()
@@ -606,6 +607,7 @@ exports.successPayCustom = async (req, res, next) => {
             })
         } else {
             const billTour = new BillTour({
+                price: tour.price,
                 userID: req.accountID, //'622daaa81d06d9205fab2525'
                 tourCustomID: req.params.tourCustomID, //req.params.tourId
                 //bookedDate: Date.now()

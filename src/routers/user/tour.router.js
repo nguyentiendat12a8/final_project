@@ -8,8 +8,8 @@ const router = express.Router()
 
 router.get('/list-tour', listTour) 
 router.get('/detail-tour', detailTour)
-router.get('/payment-tour/:slug',[verifyToken], paymentTour)
-router.get('/success/:slug',[verifyToken], success) //:tourID
+router.get('/payment-tour/tourID',[verifyToken], paymentTour)
+router.get('/success/:tourID',[verifyToken], success) //:tourID
 router.get('/cancel',[verifyToken], cancel)
 router.get('/list-bill-tour', [verifyToken], listBillTour)
 router.get('/detail-bill-tour/:billTourID', [verifyToken], detailBillTour)

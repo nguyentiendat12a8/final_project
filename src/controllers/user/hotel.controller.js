@@ -193,6 +193,7 @@ exports.successHotelRoom = async (req, res, next) => {
             })
         } else {
             const billRoom = new BillHotelRoom({
+                price: total,
                 checkIn,
                 checkOut,
                 userID: req.accountID,//'622daaa81d06d9205fab2525'
