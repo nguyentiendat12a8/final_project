@@ -46,7 +46,7 @@ exports.signin = async (req, res, next) => {
         message: "All input is required",
       })
     }
-    const user = await Moderator.findOne({ username });
+    const user = await Moderator.findOne({ username, deleted: false });
     if (!user) {
       return res.status(404).json({
         errorCode: "404",

@@ -1,9 +1,9 @@
 const express = require('express')
 const { checkDuplicateAdmin } = require('../../middlewares/verifySignUp.middleware')
 const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailResetPass, confirmLink,
-     listUserAccount, detailUserAccount, deleteUserAccount, trashUserAccount, forceDeleteUserAccount, restoreUserAccount,
-     listModAccount, detailModAccount, deleteModAccount, trashModAccount, forceDeleteModAccount, restoreModAccount,
-     listAdminAccount, detailAdminAccount, deleteAdminAccount, trashAdminAccount, forceDeleteAdminAccount, restoreAdminAccount,
+     listUserAccount, detailUserAccount, deleteUserAccount, trashUserAccount, restoreUserAccount,
+     listModAccount, detailModAccount, deleteModAccount, trashModAccount,  restoreModAccount,
+     
      configPaypal, viewPaypal, editPaypal, updatePaypal
     } = require('../../controllers/admin/account.controller')
 const { verifyToken, isAdmin } = require('../../middlewares/jwt.middleware')
@@ -20,28 +20,17 @@ router.patch('/update-forgotten-password/:accountID/:token', confirmLink)
 
 //route manage user account
 router.get('/list-user-account', [verifyToken, isAdmin], listUserAccount)
-router.get('/detail-user-account/:userID',[verifyToken, isAdmin], detailUserAccount) //view detail o ca deteled true va false
+router.get('/detail-user-account/:userID',[verifyToken, isAdmin], detailUserAccount) 
 router.patch('/delete-user-account/:userID',[verifyToken, isAdmin], deleteUserAccount)
 router.get('/trash-user-account',[verifyToken, isAdmin], trashUserAccount)
 router.patch('/restore-user-account/:userID',[verifyToken, isAdmin], restoreUserAccount)
-router.delete('/force-delete-user-account/:userID', [verifyToken, isAdmin], forceDeleteUserAccount)
 
 //route manage moderator account
 router.get('/list-moderator-account', [verifyToken, isAdmin], listModAccount)
-router.get('/detail-moderator-account/:moderatorID',[verifyToken, isAdmin], detailModAccount) //view detail o ca deteled true va false
+router.get('/detail-moderator-account/:moderatorID',[verifyToken, isAdmin], detailModAccount) 
 router.patch('/delete-moderator-account/:moderatorID',[verifyToken, isAdmin], deleteModAccount)
 router.get('/trash-moderator-account',[verifyToken, isAdmin], trashModAccount)
 router.patch('/restore-moderator-account/:moderatorID',[verifyToken, isAdmin], restoreModAccount )
-router.delete('/force-delete-moderator-account/:moderatorID', [verifyToken, isAdmin], forceDeleteModAccount)
-
-//route manage admin account
-router.get('/list-admin-account', [verifyToken, isAdmin], listAdminAccount)
-router.get('/detail-admin-account/:adminID',[verifyToken, isAdmin], detailAdminAccount) //view detail o ca deteled true va false
-router.patch('/delete-admin-account/:adminID',[verifyToken, isAdmin], deleteAdminAccount)
-router.get('/trash-admin-account',[verifyToken, isAdmin], trashAdminAccount)
-router.patch('/restore-admin-account/:adminID',[verifyToken, isAdmin], restoreAdminAccount )
-router.delete('/force-delete-admin-account/:adminID', [verifyToken, isAdmin], forceDeleteAdminAccount)
-
 
 //route paypal info
 router.post('/config-paypal', [verifyToken, isAdmin], configPaypal)

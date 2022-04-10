@@ -183,7 +183,6 @@ exports.sendEmailResetPass = async (req, res) => {
   }
 }
 
-
 exports.confirmLink = async (req, res) => {
   try {
     const schema = Joi.object({ password: Joi.string().required() })
@@ -212,32 +211,18 @@ exports.confirmLink = async (req, res) => {
   }
 }
 
-
 // manage account of user
 exports.listUserAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  User.find({ deleted: false })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      User.countDocuments({ deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
+  User.find({deleted: false}, (err, list) => {
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: err.message
     })
+    return res.status(200).send({
+      errorCode: 0,
+      data: list
+    })
+  })
 }
 
 exports.detailUserAccount = async (req, res) => {
@@ -277,29 +262,16 @@ exports.deleteUserAccount = async (req, res) => {
 }
 
 exports.trashUserAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  User.find({ deleted: true })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      User.countDocuments({ deleted: true }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
+  User.find({deleted: true}, (err, list) => {
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: err.message
     })
+    return res.status(200).send({
+      errorCode: 0,
+      data: list
+    })
+  })
 }
 
 exports.restoreUserAccount = async (req, res) => {
@@ -320,50 +292,19 @@ exports.restoreUserAccount = async (req, res) => {
   })
 }
 
-exports.forceDeleteUserAccount = async (req, res) => {
-  const userID = req.params.userID
-  if (!userID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  User.deleteOne({ _id: userID, deleted: true }, err => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'delete function invalid or user server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'Force delete user account successfully'
-    })
-  })
-}
-
 // manage account of moderator
 
 exports.listModAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  Moderator.find({ deleted: false })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      Moderator.countDocuments({ deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
+  Moderator.find({deleted: false}, (err, list) => {
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: err.message
     })
+    return res.status(200).send({
+      errorCode: 0,
+      data: list
+    })
+  })
 }
 
 exports.detailModAccount = async (req, res) => {
@@ -399,29 +340,16 @@ exports.deleteModAccount = async (req, res) => {
 }
 
 exports.trashModAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  Moderator.find({ deleted: true })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      Moderator.countDocuments({ deleted: true }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
+  Moderator.find({deleted: true}, (err, list) => {
+    if(err) return res.status(500).send({
+      errorCode: 500,
+      message: err.message
     })
+    return res.status(200).send({
+      errorCode: 0,
+      data: list
+    })
+  })
 }
 
 exports.restoreModAccount = async (req, res) => {
@@ -441,147 +369,6 @@ exports.restoreModAccount = async (req, res) => {
     })
   })
 }
-
-exports.forceDeleteModAccount = async (req, res) => {
-  const moderatorID = req.params.moderatorID
-  if (!moderatorID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Moderator.deleteOne({ _id: moderatorID, deleted: true }, err => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'delete function invalid or mod server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'Force delete moderator account successfully'
-    })
-  })
-}
-
-//manage account of admin
-exports.listAdminAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  Admin.find({ deleted: false })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      Admin.countDocuments({ deleted: false }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
-    })
-}
-
-exports.detailAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  Admin.findById({ _id: adminID }, (err, admin) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: err
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      data: admin
-    })
-  })
-}
-
-exports.deleteAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  if (!adminID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Admin.findByIdAndUpdate({ _id: adminID }, { deleted: true }, { new: true }, err => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: err
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: `Delete Admin successfully!`
-    })
-  })
-
-}
-
-exports.trashAdminAccount = async (req, res) => {
-  let perPage = 10
-  let page = req.query.page || 1
-  Admin.find({ deleted: true })
-    .skip((perPage * page) - perPage)
-    .limit(perPage)
-    .exec(async (err, list) => {
-      if (err) return res.status(500).send({
-        errorCode: 500,
-        message: err
-      })
-      Admin.countDocuments({ deleted: true }, (err, count) => {
-        if (err) return res.status(500).send({
-          errorCode: 500,
-          message: err
-        })
-        return res.status(200).send({
-          errorCode: 0,
-          data: list,
-          current: page,
-          pages: Math.ceil(count / perPage)
-        })
-      })
-    })
-}
-
-exports.restoreAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  if (!adminID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Admin.findByIdAndUpdate({ _id: adminID }, { deleted: false }, { new: true }, (err) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: err
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'Restore Admin account successfully'
-    })
-  })
-}
-
-exports.forceDeleteAdminAccount = async (req, res) => {
-  const adminID = req.params.adminID
-  if (!adminID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  Admin.deleteOne({ _id: adminID, deleted: true }, err => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: 'delete function invalid or mod server is error'
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      message: 'Force delete Admin account successfully'
-    })
-  })
-}
-
 
 // payment method
 exports.configPaypal = async (req, res) => {

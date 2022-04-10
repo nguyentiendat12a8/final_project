@@ -43,11 +43,11 @@ exports.signin = async (req, res, next) => {
         message: "All input is required",
       })
     }
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username, deleted: false });
     if (!user) {
       return res.status(404).json({
         errorCode: "404",
-        message: "User not found ~~~",
+        message: "User not found!",
       })
     }
     if (bcrypt.compareSync(password, user.password)) {
