@@ -14,7 +14,7 @@ const TourDraftStatus = db.tourDraftStatus
 const TourCustom = db.tourCustom
 
 exports.listTour = (req, res, next) => {
-    Tour.find({}, (err, list) => { // theem dieu kien , private: false
+    Tour.find({private: false}, (err, list) => { 
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err

@@ -67,7 +67,6 @@ exports.editHotelRoom = (req, res) => {
             })
         }
         const hotelRoomDetail = {
-            price: room.startDate,
             bedroom: {
                 singleBed: room.bedroom.singleBed,
                 doubleBed: room.bedroom.doubleBed,
@@ -83,8 +82,8 @@ exports.editHotelRoom = (req, res) => {
                 kitchen: room.utilities.kitchen,
                 bathtub: room.utilities.bathtub,
             },
-            photo: room.photo,
             description: room.description,
+            private: room.private,
             slug: room.slug
         }
         return res.status(200).send({
@@ -95,18 +94,7 @@ exports.editHotelRoom = (req, res) => {
 }
 
 exports.updateHotelRoom = (req, res) => {
-    if (req.files) {
-        let path = ''
-        req.files.forEach((files, index, arr) => {
-            path = path + files.path + ','
-        });
-        path = path.substring(0, path.lastIndexOf(','))
-        req.body.photo = path
-    } else {
-        req.body.photo = 'No photo'
-    }
     HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID}, {
-        price: req.body.price,
         bedroom: {
             singleBed: req.body.singleBed,
             doubleBed: req.body.doubleBed,
@@ -122,8 +110,8 @@ exports.updateHotelRoom = (req, res) => {
             kitchen: req.body.kitchen,
             bathtub: req.body.bathtub,
         },
-        photo: req.body.photo,
         description: req.body.description,
+        private: req.body.private,
     }, { new: true }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,

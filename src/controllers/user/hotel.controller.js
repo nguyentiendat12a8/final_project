@@ -6,7 +6,7 @@ const PaypalInfo = db.paypalInfo
 const Moderator = db.moderator
 
 exports.listHotelRoom = (req, res) => {
-    HotelRoom.find({}, (err, list) => {
+    HotelRoom.find({private: false}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err

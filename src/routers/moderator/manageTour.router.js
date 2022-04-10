@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.post('/add-tour', [verifyToken, isModerator, upload.array('picture')], addTour)
 router.get('/edit-tour/:slug',[verifyToken, isModerator], editTour)
-router.patch('/update-tour/:slug', [verifyToken, isModerator, upload.array('picture')], updateTour)
+router.patch('/update-tour/:slug', [verifyToken, isModerator], updateTour)
 //router.patch('/delete-tour/:slug', [verifyToken, isModerator], deleteTour)
 router.get('/list-tour', [verifyToken, isModerator], listTour)
 router.get('/detail-tour/:slug', [verifyToken, isModerator], detailTour)

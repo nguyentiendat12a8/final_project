@@ -80,8 +80,6 @@ exports.editTour = (req, res, next) => {
             const category = await CategoryTour.findById(tour.categoryTourID)
             const tourDetail = {
                 startDate: tour.startDate,
-                picture: tour.picture,
-                price: tour.price,
                 time: tour.time,
                 description: {
                     content: tour.description.content,
@@ -110,8 +108,6 @@ exports.updateTour = async (req, res, next) => {
     const category = CategoryTour.findOne({ categoryName: req.body.categoryName })
     Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, {
         startDate: req.body.startDate,
-        price: req.body.price,
-        picture: req.body.picture,
         address: req.body.address,
         time: req.body.time,
         private: req.body.private,
