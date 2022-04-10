@@ -34,7 +34,7 @@ exports.listHotelRoom = (req, res) => {
 }
 
 exports.detailHotelRoom = (req, res) => {
-    HotelRoom.findById(req.params.slug, (err, room) => {
+    HotelRoom.findOne({slug: req.params.slug}, (err, room) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -68,6 +68,7 @@ exports.detailHotelRoom = (req, res) => {
         return res.status(200).send({
             errorCode: 0,
             data: roomDetail,
+            timeBooked: req.timeBooked
         })
     })
 }
