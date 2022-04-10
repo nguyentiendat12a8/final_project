@@ -164,7 +164,7 @@ exports.listTourAds = (req, res) => {
                 })
             }
             var show = {
-                roomName: tourDetail.roomName,
+                roomName: tourDetail.tourName,
                 timeEnd: tour.timeEnd,
                 _id: tour._id
             }
@@ -174,7 +174,7 @@ exports.listTourAds = (req, res) => {
 
         return res.status(200).send({
             errorCode: 0,
-            data: list
+            data: listShow
         })
     })
 }
@@ -206,7 +206,6 @@ exports.showTourAds = (req, res) => {
                 errorCode: 400,
                 message: 'This tour has been deleted or an error has occurred, please try again!'
             })
-            console.log(tourDetail)
             var show = {
                 _id: tourDetail._id,
                 roomName: tourDetail.tourName,

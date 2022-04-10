@@ -362,7 +362,7 @@ exports.paymentAdsHotelRoom = async (req,res) =>{
 
 exports.successAdsHotelRoom = async (req,res) =>{
     const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID:  req.accountID}) //'622dbfb2fcdc11b7a3fcd5af'
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
