@@ -19,7 +19,6 @@ exports.addExperiencePost = (req, res) => {
         postText: req.body.postText,
         photo: req.body.photo,
         address: req.body.address,
-        //time: moment.tz("Asia/Bangkok"),
         userID: req.accountID
     })
     post.save(err => {
