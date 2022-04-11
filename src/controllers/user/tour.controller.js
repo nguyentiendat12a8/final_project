@@ -430,7 +430,15 @@ exports.listOrganization = (req, res) => {
 }
 
 exports.sendTourDraft = async (req, res) => {
+    const check = await TourDraftStatus.findOne({userID: req.accountID})
+    if(check){
+        return res.status(400).send({
+            errorCode: 400,
+            message: 'Time to send the next custom versions is 2 days!'
+        })
+    }
     const send = new TourDraftStatus({
+        userID: req.accountID,
         tourDraftID: req.params.tourDraftID,
         moderatorID: req.params.moderatorID
     })
@@ -452,15 +460,14 @@ exports.viewTourDraft = (req, res) => {
             errorCode: 500,
             message: err
         })
-
-        var check
-        const status = await TourDraftStatus.findOne({ tourDraftID: tour._id })
-        if (!status) check = 'Unsent'
-        else check = 'Sent'
+        // var check
+        // const status = await TourDraftStatus.findOne({ tourDraftID: tour._id })
+        // if (!status) check = 'Unsent'
+        // else check = 'Sent'
         return res.status(200).send({
             errorCode: 0,
             data: listTour,
-            check
+            //check
         })
     })
 }

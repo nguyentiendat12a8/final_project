@@ -3,6 +3,10 @@ const mongoose = require('mongoose')
 exports.TourDraftStatus = mongoose.model(
     'TourDraftStatus',
     new mongoose.Schema({
+        userID: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }],
         moderatorID: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Moderator'
