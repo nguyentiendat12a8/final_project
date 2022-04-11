@@ -5,19 +5,19 @@ const Admin = db.admin
 const Moderator = db.moderator
 
 exports.verifyToken = async (req, res, next) => {
-    let token = req.body.token || req.query.token ||req.headers["x-access-token"];
-    if(!token){
-       return res.status(401).send({
-           errorCode: 401,
-           message: "token is required!"
-       })
+    let token = req.body.token || req.query.token || req.headers["x-access-token"];
+    if (!token) {
+        return res.status(401).send({
+            errorCode: 401,
+            message: "token is required!"
+        })
     }
-    jwt.verify(token, config.TOKEN_KEY, (err,decoded)=>{
-        if(err){
-            if(err.name === 'JsonWebTokenError'){
+    jwt.verify(token, config.TOKEN_KEY, (err, decoded) => {
+        if (err) {
+            if (err.name === 'JsonWebTokenError') {
                 return res.status(401).send({
                     errorCode: 401,
-                    message:'Unauthorized!'
+                    message: 'Unauthorized!'
                 })
             }
             return res.status(401).send({
@@ -35,7 +35,10 @@ exports.verifyRefreshToken = (req, res, next) => {
     //const refreshToken = req.cookies.access_token
     //const token = req.body.access_token
     if (!refreshToken) {
-        return res.status(401).send("chua duoc dang nhap")
+        return res.status(401).send({
+            errorCode: 401,
+            message: 'Unauthorized!'
+        })
     }
 
     jwt.verify(refreshToken, config.REFRESH_TOKEN_KEY, (err, decoded) => {
@@ -47,7 +50,7 @@ exports.verifyRefreshToken = (req, res, next) => {
         })
         //req.userId = decoded.id
         //return res.json(token)
-        return res.send({token : token})
+        return res.send({ token: token })
     })
 }
 
@@ -56,8 +59,8 @@ exports.isAdmin = (req, res, next) => {
         if (err) {
             return res.status(500).send({
                 errorCode: 500,
-                 message: err 
-                })
+                message: err
+            })
         }
         next()
     })
@@ -66,9 +69,9 @@ exports.isAdmin = (req, res, next) => {
 exports.isModerator = (req, res, next) => {
     Moderator.findById(req.userId).exec(err => {
         if (err) {
-            return res.status(500).send({ 
+            return res.status(500).send({
                 errorCode: 500,
-                message: err 
+                message: err
             })
         }
         next()

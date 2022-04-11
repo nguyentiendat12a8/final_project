@@ -38,4 +38,6 @@ router.get('/view-paypal', [verifyToken, isAdmin], viewPaypal)
 router.get('/edit-paypal',  [verifyToken, isAdmin], editPaypal)
 router.put('/update-paypal',  [verifyToken, isAdmin], updatePaypal)
 
+
+
 module.exports = router

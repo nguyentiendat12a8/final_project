@@ -130,20 +130,6 @@ exports.updateTour = async (req, res, next) => {
     })
 }
 
-// exports.deleteTour = (req, res, next) => {
-//     Tour.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, { deleted: true }, { new: true }, err => {
-//         if (err) return res.status(500).send({
-//             errorCode: 500,
-//             message: err
-//         })
-//         return res.status(200).send({
-//             errorCode: 0,
-//             message: 'delete tour successfully!'
-//         })
-//     })
-// }
-
-
 //list tour according moderator 
 exports.listTour = (req, res, next) => {
     Tour.find({ moderatorID: req.accountID }, async (err, list) => {
@@ -159,7 +145,7 @@ exports.listTour = (req, res, next) => {
                 var tour = {
                     tourName: detail.tourName,
                     picture: detail.picture,
-                    startDate: detail.startDate,
+                    //startDate: detail.startDate,
                     //time: detail.time,
                     price: detail.price,
                     address: detail.address,
@@ -175,7 +161,7 @@ exports.listTour = (req, res, next) => {
                 var tour = {
                     tourName: detail.tourName,
                     picture: detail.picture,
-                    startDate: detail.startDate,
+                    //startDate: detail.startDate,
                     //time: detail.time,
                     price: detail.price,
                     address: detail.address,
