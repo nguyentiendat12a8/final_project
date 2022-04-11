@@ -61,7 +61,7 @@ exports.signin = async (req, res, next) => {
           expiresIn: process.env.RefreshTokenLife,
         }
       )
-      userInfo = {
+      var userInfo = {
         userName: user.userName,
         email: user.email,
         phone: user.phone,
