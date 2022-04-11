@@ -232,6 +232,7 @@ exports.listBillTour = (req, res, next) => {
                 message: 'Bill tour is error'
             })
             var detail = {
+                price: list[i].price,
                 bookedDate: list[i].bookedDate,
                 tourName: tour.tourName,
                 startDate: tour.startDate,

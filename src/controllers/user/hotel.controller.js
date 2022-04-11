@@ -234,6 +234,7 @@ exports.listBillHotel = (req, res) => {
                 message: 'Bill hotel is error'
             })
             var detail = {
+                price : list[i].price,
                 bookedDate: list[i].bookedDate,
                 checkIn: list[i].checkIn,
                 checkOut: list[i].checkOut,
