@@ -81,7 +81,10 @@ exports.signin = async (req, res, next) => {
       })
     }
   } catch (err) {
-    return console.log(err)
+    return res.status(500).json({
+      errorCode: 500,
+      message: "User server is error",
+    })
   }
 }
 

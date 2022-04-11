@@ -66,7 +66,7 @@ exports.signin = async (req, res, next) => {
         phone: user.phone,
         avatar: user.avatar
       }
-      return res.status(200).json({
+      return res.status(200).send({
         errorCode: 0,
         token: token,
         refreshToken: refreshToken,
@@ -80,8 +80,8 @@ exports.signin = async (req, res, next) => {
       })
     }
   } catch (err) {
-    return res.status(400).json({
-      errorCode: 400,
+    return res.status(500).json({
+      errorCode: 500,
       message: "Admin server is error",
     })
   }
