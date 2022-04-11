@@ -6,7 +6,7 @@ const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailRese
      
      configPaypal, viewPaypal, editPaypal, updatePaypal
     } = require('../../controllers/admin/account.controller')
-const { verifyToken, isAdmin } = require('../../middlewares/jwt.middleware')
+const { verifyToken, isAdmin, verifyRefreshToken } = require('../../middlewares/jwt.middleware')
 const { uploadAvatar } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
 
@@ -38,6 +38,6 @@ router.get('/view-paypal', [verifyToken, isAdmin], viewPaypal)
 router.get('/edit-paypal',  [verifyToken, isAdmin], editPaypal)
 router.put('/update-paypal',  [verifyToken, isAdmin], updatePaypal)
 
-
+router.get('/verifyRefreshToken', verifyRefreshToken)
 
 module.exports = router
