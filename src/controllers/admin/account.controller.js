@@ -80,7 +80,10 @@ exports.signin = async (req, res, next) => {
       })
     }
   } catch (err) {
-    return console.log(err)
+    return res.status(400).json({
+      errorCode: 400,
+      message: "Admin server is error",
+    })
   }
 }
 
