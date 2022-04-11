@@ -58,7 +58,7 @@ exports.signin = async (req, res, next) => {
         { id: user._id },
         process.env.REFRESH_TOKEN_KEY,
         {
-          expiresIn: process.env.RefreshTokenLife,
+          expiresIn: process.env.refreshTokenLife,
         }
       )
       var userInfo = {
