@@ -49,23 +49,39 @@ exports.signin = async (req, res, next) => {
         message: "User not found ~~~",
       })
     }
+    
     if (bcrypt.compareSync(password, user.password)) {
-      const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
-        expiresIn: process.env.tokenLife,
-      })
-      const refreshToken = jwt.sign(
-        { id: user._id },
-        process.env.REFRESH_TOKEN_KEY,
-        {
-          expiresIn: process.env.RefreshTokenLife,
-        }
-      )
-      userInfo = {
-        adminName: user.adminName,
-        email: user.email,
-        phone: user.phone,
-        avatar: user.avatar
+      try {
+        const token = jwt.sign({ id: user._id }, process.env.TOKEN_KEY, {
+          expiresIn: process.env.tokenLife,
+        })
+        const refreshToken = jwt.sign(
+          { id: user._id },
+          process.env.REFRESH_TOKEN_KEY,
+          {
+            expiresIn: process.env.RefreshTokenLife,
+          }
+        )
+      } catch (error) {
+        return res.status(400).json({
+          errorCode: 400,
+          message: "sai 1",
+        })
       }
+      try {
+        userInfo = {
+          adminName: user.adminName,
+          email: user.email,
+          phone: user.phone,
+          avatar: user.avatar
+        }
+      } catch (error) {
+        return res.status(400).json({
+          errorCode: 400,
+          message: "sai 2",
+        })
+      }
+      
       return res.status(200).send({
         errorCode: 0,
         token: token,
