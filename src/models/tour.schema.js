@@ -6,7 +6,7 @@ exports.Tour = mongoose.model(
     'Tour',
     new mongoose.Schema({
         tourName: {type: String, required: true},
-        startDate: {type: String, required: true},
+        startDate: {type: Date, required: true},
         price: {type: Number, required: true},
         picture: {type: String, required: true},
         time: {type: String, required: true},

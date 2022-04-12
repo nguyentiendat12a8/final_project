@@ -229,52 +229,89 @@ exports.detailTour = async (req, res) => {
     })
 }
 
-exports.schedule = (req, res) => {
-    Tour.find({ moderatorID: req.accountID }, async (err, list) => {
-        if (err) return res.status(500).send({
-            errorCode: 500,
-            message: err.message
-        })
-        var listStart = []
-        var date = new Date()
-        list.forEach(e => {
-            if (parseInt(e.startDate) === parseInt(date.getDate())) {
-                listStart.push(e)
-            }
-        })
+exports.schedule = async (req, res) => {
+    const list = await Tour.find({ moderatorID: req.accountID })
+    const listCustom = await TourCustom.find({ moderatorID: req.accountID })
+    var listStart = []
+    var listCustomStart = []
+    var date = new Date()
 
-        var listBillStart = []
-        async function getTourFromBill(e) {
-            var check = await BillTour.find({ tourID: e._id })
-            
-            if (check) {
-                for(i = 0; i < check.length; i ++) {
-                 listBillStart.push(check[i])
+    //handle schedule tour custom
+    listCustom.forEach(e => {
+        if (e.startDate.getFullYear() === date.getFullYear()) {
+            if (e.startDate.getMonth() === date.getMonth()) {
+                if (e.startDate.getDate() === date.getDate()) {
+                    listCustomStart.push(e)
                 }
-                
             }
-            return listBillStart
         }
-        await Promise.all(listStart.map(e => getTourFromBill(e)))
-        var show = []
-        async function getTourAndUserInfo(i) {
-            var tour = await Tour.findById(i.tourID)
-            var user = await User.findById(i.userID)
-            var detail = {
-                tourName: tour.tourName,
-                startDate: tour.startDate,
-                address: tour.address,
-                startingPoint: tour.startingPoint,
-                userName: user.userName,
-                phone: user.phone
+    })
+    async function getTourCustomFromBill(e) {
+        var check = await BillTour.find({ tourCustomID: e._id })
+        if (check) {
+            for (i = 0; i < check.length; i++) {
+                listCustomBillStart.push(check[i])
             }
-            return show.push(detail)
         }
-        await Promise.all(listBillStart.map(i => getTourAndUserInfo(i)))
-        return res.status(200).send({
-            errorCode: 0,
-            data: show
-        })
+        return listCustomBillStart
+    }
+    async function getTourCustomAndUserInfo(i) {
+        var tour = await TourCustom.findById(i.tourCustomID)
+        var user = await User.findById(i.userID)
+        var detail = {
+            tourName: tour.tourName,
+            startDate: tour.startDate,
+            address: tour.address,
+            startingPoint: tour.startingPoint,
+            userName: user.userName,
+            phone: user.phone
+        }
+        return show.push(detail)
+    }
+    //handle schedule tour 
+    list.forEach(e => {
+        if (e.startDate.getFullYear() === date.getFullYear()) {
+            if (e.startDate.getMonth() === date.getMonth()) {
+                if (e.startDate.getDate() === date.getDate()) {
+                    listStart.push(e)
+                }
+            }
+        }
+    })
+    var listBillStart = []
+    var listCustomBillStart = []
+    async function getTourFromBill(e) {
+        var check = await BillTour.find({ tourID: e._id })
+        if (check) {
+            for (i = 0; i < check.length; i++) {
+                listBillStart.push(check[i])
+            }
+        }
+        return listBillStart
+    }
+    var show = []
+    var showCustom = []
+    async function getTourAndUserInfo(i) {
+        var tour = await Tour.findById(i.tourID)
+        var user = await User.findById(i.userID)
+        var detail = {
+            tourName: tour.tourName,
+            startDate: tour.startDate,
+            address: tour.address,
+            startingPoint: tour.startingPoint,
+            userName: user.userName,
+            phone: user.phone
+        }
+        return show.push(detail)
+    }
+    await Promise.all(listStart.map(e => getTourFromBill(e)), listCustomStart.map(e => getTourCustomFromBill(e)))
+    await Promise.all(listBillStart.map(i => getTourAndUserInfo(i)), listCustomBillStart.map(i => getTourCustomAndUserInfo(i)))
+    return res.status(200).send({
+        errorCode: 0,
+        data: {
+            show,
+            showCustom
+        }
     })
 }
 //search, filter

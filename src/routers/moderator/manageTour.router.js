@@ -1,5 +1,7 @@
 const express = require('express')
-const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour, schedule } = require('../../controllers/moderator/tour.controller')
+const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour,
+     filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour,
+      viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour, schedule } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
