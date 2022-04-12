@@ -154,7 +154,7 @@ exports.listTour = (req, res, next) => {
                     //numberOfStar: detail.rate.numberOfStar,
                     private: detail.private,
                     slug: detail.slug,
-                    ads: null
+                    timeEnd: null
                 }
                 return show.push(tour)
             } else {
@@ -170,7 +170,7 @@ exports.listTour = (req, res, next) => {
                     // numberOfStar: detail.rate.numberOfStar,
                     private: detail.private,
                     slug: detail.slug,
-                    ads: ads.timeEnd
+                    timeEnd: new Date (ads.timeEnd.setDate(ads.timeEnd.getDate() + 7))
                 }
                 return show.push(tour)
             }

@@ -139,7 +139,7 @@ exports.listHotelRoom = (req, res) => {
                     price: e.price,
                     photo: e.photo,
                     private: e.private,
-                    timeEnd: ads.timeEnd,
+                    timeEnd: new Date (ads.timeEnd.setDate(ads.timeEnd.getDate() + 7)),
                     //acreage: e.acreage,
                     //address: e.address,
                     slug: e.slug
