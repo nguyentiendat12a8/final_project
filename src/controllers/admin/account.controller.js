@@ -221,30 +221,41 @@ exports.listUserAccount = async (req, res) => {
       errorCode: 500,
       message: err.message
     })
+    var show = []
+    list.forEach(e => {
+      var detail = {
+        username: e.username,
+        userName: e.userName,
+        email: e.email,
+        phone: e.phone,
+        avatar: e.avatar
+      }
+      show.push(detail)
+    })
     return res.status(200).send({
       errorCode: 0,
-      data: list
+      data: show
     })
   })
 }
 
-exports.detailUserAccount = async (req, res) => {
-  const userID = req.params.userID
-  if (!userID) return res.status(400).send({
-    errorCode: 400,
-    message: 'Invalid link'
-  })
-  User.findOne({ _id: userID }, (err, user) => {
-    if (err) return res.status(500).send({
-      errorCode: 500,
-      message: err
-    })
-    return res.status(200).send({
-      errorCode: 0,
-      data: user
-    })
-  })
-}
+// exports.detailUserAccount = async (req, res) => {
+//   const userID = req.params.userID
+//   if (!userID) return res.status(400).send({
+//     errorCode: 400,
+//     message: 'Invalid link'
+//   })
+//   User.findOne({ _id: userID }, (err, user) => {
+//     if (err) return res.status(500).send({
+//       errorCode: 500,
+//       message: err
+//     })
+//     return res.status(200).send({
+//       errorCode: 0,
+//       data: user
+//     })
+//   })
+// }
 
 exports.deleteUserAccount = async (req, res) => {
   const userID = req.params.userID
@@ -270,9 +281,20 @@ exports.trashUserAccount = async (req, res) => {
       errorCode: 500,
       message: err.message
     })
+    var show = []
+    list.forEach(e => {
+      var detail = {
+        username: e.username,
+        userName: e.userName,
+        email: e.email,
+        phone: e.phone,
+        avatar: e.avatar
+      }
+      show.push(detail)
+    })
     return res.status(200).send({
       errorCode: 0,
-      data: list
+      data: show
     })
   })
 }
@@ -303,9 +325,22 @@ exports.listModAccount = async (req, res) => {
       errorCode: 500,
       message: err.message
     })
+    var show = []
+    list.forEach(e => {
+      var detail = {
+        username: e.username,
+        modName: e.modName,
+        email: e.email,
+        phone: e.phone,
+        avatar: e.avatar,
+        organizationName: e.organizationName,
+        tourCustomStatus: e.tourCustomStatus
+      }
+      show.push(detail)
+    })
     return res.status(200).send({
       errorCode: 0,
-      data: list
+      data: show
     })
   })
 }
@@ -348,9 +383,22 @@ exports.trashModAccount = async (req, res) => {
       errorCode: 500,
       message: err.message
     })
+    var show = []
+    list.forEach(e => {
+      var detail = {
+        username: e.username,
+        modName: e.modName,
+        email: e.email,
+        phone: e.phone,
+        avatar: e.avatar,
+        organizationName: e.organizationName,
+        tourCustomStatus: e.tourCustomStatus
+      }
+      show.push(detail)
+    })
     return res.status(200).send({
       errorCode: 0,
-      data: list
+      data: show
     })
   })
 }
