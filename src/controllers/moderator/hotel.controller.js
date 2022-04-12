@@ -16,7 +16,7 @@ exports.addHotelRoom = (req, res) => {
         path = path.substring(0, path.lastIndexOf(','))
         req.body.photo = path
     } else {
-        req.body.photo = 'No photo'
+        req.body.photo = ''
     }
     const room = new HotelRoom({
         roomName: req.body.roomName,

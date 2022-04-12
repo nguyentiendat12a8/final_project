@@ -10,7 +10,7 @@ exports.addPost = async (req, res) => {
         path = path.substring(0, path.lastIndexOf(','))
         req.body.photo = path
     } else {
-        req.body.photo = 'No photo'
+        req.body.photo = ''
     }
     var post = new Post(req.body)
     post.moderatorID = req.accountID
