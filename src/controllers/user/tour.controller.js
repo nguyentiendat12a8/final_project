@@ -14,7 +14,7 @@ const TourDraftStatus = db.tourDraftStatus
 const TourCustom = db.tourCustom
 
 exports.listTour = (req, res, next) => {
-    Tour.find({private: false}, (err, list) => { 
+    Tour.find({ private: false }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -227,20 +227,27 @@ exports.listBillTour = (req, res, next) => {
         var show = []
         for (i = 0; i < list.length; i++) {
             var tour = await Tour.findById(list[i].tourID)
-            if (!tour) return res.status(500).send({
-                errorCode: 500,
-                message: 'Bill tour is error'
-            })
-            var detail = {
-                price: list[i].price,
-                bookedDate: list[i].bookedDate,
-                tourName: tour.tourName,
-                startDate: tour.startDate,
-                _id: list[i]._id
+            var tourCustom = await TourCustom.findById(list[i].tourCustomID)
+            if (tour) {
+                var detail = {
+                    price: list[i].price,
+                    bookedDate: list[i].bookedDate,
+                    tourName: tour.tourName,
+                    startDate: tour.startDate,
+                    _id: list[i]._id
+                }
+                show.push(detail)
+            } else {
+                var detail = {
+                    price: list[i].price,
+                    bookedDate: list[i].bookedDate,
+                    tourName: tourCustom.tourName,
+                    startDate: tourCustom.startDate,
+                    _id: list[i]._id
+                }
+                show.push(detail)
             }
-            show.push(detail)
         }
-
         return res.status(200).send({
             errorCode: 0,
             data: show
@@ -255,33 +262,52 @@ exports.detailBillTour = (req, res, next) => {
             message: err
         })
         var tour = await Tour.findById(billTour.tourID)
-        if (!tour) return res.status(500).send({
-            errorCode: 500,
-            message: 'Bill tour is error'
-        })
+        var tourCustom = await TourCustom.findById(billTour.tourCustomID)
         const moderator = await Moderator.findById(tour.moderatorID)
-        var detail = {
-            bookedDate: billTour.bookedDate,
-            tourName: tour.tourName,
-            startDate: tour.startDate,
-            price: tour.price,
-            picture: tour.picture,
-            time: tour.time,
-            address: tour.address,
-            startingPoint: tour.startingPoint,
-            description: {
-                content: tour.description.content,
-                vehicle: tour.description.vehicle,
-                timeDecription: tour.description.timeDecription
-            },
-            rate: {
-                numberOfStar: tour.rate.numberOfStar,
-                numberOfRate: tour.rate.numberOfRate
-            },
-            hotel: tour.hotel,
-            moderatorName: moderator.modName,
-            moderatorEmail: moderator.email,
-            moderatorPhone: moderator.phone
+        if (tour) {
+            var detail = {
+                bookedDate: billTour.bookedDate,
+                tourName: tour.tourName,
+                startDate: tour.startDate,
+                price: tour.price,
+                picture: tour.picture,
+                time: tour.time,
+                address: tour.address,
+                startingPoint: tour.startingPoint,
+                description: {
+                    content: tour.description.content,
+                    vehicle: tour.description.vehicle,
+                    timeDecription: tour.description.timeDecription
+                },
+                rate: {
+                    numberOfStar: tour.rate.numberOfStar,
+                    numberOfRate: tour.rate.numberOfRate
+                },
+                hotel: tour.hotel,
+                moderatorName: moderator.modName,
+                moderatorEmail: moderator.email,
+                moderatorPhone: moderator.phone
+            }
+        } else {
+            var detail = {
+                bookedDate: billTour.bookedDate,
+                tourName: tourCustom.tourName,
+                startDate: tourCustom.startDate,
+                price: tourCustom.price,
+                picture: tourCustom.picture,
+                time: tourCustom.time,
+                address: tourCustom.address,
+                startingPoint: tourCustom.startingPoint,
+                description: {
+                    content: tourCustom.description.content,
+                    vehicle: tourCustom.description.vehicle,
+                    timeDecription: tourCustom.description.timeDecription
+                },
+                hotel: tourCustom.hotel,
+                moderatorName: moderator.modName,
+                moderatorEmail: moderator.email,
+                moderatorPhone: moderator.phone
+            }
         }
 
         return res.status(200).send({
@@ -431,8 +457,8 @@ exports.listOrganization = (req, res) => {
 }
 
 exports.sendTourDraft = async (req, res) => {
-    const check = await TourDraftStatus.findOne({userID: req.accountID})
-    if(check){
+    const check = await TourDraftStatus.findOne({ userID: req.accountID })
+    if (check) {
         return res.status(400).send({
             errorCode: 400,
             message: 'Time to send the next custom versions is 2 days!'
@@ -723,14 +749,14 @@ exports.filterTour = async (req, res) => {
             message: 'Category server is error!'
         })
 
-        const list = await Tour.find({ categoryTourID: category._id})
+        const list = await Tour.find({ categoryTourID: category._id })
         if (!list) return res.status(500).send({
             errorCode: 500,
             message: 'Tour server is error!'
         })
         var show = []
         list.forEach(e => {
-            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+            if (e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)) {
                 var tour = {
                     tourName: e.tourName,
                     picture: e.picture,
@@ -759,7 +785,7 @@ exports.filterTour = async (req, res) => {
             message: 'Category server is error!'
         })
 
-        const list = await Tour.find({ categoryTourID: category._id})
+        const list = await Tour.find({ categoryTourID: category._id })
         if (!list) return res.status(500).send({
             errorCode: 500,
             message: 'Tour server is error!'
@@ -775,7 +801,7 @@ exports.filterTour = async (req, res) => {
         }
         var show = []
         list.forEach(e => {
-            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+            if (e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)) {
                 var tour = {
                     tourName: e.tourName,
                     picture: e.picture,
@@ -802,10 +828,10 @@ exports.filterTour = async (req, res) => {
             errorCode: 500,
             message: 'Tour server is error!'
         })
-        
+
         var show = []
         list.forEach(e => {
-            if( e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+            if (e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)) {
                 var tour = {
                     tourName: e.tourName,
                     picture: e.picture,
@@ -843,7 +869,7 @@ exports.filterTour = async (req, res) => {
         }
         var show = []
         list.forEach(e => {
-            if(e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)){
+            if (e.rate.numberOfStar >= star && e.rate.numberOfStar < (parseInt(star) + 1)) {
                 var tour = {
                     tourName: e.tourName,
                     picture: e.picture,
@@ -881,19 +907,19 @@ exports.filterTour = async (req, res) => {
         }
         var show = []
         list.forEach(e => {
-                var tour = {
-                    tourName: e.tourName,
-                    picture: e.picture,
-                    startDate: e.startDate,
-                    time: e.time,
-                    price: e.price,
-                    address: e.address,
-                    startingPoint: e.startingPoint,
-                    numberOfRate: e.rate.numberOfRate,
-                    numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
-                    slug: e.slug
-                }
-                show.push(tour)
+            var tour = {
+                tourName: e.tourName,
+                picture: e.picture,
+                startDate: e.startDate,
+                time: e.time,
+                price: e.price,
+                address: e.address,
+                startingPoint: e.startingPoint,
+                numberOfRate: e.rate.numberOfRate,
+                numberOfStar: e.rate.numberOfStar, //if === 0 => no rating
+                slug: e.slug
+            }
+            show.push(tour)
         })
 
         return res.status(200).send({

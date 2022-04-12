@@ -20,14 +20,14 @@ router.patch('/update-forgotten-password/:accountID/:token', confirmLink)
 
 //route manage user account
 router.get('/list-user-account', [verifyToken, isAdmin], listUserAccount)
-router.get('/detail-user-account/:userID',[verifyToken, isAdmin], detailUserAccount) 
+//router.get('/detail-user-account/:userID',[verifyToken, isAdmin], detailUserAccount) 
 router.patch('/delete-user-account/:userID',[verifyToken, isAdmin], deleteUserAccount)
 router.get('/trash-user-account',[verifyToken, isAdmin], trashUserAccount)
 router.patch('/restore-user-account/:userID',[verifyToken, isAdmin], restoreUserAccount)
 
 //route manage moderator account
 router.get('/list-moderator-account', [verifyToken, isAdmin], listModAccount)
-router.get('/detail-moderator-account/:moderatorID',[verifyToken, isAdmin], detailModAccount) 
+//router.get('/detail-moderator-account/:moderatorID',[verifyToken, isAdmin], detailModAccount) 
 router.patch('/delete-moderator-account/:moderatorID',[verifyToken, isAdmin], deleteModAccount)
 router.get('/trash-moderator-account',[verifyToken, isAdmin], trashModAccount)
 router.patch('/restore-moderator-account/:moderatorID',[verifyToken, isAdmin], restoreModAccount )

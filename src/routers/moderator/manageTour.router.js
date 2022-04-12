@@ -1,5 +1,5 @@
 const express = require('express')
-const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour } = require('../../controllers/moderator/tour.controller')
+const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBillTour, searchTour, filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour, viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour, schedule } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../middlewares/uploadFile.middleware')
 const router = express.Router()
@@ -10,10 +10,10 @@ router.patch('/update-tour/:slug', [verifyToken, isModerator], updateTour)
 //router.patch('/delete-tour/:slug', [verifyToken, isModerator], deleteTour)
 router.get('/list-tour', [verifyToken, isModerator], listTour)
 router.get('/detail-tour/:slug', [verifyToken, isModerator], detailTour)
+router.get('/schedule', [verifyToken,isModerator], schedule) // thieu lich bat dau cho custom tour va fix startdate
 
 //bill tour
-router.get('/list-bill-tour', [verifyToken, isModerator],listBillTour) //chưa có bill để test
-//router.patch('/delete-bill-tour/:billTourID', [verifyToken, isModerator], deleteBillTour) // chưa test, xóa mềm
+router.get('/list-bill-tour', [verifyToken, isModerator],listBillTour)
 
 //search tour, filter price
 router.get('/search', [verifyToken,isModerator], searchTour)

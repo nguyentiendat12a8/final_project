@@ -13,8 +13,7 @@ router.get('/list-hotel-room', [verifyToken, isModerator], listHotelRoom)
 router.get('/detail-hotel-room/:slug', [verifyToken, isModerator], detailHotelRoom)
 
 //bill hotel-room
- router.get('/list-bill-hotel-room', [verifyToken, isModerator],listBillHotelRoom) //chưa có bill để test
-// router.patch('/delete-bill-hotel-room/:billhotel-roomID', [verifyToken, isModerator], deleteBillHotelRoom) // chưa test, xóa mềm
+ router.get('/list-bill-hotel-room', [verifyToken, isModerator],listBillHotelRoom) 
 
 // //search hotel-room, filter price
 router.get('/search', [verifyToken,isModerator], searchHotelRoom)

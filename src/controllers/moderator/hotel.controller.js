@@ -55,7 +55,7 @@ exports.addHotelRoom = (req, res) => {
 }
 
 exports.editHotelRoom = (req, res) => {
-    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID}, async (err, room) => {
+    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID }, async (err, room) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -94,7 +94,7 @@ exports.editHotelRoom = (req, res) => {
 }
 
 exports.updateHotelRoom = (req, res) => {
-    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID}, {
+    HotelRoom.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, {
         bedroom: {
             singleBed: req.body.singleBed,
             doubleBed: req.body.doubleBed,
@@ -124,16 +124,16 @@ exports.updateHotelRoom = (req, res) => {
     })
 }
 
-exports.listHotelRoom =  (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID}, async (err, list) => {
+exports.listHotelRoom = (req, res) => {
+    HotelRoom.find({ moderatorID: req.accountID }, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
         })
         var listDetail = []
         async function getDetail(e) {
-            var ads = await RoomAds.findOne({hotelRoomID: e._id})
-            if(ads) {
+            var ads = await RoomAds.findOne({ hotelRoomID: e._id })
+            if (ads) {
                 var detail = {
                     roomName: e.roomName,
                     price: e.price,
@@ -159,8 +159,8 @@ exports.listHotelRoom =  (req, res) => {
                 return listDetail.push(detail)
             }
         }
-        
-        await Promise.all(list.map(e=> getDetail(e)))
+
+        await Promise.all(list.map(e => getDetail(e)))
         return res.status(200).send({
             errorCode: 0,
             data: listDetail,
@@ -169,7 +169,7 @@ exports.listHotelRoom =  (req, res) => {
 }
 
 exports.detailHotelRoom = (req, res) => {
-    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID}, (err, post) => {
+    HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -183,35 +183,31 @@ exports.detailHotelRoom = (req, res) => {
 
 exports.listBillHotelRoom = (req, res) => {
     try {
-        HotelRoom.find({ moderatorID: req.accountID }, (err, listHotelRoom) => {
+        HotelRoom.find({ moderatorID: req.accountID }, async (err, listHotelRoom) => {
             if (err) return res.status(500).send({
                 errorCode: 500,
                 message: err
             })
-            let listBill = []
-            let listDetail = []
-            listHotelRoom.forEach(async e => {
-                BillHotelRoom.find({ hotelRoomID: e._id }, (err, bill) => {
-                    if (err) return res.status(500).send({
-                        errorCode: 500,
-                        message: err
-                    })
-
-                    listBill.push(bill)
-                })
-            })
-            listBill.forEach(async e => {
-                var user = await User.findById(e.userID)
-                var room = await HotelRoom.findById(e.hotelRoomID)
-                var detail = {
-                    checkIn: e.checkIn,
-                    checkOut: checkOut,
-                    bookedDate: e.createdAt,
-                    HotelRoomName: room.roomName,
-                    userID: user.userName
+            var listDetail = []
+            async function getBill(e) {
+                var bill = await BillHotelRoom.find({ hotelRoomID: e._id })
+                if (bill) {
+                    for (i = 0; i < bill.length; i++) {
+                        var user = await User.findById(bill[i].userID)
+                        var room = await HotelRoom.findById(bill[i].hotelRoomID)
+                        var detail = {
+                            price: bill[i].price,
+                            checkIn: bill[i].checkIn,
+                            checkOut: bill[i].checkOut,
+                            bookedDate: bill[i].createdAt,
+                            hotelRoomName: room.roomName,
+                            userID: user.userName
+                        }
+                        listDetail.push(detail)
+                    }
                 }
-                listDetail.push(detail)
-            })
+            }
+            await Promise.all(listHotelRoom.map(e => getBill(e)))
             return res.status(200).send({
                 errorCode: 0,
                 data: listDetail
@@ -229,7 +225,7 @@ exports.listBillHotelRoom = (req, res) => {
 //search, filter
 
 exports.searchHotelRoom = async (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
+    HotelRoom.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -256,7 +252,7 @@ exports.searchHotelRoom = async (req, res) => {
 }
 
 exports.filterHotelRoom = async (req, res) => {
-    HotelRoom.find({ moderatorID: req.accountID}, (err, list) => {
+    HotelRoom.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
             message: err
@@ -303,7 +299,7 @@ exports.filterHotelRoom = async (req, res) => {
 
 
 //ads 
-exports.paymentAdsHotelRoom = async (req,res) =>{
+exports.paymentAdsHotelRoom = async (req, res) => {
     const ads = await Ads.findOne({})
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) // '622dbfb2fcdc11b7a3fcd5af'
     if (paypalInfo === null) {
@@ -367,9 +363,9 @@ exports.paymentAdsHotelRoom = async (req,res) =>{
     });
 }
 
-exports.successAdsHotelRoom = async (req,res) =>{
+exports.successAdsHotelRoom = async (req, res) => {
     const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID:  req.accountID}) //'622dbfb2fcdc11b7a3fcd5af'
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -419,7 +415,7 @@ exports.successAdsHotelRoom = async (req,res) =>{
     });
 }
 
-exports.cancelAdsHotelRoom = (req,res) =>{
+exports.cancelAdsHotelRoom = (req, res) => {
     return res.status(200).send({
         errorCode: 0,
         message: 'Cancel payment ads hotel successfully!'

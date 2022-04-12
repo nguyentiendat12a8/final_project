@@ -140,8 +140,8 @@ exports.listTour = (req, res, next) => {
         var show = []
 
         async function getDetail(detail) {
-            var ads = await TourAds.findOne({tourID: detail._id})
-            if(!ads) {
+            var ads = await TourAds.findOne({ tourID: detail._id })
+            if (!ads) {
                 var tour = {
                     tourName: detail.tourName,
                     picture: detail.picture,
@@ -229,6 +229,54 @@ exports.detailTour = async (req, res) => {
     })
 }
 
+exports.schedule = (req, res) => {
+    Tour.find({ moderatorID: req.accountID }, async (err, list) => {
+        if (err) return res.status(500).send({
+            errorCode: 500,
+            message: err.message
+        })
+        var listStart = []
+        var date = new Date()
+        list.forEach(e => {
+            if (parseInt(e.startDate) === parseInt(date.getDate())) {
+                listStart.push(e)
+            }
+        })
+
+        var listBillStart = []
+        async function getTourFromBill(e) {
+            var check = await BillTour.find({ tourID: e._id })
+            
+            if (check) {
+                for(i = 0; i < check.length; i ++) {
+                 listBillStart.push(check[i])
+                }
+                
+            }
+            return listBillStart
+        }
+        await Promise.all(listStart.map(e => getTourFromBill(e)))
+        var show = []
+        async function getTourAndUserInfo(i) {
+            var tour = await Tour.findById(i.tourID)
+            var user = await User.findById(i.userID)
+            var detail = {
+                tourName: tour.tourName,
+                startDate: tour.startDate,
+                address: tour.address,
+                startingPoint: tour.startingPoint,
+                userName: user.userName,
+                phone: user.phone
+            }
+            return show.push(detail)
+        }
+        await Promise.all(listBillStart.map(i => getTourAndUserInfo(i)))
+        return res.status(200).send({
+            errorCode: 0,
+            data: show
+        })
+    })
+}
 //search, filter
 exports.searchTour = async (req, res) => {
     Tour.find({ moderatorID: req.accountID }, (err, list) => {
@@ -319,36 +367,68 @@ exports.filterTour = async (req, res) => {
 
 exports.listBillTour = async (req, res, next) => {
     try {
-        Tour.find({ moderatorID: req.accountID }, (err, listTour) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            let listBill = []
-            let listDetail = []
-            listTour.forEach(async e => {
-                BillTour.find({ tourID: e._id }, (err, bill) => {
-                    if (err) return res.status(500).send({
-                        errorCode: 500,
-                        message: err
-                    })
-                    listBill.push(bill)
-                })
-            })
-            listBill.forEach(async e => {
-                var user = await User.findById(e.userID)
-                var tour = await Tour.findById(e.tourID)
-                var detail = {
-                    bookedDate: e.bookedDate,
-                    tourName: tour.tourName,
-                    userID: user.userName,
+        const listTour = await Tour.find({ moderatorID: req.accountID })
+        const listTourCustom = await TourCustom.find({ moderatorID: req.accountID })
+        var listDetail = []
+        var listCustomDetail = []
+        async function getBill(e) {
+            var bill = await BillTour.find({ tourID: e._id })
+            if (bill) {
+                for (i = 0; i < bill.length; i++) {
+                    var user = await User.findById(bill[i].userID)
+                    var tour = await Tour.findById(bill[i].tourID)
+                    var detail = {
+                        price: bill[i].price,
+                        bookedDate: bill[i].bookedDate,
+                        tourName: tour.tourName,
+                        startDate: tour.startDate,
+                        userID: user.userName,
+                        _id: bill[i]._id
+                    }
+                    listDetail.push(detail)
                 }
-                listDetail.push(detail)
-            })
-            return res.status(200).send({
-                errorCode: 0,
-                data: listDetail
-            })
+            }
+            return listDetail
+        }
+        async function getCustomBill(t) {
+            var bill = await BillTour.find({ tourCustomID: t._id })
+            if (bill) {
+                if (bill.length === 1) {
+                    var user = await User.findById(bill[0].userID)
+                    var tourCustom = await TourCustom.findById(bill[0].tourCustomID)
+                    var detail = {
+                        price: bill[0].price,
+                        bookedDate: bill[0].bookedDate,
+                        tourName: tourCustom.tourName,
+                        startDate: tourCustom.startDate,
+                        userID: user.userName,
+                        _id: bill[0]._id
+                    }
+                } else {
+                    for (i = 0; i < bill.length; i++) {
+                        var user = await User.findById(bill[i].userID)
+                        var tourCustom = await TourCustom.findById(bill[i].tourCustomID)
+                        var detail = {
+                            price: bill[i].price,
+                            bookedDate: bill[i].bookedDate,
+                            tourName: tourCustom.tourName,
+                            startDate: tourCustom.startDate,
+                            userID: user.userName,
+                            _id: bill[i]._id
+                        }
+                        listCustomDetail.push(detail)
+                    }
+                }
+            }
+            return listCustomDetail.push(detail)
+        }
+        await Promise.all(listTour.map(e => getBill(e)), listTourCustom.map(t => getCustomBill(t)))
+        return res.status(200).send({
+            errorCode: 0,
+            data: {
+                listDetail,
+                listCustomDetail,
+            }
         })
     }
     catch (err) {
@@ -391,11 +471,11 @@ exports.addTourCustom = async (req, res) => {
             tourDraftID: req.params.tourDraftID
         })
         tour.save()
-            .then( async () => {
+            .then(async () => {
                 const tourDraft = await TourDraft.findById(req.params.tourDraftID)
                 const user = await User.findById(tourDraft.userID)
                 const link = `${process.env.BASE_URL}`
-                await sendEmail(user.email,'Your custom tour was created by moderator!', link )
+                await sendEmail(user.email, 'Your custom tour was created by moderator!', link)
                 return res.status(200).send({
                     errorCode: 0,
                     message: 'upload successfully!'
@@ -535,9 +615,9 @@ exports.viewDetailCustomTour = (req, res) => {
 
 
 //ads
-exports.paymentAdsTour = async (req,res) =>{
+exports.paymentAdsTour = async (req, res) => {
     const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID}) //'622dbfb2fcdc11b7a3fcd5af'  
+    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'  
     if (paypalInfo === null) {
         return res.status(400).send({
             errorCode: 400,
@@ -599,7 +679,7 @@ exports.paymentAdsTour = async (req,res) =>{
     });
 }
 
-exports.successAdsTour = async (req,res) =>{
+exports.successAdsTour = async (req, res) => {
     const ads = await Ads.findOne({})
     const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
     if (paypalInfo === null) {
@@ -651,7 +731,7 @@ exports.successAdsTour = async (req,res) =>{
     });
 }
 
-exports.cancelAdsTour = (req,res) =>{
+exports.cancelAdsTour = (req, res) => {
     return res.status(200).send({
         errorCode: 0,
         message: 'Cancel payment ads tour successfully!'
