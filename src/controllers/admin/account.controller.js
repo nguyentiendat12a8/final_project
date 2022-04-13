@@ -224,6 +224,7 @@ exports.listUserAccount = async (req, res) => {
     var show = []
     list.forEach(e => {
       var detail = {
+        _id: e._id,
         username: e.username,
         userName: e.userName,
         email: e.email,
@@ -284,6 +285,7 @@ exports.trashUserAccount = async (req, res) => {
     var show = []
     list.forEach(e => {
       var detail = {
+        _id: e._id,
         username: e.username,
         userName: e.userName,
         email: e.email,
@@ -328,6 +330,7 @@ exports.listModAccount = async (req, res) => {
     var show = []
     list.forEach(e => {
       var detail = {
+        _id: e._id,
         username: e.username,
         modName: e.modName,
         email: e.email,
@@ -386,6 +389,7 @@ exports.trashModAccount = async (req, res) => {
     var show = []
     list.forEach(e => {
       var detail = {
+        _id: e._id,
         username: e.username,
         modName: e.modName,
         email: e.email,
