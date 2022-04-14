@@ -8,57 +8,67 @@ const PaypalInfo = db.paypalInfo
 const paypal = require('paypal-rest-sdk')
 
 exports.addHotelRoom = (req, res) => {
-    if (req.files) {
-        let path = ''
-        req.files.forEach((files, index, arr) => {
-            path = path + files.path + ','
-        });
-        path = path.substring(0, path.lastIndexOf(','))
-        req.body.photo = path
-    } else {
-        req.body.photo = ''
-    }
-    const room = new HotelRoom({
-        roomName: req.body.roomName,
-        price: req.body.price,
-        bedroom: {
-            singleBed: req.body.singleBed,
-            doubleBed: req.body.doubleBed,
-            queenSizeBed: req.body.queenSizeBed,
-            kingSizeBed: req.body.kingSizeBed,
-        },
-        utilities: {
-            parking: req.body.parking,
-            wifi: req.body.wifi,
-            pool: req.body.pool,
-            smoking: req.body.smoking,
-            TV: req.body.TV,
-            kitchen: req.body.kitchen,
-            bathtub: req.body.bathtub,
-        },
-        photo: req.body.photo,
-        acreage: req.body.acreage,
-        description: req.body.description,
-        address: req.body.address,
-        moderatorID: req.accountID
-    })
-    room.save(err => {
-        if (err) return res.status(500).send({
+    try {
+        if (req.files) {
+            let path = ''
+            req.files.forEach((files, index, arr) => {
+                path = path + files.path + ','
+            });
+            path = path.substring(0, path.lastIndexOf(','))
+            req.body.photo = path
+        } else {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Picture must be add in here!'
+            })
+        }
+        const room = new HotelRoom({
+            roomName: req.body.roomName,
+            price: req.body.price,
+            bedroom: {
+                singleBed: req.body.singleBed,
+                doubleBed: req.body.doubleBed,
+                queenSizeBed: req.body.queenSizeBed,
+                kingSizeBed: req.body.kingSizeBed,
+            },
+            utilities: {
+                parking: req.body.parking,
+                wifi: req.body.wifi,
+                pool: req.body.pool,
+                smoking: req.body.smoking,
+                TV: req.body.TV,
+                kitchen: req.body.kitchen,
+                bathtub: req.body.bathtub,
+            },
+            photo: req.body.photo,
+            acreage: req.body.acreage,
+            description: req.body.description,
+            address: req.body.address,
+            moderatorID: req.accountID
+        })
+        room.save(err => {
+            if (err) return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
+            return res.status(200).send({
+                errorCode: 0,
+                message: 'Add hotel room successfully!'
+            })
+        })
+    } catch (error) {
+        return res.status(500).json({
             errorCode: 500,
-            message: err
+            message: 'Add hotel function is error!',
         })
-        return res.status(200).send({
-            errorCode: 0,
-            message: 'Add hotel room successfully!'
-        })
-    })
+    }
 }
 
 exports.editHotelRoom = (req, res) => {
     HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID }, async (err, room) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Hotel server is error!'
         })
         if (room == null) {
             return res.status(400).send({
@@ -115,7 +125,7 @@ exports.updateHotelRoom = (req, res) => {
     }, { new: true }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -128,7 +138,7 @@ exports.listHotelRoom = (req, res) => {
     HotelRoom.find({ moderatorID: req.accountID }, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var listDetail = []
         async function getDetail(e) {
@@ -139,7 +149,7 @@ exports.listHotelRoom = (req, res) => {
                     price: e.price,
                     photo: e.photo,
                     private: e.private,
-                    timeEnd: new Date (ads.timeEnd.setDate(ads.timeEnd.getDate() + 7)),
+                    timeEnd: new Date(ads.timeEnd.setDate(ads.timeEnd.getDate() + 7)),
                     //acreage: e.acreage,
                     //address: e.address,
                     slug: e.slug
@@ -172,7 +182,7 @@ exports.detailHotelRoom = (req, res) => {
     HotelRoom.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Hotel server is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -186,7 +196,7 @@ exports.listBillHotelRoom = (req, res) => {
         HotelRoom.find({ moderatorID: req.accountID }, async (err, listHotelRoom) => {
             if (err) return res.status(500).send({
                 errorCode: 500,
-                message: err
+                message: err.message
             })
             var listDetail = []
             async function getBill(e) {
@@ -217,7 +227,7 @@ exports.listBillHotelRoom = (req, res) => {
     catch (err) {
         return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Bill hotel server is error!'
         })
     }
 }
@@ -228,7 +238,7 @@ exports.searchHotelRoom = async (req, res) => {
     HotelRoom.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var search = req.query.address
         var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))
@@ -255,7 +265,7 @@ exports.filterHotelRoom = async (req, res) => {
     HotelRoom.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         if (req.query.filter === 'ASC') {
             var dataSort = list.sort((a, b) => a.price - b.price)
@@ -300,119 +310,134 @@ exports.filterHotelRoom = async (req, res) => {
 
 //ads 
 exports.paymentAdsHotelRoom = async (req, res) => {
-    const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) // '622dbfb2fcdc11b7a3fcd5af'
-    if (paypalInfo === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'The manager of the tour you booked does not have an online payment method'
+    try {
+        const ads = await Ads.findOne({})
+        const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) // '622dbfb2fcdc11b7a3fcd5af'
+        if (paypalInfo === null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'The manager of the tour you booked does not have an online payment method'
+            })
+        }
+
+        paypal.configure({
+            'mode': 'sandbox', //sandbox or live
+            'client_id': paypalInfo.clientID,
+            'client_secret': paypalInfo.secret
+        });
+        const create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": `http://localhost:4000/moderator/hotel/success-ads-hotel-room/${req.query.hotelRoomID}`,//
+                "cancel_url": "http://localhost:4000/moderator/hotel/cancel-ads-hotel-room"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": `Payment ads`,
+                        //"sku": "001",
+                        "price": `${ads.price}`,
+                        "currency": "USD",
+                        "quantity": 1
+                    }]
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": `${ads.price}`
+                },
+                "description": "Ads payment"
+            }]
+        };
+
+
+        paypal.payment.create(create_payment_json, function (error, payment) {
+            if (error) {
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: error.response
+                })
+            } else {
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        //res.redirect(payment.links[i].href);
+                        return res.status(200).send({
+                            errorCode: 0,
+                            data: payment.links[i].href
+                        })
+                    }
+                }
+
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            errorCode: 500,
+            message: 'Payment function is error!',
         })
     }
 
-    paypal.configure({
-        'mode': 'sandbox', //sandbox or live
-        'client_id': paypalInfo.clientID,
-        'client_secret': paypalInfo.secret
-    });
-    const create_payment_json = {
-        "intent": "sale",
-        "payer": {
-            "payment_method": "paypal"
-        },
-        "redirect_urls": {
-            "return_url": `http://localhost:4000/moderator/hotel/success-ads-hotel-room/${req.query.hotelRoomID}`,//
-            "cancel_url": "http://localhost:4000/moderator/hotel/cancel-ads-hotel-room"
-        },
-        "transactions": [{
-            "item_list": {
-                "items": [{
-                    "name": `Payment ads`,
-                    //"sku": "001",
-                    "price": `${ads.price}`,
-                    "currency": "USD",
-                    "quantity": 1
-                }]
-            },
-            "amount": {
-                "currency": "USD",
-                "total": `${ads.price}`
-            },
-            "description": "Ads payment"
-        }]
-    };
-
-
-    paypal.payment.create(create_payment_json, function (error, payment) {
-        if (error) {
-            return res.status(500).send({
-                errorCode: 500,
-                message: error
-            })
-        } else {
-            for (let i = 0; i < payment.links.length; i++) {
-                if (payment.links[i].rel === 'approval_url') {
-                    //res.redirect(payment.links[i].href);
-                    return res.status(200).send({
-                        errorCode: 0,
-                        data: payment.links[i].href
-                    })
-                }
-            }
-
-        }
-    });
 }
 
 exports.successAdsHotelRoom = async (req, res) => {
-    const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
-    if (paypalInfo === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'The manager of the tour you booked does not have an online payment method'
+    try {
+        const ads = await Ads.findOne({})
+        const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
+        if (paypalInfo === null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'The manager of the tour you booked does not have an online payment method'
+            })
+        }
+
+        paypal.configure({
+            'mode': 'sandbox', //sandbox or live
+            'client_id': paypalInfo.clientID,
+            'client_secret': paypalInfo.secret
+        });
+
+        const payerId = req.query.PayerID;
+        const paymentId = req.query.paymentId;
+
+        const execute_payment_json = {
+            "payer_id": payerId,
+            "transactions": [{
+                "amount": {
+                    "currency": "USD",
+                    "total": `${ads.price}`
+                }
+            }]
+        };
+        paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+            if (error) {
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: error.response
+                })
+            } else {
+                const roomAds = new RoomAds({
+                    hotelRoomID: req.params.hotelRoomID
+                })
+                roomAds.save()
+                    .then(() => {
+                        return res.status(200).send({
+                            errorCode: 0,
+                            message: 'save booked ads hotel successfully'
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            }
+        })
+    } catch (error) {
+        return res.status(500).json({
+            errorCode: 500,
+            message: 'Payment function is error!',
         })
     }
-
-    paypal.configure({
-        'mode': 'sandbox', //sandbox or live
-        'client_id': paypalInfo.clientID,
-        'client_secret': paypalInfo.secret
-    });
-
-    const payerId = req.query.PayerID;
-    const paymentId = req.query.paymentId;
-
-    const execute_payment_json = {
-        "payer_id": payerId,
-        "transactions": [{
-            "amount": {
-                "currency": "USD",
-                "total": `${ads.price}`
-            }
-        }]
-    };
-    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
-        if (error) {
-            return res.status(500).send({
-                errorCode: 500,
-                message: error.response
-            })
-        } else {
-            const roomAds = new RoomAds({
-                hotelRoomID: req.params.hotelRoomID
-            })
-            roomAds.save()
-                .then(() => {
-                    return res.status(200).send({
-                        errorCode: 0,
-                        message: 'save booked ads hotel successfully'
-                    })
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-        }
-    });
 }
 
 exports.cancelAdsHotelRoom = (req, res) => {

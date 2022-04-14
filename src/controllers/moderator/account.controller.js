@@ -11,23 +11,37 @@ const Moderator = db.moderator
 const PaypalInfo = db.paypalInfo
 
 exports.signup = async (req, res) => {
-  const user = new Moderator({
-    username: req.body.username,
-    password: bcrypt.hashSync(req.body.password, 8),
-    modName: req.body.modName,
-    email: req.body.email,
-    phone: req.body.phone,
-    //avatar: req.file.path,
-    organizationName: req.body.organizationName,
-    tourCustomStatus: req.body.tourCustomStatus,
-    //dueDate: 
-
-  })
+  var user
+  if(!req.file) {
+    const user = new Moderator({
+      username: req.body.username,
+      password: bcrypt.hashSync(req.body.password, 8),
+      modName: req.body.modName,
+      email: req.body.email,
+      phone: req.body.phone,
+      //avatar: req.file.path,
+      organizationName: req.body.organizationName,
+      tourCustomStatus: req.body.tourCustomStatus,
+      //dueDate: 
+    })
+  } else {
+    const user = new Moderator({
+      username: req.body.username,
+      password: bcrypt.hashSync(req.body.password, 8),
+      modName: req.body.modName,
+      email: req.body.email,
+      phone: req.body.phone,
+      avatar: req.file.path,
+      organizationName: req.body.organizationName,
+      tourCustomStatus: req.body.tourCustomStatus,
+      //dueDate: 
+    })
+  }
   user.save((err, user) => {
     if (err) {
       return res.status(500).send({
         errorCode: 500,
-        message: err
+        message: 'Sign up function is error!'
       })
     }
     return res.send({
@@ -85,7 +99,10 @@ exports.signin = async (req, res, next) => {
       })
     }
   } catch (err) {
-    return console.log(err)
+    return res.status(500).json({
+      errorCode: 500,
+      message: 'Sign in function is error!',
+    })
   }
 }
 
@@ -110,7 +127,10 @@ exports.updatePassword = async (req, res, next) => {
       })
     }
   } catch (error) {
-    console.log(error)
+    return res.status(500).json({
+      errorCode: 500,
+      message: 'Update password function is error!',
+    })
   }
 }
 
@@ -132,8 +152,8 @@ exports.editAccount = async (req, res, next) => {
   })
     .catch(err => {
       return res.status(500).send({
-        errorCode: '500',
-        message: err
+        errorCode: 500,
+        message: 'Edit account function is error!'
       })
     })
 }
@@ -159,7 +179,10 @@ exports.updateAccount = async (req, res, next) => {
       { new: true })
     return res.status(200).send({ message: 'Change info successfully!' })
   } catch (error) {
-    console.log(error)
+    return res.status(500).json({
+      errorCode: 500,
+      message: 'Update account function is error!',
+    })
   }
 }
 
@@ -187,10 +210,15 @@ exports.sendEmailResetPass = async (req, res) => {
     const link = `${process.env.BASE_URL}/moderator/account/update-forgotten-password/${user._id}/${token.token}`
     await sendEmail(user.email, "Password reset", link);
 
-    res.send("password reset link sent to your email account")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset link sent to your email account"
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error)
+    return res.status(500).json({
+      errorCode: 500,
+      message: 'Forgot password function is error!',
+    })
   }
 }
 
@@ -216,10 +244,15 @@ exports.confirmLink = async (req, res) => {
     user.password = bcrypt.hashSync(req.body.password, 8)
     await user.save()
     await token.delete()
-    res.send("password reset sucessfully.")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset sucessfully."
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error);
+    return res.status(500).json({
+      errorCode: 500,
+      message: 'Change password function is error!',
+    })
   }
 }
 
@@ -227,8 +260,8 @@ exports.confirmLink = async (req, res) => {
 
 // payment method
 exports.configPaypal = async (req, res) => {
-  const check = await PaypalInfo.findOne({moderatorID: req.accountID})
-  if(check) return res.status(400).send({
+  const check = await PaypalInfo.findOne({ moderatorID: req.accountID })
+  if (check) return res.status(400).send({
     errorCode: 400,
     message: 'Only 1 payment account per person!'
   })
@@ -240,7 +273,7 @@ exports.configPaypal = async (req, res) => {
   await paypalInfo.save(err => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Save paypal function is error!'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -253,15 +286,15 @@ exports.viewPaypal = async (req, res) => {
   PaypalInfo.findOne({ moderatorID: req.accountID }, (err, paypal) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Paypal server is error!'
     })
-    if(!paypal) return res.status(200).send({
+    if (!paypal) return res.status(200).send({
       errorCode: 0,
       message: 'The account does not have paypal payment information!'
     })
     var show = {
       clientID: paypal.clientID,
-      secret:paypal.secret
+      secret: paypal.secret
     }
     return res.status(200).send({
       errorCode: 0,
@@ -274,15 +307,15 @@ exports.editPaypal = async (req, res) => {
   PaypalInfo.findOne({ moderatorID: req.accountID }, (err, paypal) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Edit paypal function is error!'
     })
-    if(!paypal) return res.status(400).send({
+    if (!paypal) return res.status(400).send({
       errorCode: 400,
       message: 'The account does not have paypal payment information!'
     })
     var show = {
       clientID: paypal.clientID,
-      secret:paypal.secret
+      secret: paypal.secret
     }
     return res.status(200).send({
       errorCode: 0,
@@ -295,10 +328,10 @@ exports.updatePaypal = async (req, res) => {
   PaypalInfo.findOneAndUpdate({ moderatorID: req.accountID }, {
     clientID: req.body.clientID,
     secret: req.body.secret
-  }, {new: true}, (err) => {
+  }, { new: true }, (err) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,

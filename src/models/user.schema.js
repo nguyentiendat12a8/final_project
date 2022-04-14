@@ -10,7 +10,7 @@ exports.User = mongoose.model(
         phone: {type: String, required: true},
         avatar: {type: String},
         deleted: {type: Boolean, default: false},
-        slug: {type: String, slug: 'userName', unique: true },
+        //slug: {type: String, slug: 'userName', unique: true },
         //createdAt: { type: String, default: new Date() },
 
     },

@@ -3,7 +3,7 @@ const { addTour, editTour, updateTour, deleteTour, listTour, detailTour, listBil
      filterTour, addTourCustom, viewAndAddTourCustom, viewListTourCustomToUser, viewListCustomTour,
       viewDetailCustomTour, paymentAdsTour, successAdsTour, cancelAdsTour, schedule } = require('../../controllers/moderator/tour.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
-const { upload } = require('../../middlewares/uploadFile.middleware')
+const { upload } = require('../../util/uploadFile.middleware')
 const router = express.Router()
 
 router.post('/add-tour', [verifyToken, isModerator, upload.array('picture')], addTour)

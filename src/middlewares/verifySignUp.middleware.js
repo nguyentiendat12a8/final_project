@@ -10,24 +10,31 @@ exports.checkDuplicateUser = (req, res, next) => {
         username: req.body.username
     }).exec((err, user) => {
         if (err) {
-            res.status(500).send({ message: err })
-            return
+            return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
         }
-
         if (user) {
-            res.status(400).send({ message: 'Failed! username is already in use' })
-            return
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Failed! username is already in use'
+            })
         }
         User.findOne({
             email: req.body.email
         }).exec((err, user) => {
             if (err) {
-                res.status(500).send({ message: err })
-                return
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
             }
             if (user) {
-                res.status(400).send({ message: 'failed! email is already in use' })
-                return
+                return res.status(400).send({
+                    errorCode: 400,
+                    message: 'failed! email is already in use'
+                })
             }
             next()
         })
@@ -39,24 +46,31 @@ exports.checkDuplicateAdmin = (req, res, next) => {
         username: req.body.username
     }).exec((err, user) => {
         if (err) {
-            res.status(500).send({ message: err })
-            return
+            return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
         }
-
         if (user) {
-            res.status(400).send({ message: 'Failed! username is already in use' })
-            return
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Failed! username is already in use'
+            })
         }
         Admin.findOne({
             email: req.body.email
         }).exec((err, user) => {
             if (err) {
-                res.status(500).send({ message: err })
-                return
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
             }
             if (user) {
-                res.status(400).send({ message: 'failed! email is already in use' })
-                return
+                return res.status(400).send({
+                    errorCode: 400,
+                    message: 'failed! email is already in use'
+                })
             }
             next()
         })
@@ -68,24 +82,31 @@ exports.checkDuplicateMod = (req, res, next) => {
         username: req.body.username
     }).exec((err, user) => {
         if (err) {
-            res.status(500).send({ message: err })
-            return
+            return res.status(500).send({
+                errorCode: 500,
+                message: err
+            })
         }
-
         if (user) {
-            res.status(400).send({ message: 'Failed! username is already in use' })
-            return
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Failed! username is already in use'
+            })
         }
         Moderator.findOne({
             email: req.body.email
         }).exec((err, user) => {
             if (err) {
-                res.status(500).send({ message: err })
-                return
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: err
+                })
             }
             if (user) {
-                res.status(400).send({ message: 'failed! email is already in use' })
-                return
+                return res.status(400).send({
+                    errorCode: 400,
+                    message: 'failed! email is already in use'
+                })
             }
             next()
         })

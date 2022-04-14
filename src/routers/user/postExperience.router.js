@@ -2,7 +2,7 @@ const express = require('express')
 const { addExperiencePost, editExperiencePost, updateExperiencePost, deleteExperiencePost, listExperiencePost, likeExperiencePost, myPost, commentExperiencePost, listCommentExperiencePost } = require('../../controllers/user/experiencePost.controller')
 const { checkLike } = require('../../middlewares/checkLike.middleware')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
-const { upload } = require('../../middlewares/uploadFile.middleware')
+const { upload } = require('../../util/uploadFile.middleware')
 const router = express.Router()
 
 router.post('/add-post-experience', [verifyToken, upload.array('photo')], addExperiencePost)

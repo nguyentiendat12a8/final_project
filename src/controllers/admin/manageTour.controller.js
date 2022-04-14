@@ -4,14 +4,14 @@ const Tour = db.tour
 
 
 //control category tour
-exports.addCategory = (req,res) =>{
-    const category = new CategoryTour ({
+exports.addCategory = (req, res) => {
+    const category = new CategoryTour({
         categoryName: req.body.categoryName
     })
-    category.save(err =>{
-        if(err) return res.status(500).send({
+    category.save(err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Save category function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -20,11 +20,11 @@ exports.addCategory = (req,res) =>{
     })
 }
 
-exports.listCategory = (req,res) => {
-    CategoryTour.find({}, (err, list) =>{
-        if(err) return res.status(500).send({
+exports.listCategory = (req, res) => {
+    CategoryTour.find({}, (err, list) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -33,12 +33,12 @@ exports.listCategory = (req,res) => {
     })
 }
 
-exports.editCategory = (req,res) =>{
+exports.editCategory = (req, res) => {
     const categoryID = req.params.categoryID
-    CategoryTour.find({_id: categoryID}, (err, category)=>{
-        if(err) return res.status(500).send({
+    CategoryTour.find({ _id: categoryID }, (err, category) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -47,16 +47,16 @@ exports.editCategory = (req,res) =>{
     })
 }
 
-exports.updateCategory = (req,res) =>{
+exports.updateCategory = (req, res) => {
     const categoryID = req.params.categoryID
-    if(!categoryID) return res.status(400).send({
+    if (!categoryID) return res.status(400).send({
         errorCode: 400,
         message: 'invalid request'
     })
-    CategoryTour.findByIdAndUpdate({_id: categoryID},{categoryName: req.body.categoryName}, {new: true}, err=>{
-        if(err) return res.status(500).send({
+    CategoryTour.findByIdAndUpdate({ _id: categoryID }, { categoryName: req.body.categoryName }, { new: true }, err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -65,16 +65,16 @@ exports.updateCategory = (req,res) =>{
     })
 }
 
-exports.deleteCategory = async (req,res) =>{
-    var check = await Tour.findOne({categoryTourID:req.params.categoryID })
-    if(check) return res.status(400).send({
+exports.deleteCategory = async (req, res) => {
+    var check = await Tour.findOne({ categoryTourID: req.params.categoryID })
+    if (check) return res.status(400).send({
         errorCode: 400,
-        message: err
+        message: 'This category is used!'
     })
-    CategoryTour.findByIdAndDelete({_id: req.params.categoryID}, err=>{
-        if(err) return res.status(500).send({
+    CategoryTour.findByIdAndDelete({ _id: req.params.categoryID }, err => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Delete category function is error!'
         })
         return res.status(200).send({
             errorCode: 0,

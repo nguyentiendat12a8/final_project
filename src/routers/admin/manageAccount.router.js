@@ -7,7 +7,7 @@ const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailRese
      configPaypal, viewPaypal, editPaypal, updatePaypal
     } = require('../../controllers/admin/account.controller')
 const { verifyToken, isAdmin, verifyRefreshToken } = require('../../middlewares/jwt.middleware')
-const { uploadAvatar } = require('../../middlewares/uploadFile.middleware')
+const { uploadAvatar } = require('../../util/uploadFile.middleware')
 const router = express.Router()
 
 router.post('/signup', [checkDuplicateAdmin, uploadAvatar.single('avatar')], signup)

@@ -8,22 +8,34 @@ const Admin = db.admin
 const ResetPassword = db.resetPassword
 const User = db.user
 const Moderator = db.moderator
-const PaypalInfo =db.paypalInfo
+const PaypalInfo = db.paypalInfo
 
 exports.signup = async (req, res) => {
-  const user = new Admin({
-    username: req.body.username,
-    password: bcrypt.hashSync(req.body.password, 8),
-    adminName: req.body.adminName,
-    email: req.body.email,
-    phone: req.body.phone,
-    //avatar: req.file.path
-  })
+  var user
+  if(!req.file) {
+   user = new Admin({
+      username: req.body.username,
+      password: bcrypt.hashSync(req.body.password, 8),
+      adminName: req.body.adminName,
+      email: req.body.email,
+      phone: req.body.phone,
+      //avatar: req.file.path
+    })
+  } else {
+    user = new Admin({
+      username: req.body.username,
+      password: bcrypt.hashSync(req.body.password, 8),
+      adminName: req.body.adminName,
+      email: req.body.email,
+      phone: req.body.phone,
+      avatar: req.file.path
+    })
+  }
   user.save((err, user) => {
     if (err) {
       return res.status(500).send({
         errorCode: 500,
-        message: err
+        message: 'Signup function is error!'
       })
     }
     return res.send({
@@ -33,7 +45,7 @@ exports.signup = async (req, res) => {
   })
 }
 
-exports.signin = async (req, res, next) => {
+exports.signin = async (req, res) => {
   try {
     const { username, password } = req.body;
     if (!(username && password)) {
@@ -108,7 +120,10 @@ exports.updatePassword = async (req, res, next) => {
       })
     }
   } catch (error) {
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Change password is error!'
+    })
   }
 }
 
@@ -149,9 +164,15 @@ exports.updateAccount = async (req, res, next) => {
         phone: phone
       },
       { new: true })
-    return res.status(200).send({ message: 'Change info successfully!' })
+    return res.status(200).send({ 
+      errorCode: 0,
+      message: 'Change info successfully!' 
+    })
   } catch (error) {
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Change info is error!'
+    })
   }
 }
 
@@ -179,10 +200,15 @@ exports.sendEmailResetPass = async (req, res) => {
     const link = `${process.env.BASE_URL}/admin/account/update-forgotten-password/${user._id}/${token.token}`
     await sendEmail(user.email, "Password reset", link);
 
-    res.send("password reset link sent to your email account")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset link sent to your email account"
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: "Forgot password function is error!"
+    })
   }
 }
 
@@ -190,7 +216,10 @@ exports.confirmLink = async (req, res) => {
   try {
     const schema = Joi.object({ password: Joi.string().required() })
     const { error } = schema.validate(req.body);
-    if (error) return res.status(400).send(error.details[0].message)
+    if (error) return res.status(400).send({
+      errorCode: 400,
+      message: error.details[0].message
+    })
 
     const user = await Admin.findById(req.params.accountID);
     if (!user) return res.status(400).send({
@@ -202,22 +231,30 @@ exports.confirmLink = async (req, res) => {
       accountID: user._id,
       token: req.params.token,
     })
-    if (!token) return res.status(400).send("Invalid link or expired")
+    if (!token) return res.status(400).send({
+      errorCode: 400,
+      message: "Invalid link or expired"
+    })
 
     user.password = bcrypt.hashSync(req.body.password, 8)
     await user.save()
     await token.delete()
-    res.send("password reset sucessfully.")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset sucessfully."
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error);
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Change password is error!'
+    })
   }
 }
 
 // manage account of user
 exports.listUserAccount = async (req, res) => {
-  User.find({deleted: false}, (err, list) => {
-    if(err) return res.status(500).send({
+  User.find({ deleted: false }, (err, list) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: err.message
     })
@@ -267,7 +304,7 @@ exports.deleteUserAccount = async (req, res) => {
   User.findByIdAndUpdate({ _id: userID }, { deleted: true }, { new: true }, err => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,
@@ -277,8 +314,8 @@ exports.deleteUserAccount = async (req, res) => {
 }
 
 exports.trashUserAccount = async (req, res) => {
-  User.find({deleted: true}, (err, list) => {
-    if(err) return res.status(500).send({
+  User.find({ deleted: true }, (err, list) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: err.message
     })
@@ -310,7 +347,7 @@ exports.restoreUserAccount = async (req, res) => {
   User.findByIdAndUpdate({ _id: userID }, { deleted: false }, { new: true }, (err) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'User account server is error'
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,
@@ -322,8 +359,8 @@ exports.restoreUserAccount = async (req, res) => {
 // manage account of moderator
 
 exports.listModAccount = async (req, res) => {
-  Moderator.find({deleted: false}, (err, list) => {
-    if(err) return res.status(500).send({
+  Moderator.find({ deleted: false }, (err, list) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: err.message
     })
@@ -350,10 +387,10 @@ exports.listModAccount = async (req, res) => {
 
 exports.detailModAccount = async (req, res) => {
   const moderatorID = req.params.moderatorID
-  Moderator.findById({ _id: moderatorID }, (err, mod) => {
+  await Moderator.findById({ _id: moderatorID }, (err, mod) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Moderator server is error!'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -371,7 +408,7 @@ exports.deleteModAccount = async (req, res) => {
   Moderator.findByIdAndUpdate({ _id: moderatorID }, { deleted: true }, { new: true }, err => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,
@@ -381,8 +418,8 @@ exports.deleteModAccount = async (req, res) => {
 }
 
 exports.trashModAccount = async (req, res) => {
-  Moderator.find({deleted: true}, (err, list) => {
-    if(err) return res.status(500).send({
+  Moderator.find({ deleted: true }, (err, list) => {
+    if (err) return res.status(500).send({
       errorCode: 500,
       message: err.message
     })
@@ -416,7 +453,7 @@ exports.restoreModAccount = async (req, res) => {
   Moderator.findByIdAndUpdate({ _id: moderatorID }, { deleted: false }, { new: true }, (err) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: 'Moderator account server is error'
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,
@@ -427,8 +464,8 @@ exports.restoreModAccount = async (req, res) => {
 
 // payment method
 exports.configPaypal = async (req, res) => {
-  const check = await PaypalInfo.findOne({adminID: req.accountID})
-  if(check) return res.status(400).send({
+  const check = await PaypalInfo.findOne({ adminID: req.accountID })
+  if (check) return res.status(400).send({
     errorCode: 400,
     message: 'Only 1 payment account per person!'
   })
@@ -440,7 +477,7 @@ exports.configPaypal = async (req, res) => {
   await paypalInfo.save(err => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Save paypal function is error!'
     })
     return res.status(200).send({
       errorCode: 0,
@@ -453,15 +490,15 @@ exports.viewPaypal = async (req, res) => {
   PaypalInfo.findOne({ adminID: req.accountID }, (err, paypal) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Paypal server is error!'
     })
-    if(!paypal) return res.status(200).send({
+    if (!paypal) return res.status(200).send({
       errorCode: 0,
       message: 'The account does not have paypal payment information!'
     })
     var show = {
       clientID: paypal.clientID,
-      secret:paypal.secret
+      secret: paypal.secret
     }
     return res.status(200).send({
       errorCode: 0,
@@ -474,15 +511,15 @@ exports.editPaypal = async (req, res) => {
   PaypalInfo.findOne({ adminID: req.accountID }, (err, paypal) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: 'Paypal server is error!'
     })
-    if(!paypal) return res.status(400).send({
+    if (!paypal) return res.status(400).send({
       errorCode: 400,
       message: 'The account does not have paypal payment information!'
     })
     var show = {
       clientID: paypal.clientID,
-      secret:paypal.secret
+      secret: paypal.secret
     }
     return res.status(200).send({
       errorCode: 0,
@@ -495,10 +532,10 @@ exports.updatePaypal = async (req, res) => {
   PaypalInfo.findOneAndUpdate({ adminID: req.accountID }, {
     clientID: req.body.clientID,
     secret: req.body.secret
-  }, {new: true}, (err) => {
+  }, { new: true }, (err) => {
     if (err) return res.status(500).send({
       errorCode: 500,
-      message: err
+      message: err.message
     })
     return res.status(200).send({
       errorCode: 0,

@@ -23,7 +23,10 @@ exports.addTour = async (req, res, next) => {
             path = path.substring(0, path.lastIndexOf(','))
             req.body.picture = path
         } else {
-            req.body.picture = ''
+            return res.status(400).json({
+                errorCode: 400,
+                message: 'Picture must be add in here!',
+            })
         }
         const category = await CategoryTour.findOne({ categoryName: req.query.categoryName })
         const moderator = await Moderator.findById(req.accountID)
@@ -55,53 +58,49 @@ exports.addTour = async (req, res, next) => {
                 console.log(error)
                 return res.status(500).send({
                     errorCode: 500,
-                    message: error
+                    message: 'Add tour function is error!'
                 })
             })
     } catch (error) {
-        console.log(error)
+        return res.status(500).json({
+            errorCode: 500,
+            message: 'Add tour function is error!',
+        })
     }
 
 }
 
 exports.editTour = (req, res, next) => {
-    try {
-        Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID }, async (err, tour) => {
-            if (err) return res.status(500).send({
-                errorCode: 500,
-                message: err
-            })
-            if (tour == null) {
-                return res.status(400).send({
-                    errorCode: 400,
-                    message: 'Invalid link'
-                })
-            }
-            const category = await CategoryTour.findById(tour.categoryTourID)
-            const tourDetail = {
-                startDate: tour.startDate,
-                time: tour.time,
-                description: {
-                    content: tour.description.content,
-                    vehicle: tour.description.vehicle,
-                    timeDecription: tour.description.timeDecription,
-                },
-                private: tour.private,
-                hotel: tour.hotel,
-                categoryName: category.categoryName,
-                slug: tour.slug
-            }
-            return res.status(200).send({
-                errorCode: 0,
-                data: tourDetail
-            })
-        })
-    } catch (error) {
-        return res.status(500).send({
+    Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID }, async (err, tour) => {
+        if (err) return res.status(500).send({
             errorCode: 500,
-            message: error
+            message: 'Edit tour function is error!'
         })
-    }
+        if (tour == null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Invalid link'
+            })
+        }
+        const category = await CategoryTour.findById(tour.categoryTourID)
+        const tourDetail = {
+            startDate: tour.startDate,
+            time: tour.time,
+            description: {
+                content: tour.description.content,
+                vehicle: tour.description.vehicle,
+                timeDecription: tour.description.timeDecription,
+            },
+            private: tour.private,
+            hotel: tour.hotel,
+            categoryName: category.categoryName,
+            slug: tour.slug
+        }
+        return res.status(200).send({
+            errorCode: 0,
+            data: tourDetail
+        })
+    })
 }
 
 exports.updateTour = async (req, res, next) => {
@@ -121,7 +120,7 @@ exports.updateTour = async (req, res, next) => {
     }, { new: true }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -135,7 +134,7 @@ exports.listTour = (req, res, next) => {
     Tour.find({ moderatorID: req.accountID }, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var show = []
 
@@ -170,7 +169,7 @@ exports.listTour = (req, res, next) => {
                     // numberOfStar: detail.rate.numberOfStar,
                     private: detail.private,
                     slug: detail.slug,
-                    timeEnd: new Date (ads.timeEnd.setDate(ads.timeEnd.getDate() + 7))
+                    timeEnd: new Date(ads.timeEnd.setDate(ads.timeEnd.getDate() + 7))
                 }
                 return show.push(tour)
             }
@@ -189,7 +188,7 @@ exports.detailTour = async (req, res) => {
     Tour.findOne({ slug: req.params.slug, moderatorID: req.accountID }, async (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Detail tour function is error!'
         })
         if (tour == null) {
             return res.status(400).send({
@@ -230,96 +229,104 @@ exports.detailTour = async (req, res) => {
 }
 
 exports.schedule = async (req, res) => {
-    const list = await Tour.find({ moderatorID: req.accountID })
-    const listCustom = await TourCustom.find({ moderatorID: req.accountID })
-    var listStart = []
-    var listCustomStart = []
-    var date = new Date()
+    try {
+        const list = await Tour.find({ moderatorID: req.accountID })
+        const listCustom = await TourCustom.find({ moderatorID: req.accountID })
+        var listStart = []
+        var listCustomStart = []
+        var date = new Date()
 
-    //handle schedule tour custom
-    listCustom.forEach(e => {
-        if (e.startDate.getFullYear() === date.getFullYear()) {
-            if (e.startDate.getMonth() === date.getMonth()) {
-                if (e.startDate.getDate() === date.getDate()) {
-                    listCustomStart.push(e)
+        //handle schedule tour custom
+        listCustom.forEach(e => {
+            if (e.startDate.getFullYear() === date.getFullYear()) {
+                if (e.startDate.getMonth() === date.getMonth()) {
+                    if (e.startDate.getDate() === date.getDate()) {
+                        listCustomStart.push(e)
+                    }
                 }
             }
-        }
-    })
-    async function getTourCustomFromBill(e) {
-        var check = await BillTour.find({ tourCustomID: e._id })
-        if (check) {
-            for (i = 0; i < check.length; i++) {
-                listCustomBillStart.push(check[i])
-            }
-        }
-        return listCustomBillStart
-    }
-    async function getTourCustomAndUserInfo(i) {
-        var tour = await TourCustom.findById(i.tourCustomID)
-        var user = await User.findById(i.userID)
-        var detail = {
-            tourName: tour.tourName,
-            startDate: tour.startDate,
-            address: tour.address,
-            startingPoint: tour.startingPoint,
-            userName: user.userName,
-            phone: user.phone
-        }
-        return show.push(detail)
-    }
-    //handle schedule tour 
-    list.forEach(e => {
-        if (e.startDate.getFullYear() === date.getFullYear()) {
-            if (e.startDate.getMonth() === date.getMonth()) {
-                if (e.startDate.getDate() === date.getDate()) {
-                    listStart.push(e)
+        })
+        async function getTourCustomFromBill(e) {
+            var check = await BillTour.find({ tourCustomID: e._id })
+            if (check) {
+                for (i = 0; i < check.length; i++) {
+                    listCustomBillStart.push(check[i])
                 }
             }
+            return listCustomBillStart
         }
-    })
-    var listBillStart = []
-    var listCustomBillStart = []
-    async function getTourFromBill(e) {
-        var check = await BillTour.find({ tourID: e._id })
-        if (check) {
-            for (i = 0; i < check.length; i++) {
-                listBillStart.push(check[i])
+        async function getTourCustomAndUserInfo(i) {
+            var tour = await TourCustom.findById(i.tourCustomID)
+            var user = await User.findById(i.userID)
+            var detail = {
+                tourName: tour.tourName,
+                startDate: tour.startDate,
+                address: tour.address,
+                startingPoint: tour.startingPoint,
+                userName: user.userName,
+                phone: user.phone
             }
+            return show.push(detail)
         }
-        return listBillStart
+        //handle schedule tour 
+        list.forEach(e => {
+            if (e.startDate.getFullYear() === date.getFullYear()) {
+                if (e.startDate.getMonth() === date.getMonth()) {
+                    if (e.startDate.getDate() === date.getDate()) {
+                        listStart.push(e)
+                    }
+                }
+            }
+        })
+        var listBillStart = []
+        var listCustomBillStart = []
+        async function getTourFromBill(e) {
+            var check = await BillTour.find({ tourID: e._id })
+            if (check) {
+                for (i = 0; i < check.length; i++) {
+                    listBillStart.push(check[i])
+                }
+            }
+            return listBillStart
+        }
+        var show = []
+        var showCustom = []
+        async function getTourAndUserInfo(i) {
+            var tour = await Tour.findById(i.tourID)
+            var user = await User.findById(i.userID)
+            var detail = {
+                tourName: tour.tourName,
+                startDate: tour.startDate,
+                address: tour.address,
+                startingPoint: tour.startingPoint,
+                userName: user.userName,
+                phone: user.phone
+            }
+            return show.push(detail)
+        }
+        await Promise.all(listStart.map(e => getTourFromBill(e)), listCustomStart.map(e => getTourCustomFromBill(e)))
+        await Promise.all(listBillStart.map(i => getTourAndUserInfo(i)), listCustomBillStart.map(i => getTourCustomAndUserInfo(i)))
+        return res.status(200).send({
+            errorCode: 0,
+            data: {
+                show,
+                showCustom
+            }
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: 'Schedule function is error!'
+        })
     }
-    var show = []
-    var showCustom = []
-    async function getTourAndUserInfo(i) {
-        var tour = await Tour.findById(i.tourID)
-        var user = await User.findById(i.userID)
-        var detail = {
-            tourName: tour.tourName,
-            startDate: tour.startDate,
-            address: tour.address,
-            startingPoint: tour.startingPoint,
-            userName: user.userName,
-            phone: user.phone
-        }
-        return show.push(detail)
-    }
-    await Promise.all(listStart.map(e => getTourFromBill(e)), listCustomStart.map(e => getTourCustomFromBill(e)))
-    await Promise.all(listBillStart.map(i => getTourAndUserInfo(i)), listCustomBillStart.map(i => getTourCustomAndUserInfo(i)))
-    return res.status(200).send({
-        errorCode: 0,
-        data: {
-            show,
-            showCustom
-        }
-    })
+
 }
 //search, filter
 exports.searchTour = async (req, res) => {
     Tour.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var search = req.query.address
         var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))
@@ -350,7 +357,7 @@ exports.filterTour = async (req, res) => {
     Tour.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         if (req.query.filter === 'ASC') {
             var dataSortASC = list.sort((a, b) => a.price - b.price)
@@ -471,7 +478,7 @@ exports.listBillTour = async (req, res, next) => {
     catch (err) {
         return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Bill tour server is error!'
         })
     }
 }
@@ -488,7 +495,10 @@ exports.addTourCustom = async (req, res) => {
             path = path.substring(0, path.lastIndexOf(','))
             req.body.picture = path
         } else {
-            req.body.picture = ''
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'Picture must be add in here!'
+            })
         }
         const tour = new TourCustom({
             tourName: req.body.tourName,
@@ -522,13 +532,13 @@ exports.addTourCustom = async (req, res) => {
                 console.log(error)
                 return res.status(500).send({
                     errorCode: 500,
-                    message: error
+                    message: 'Save tour custom function is error!'
                 })
             })
     } catch (error) {
         return res.status(500).send({
             errorCode: 500,
-            message: error
+            message: 'Save tour custom function is error!'
         })
     }
 
@@ -538,7 +548,7 @@ exports.viewListTourCustomToUser = async (req, res) => {
     TourDraftStatus.find({ moderatorID: req.accountID }, async (err, listTour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         if (!listTour) return res.status(200).send({
             errorCode: 0,
@@ -572,7 +582,7 @@ exports.viewAndAddTourCustom = (req, res) => {
     TourDraft.findById({ _id: req.params.tourDraftID }, (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Tour draft server is error!'
         })
         if (!tour) return res.status(400).send({
             errorCode: 400,
@@ -589,7 +599,7 @@ exports.viewListCustomTour = (req, res) => {
     TourCustom.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         if (!list) return res.status(400).send({
             errorCode: 400,
@@ -620,7 +630,7 @@ exports.viewDetailCustomTour = (req, res) => {
     TourCustom.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, tour) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Detail tour custom function is error!'
         })
         if (!tour) {
             return res.status(400).send({
@@ -653,119 +663,134 @@ exports.viewDetailCustomTour = (req, res) => {
 
 //ads
 exports.paymentAdsTour = async (req, res) => {
-    const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'  
-    if (paypalInfo === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'The manager of the tour you booked does not have an online payment method'
+    try {
+        const ads = await Ads.findOne({})
+        const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'  
+        if (paypalInfo === null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'The manager of the tour you booked does not have an online payment method'
+            })
+        }
+
+        paypal.configure({
+            'mode': 'sandbox', //sandbox or live
+            'client_id': paypalInfo.clientID,
+            'client_secret': paypalInfo.secret
+        });
+        const create_payment_json = {
+            "intent": "sale",
+            "payer": {
+                "payment_method": "paypal"
+            },
+            "redirect_urls": {
+                "return_url": `http://localhost:4000/moderator/tour/success-ads-tour/${req.query.tourID}`,
+                "cancel_url": "http://localhost:4000/moderator/tour/cancel-ads-tour"
+            },
+            "transactions": [{
+                "item_list": {
+                    "items": [{
+                        "name": `Payment ads`,
+                        //"sku": "001",
+                        "price": `${ads.price}`,
+                        "currency": "USD",
+                        "quantity": 1
+                    }]
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": `${ads.price}`
+                },
+                "description": "Ads payment"
+            }]
+        };
+
+
+        paypal.payment.create(create_payment_json, function (error, payment) {
+            if (error) {
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: error.response
+                })
+            } else {
+                for (let i = 0; i < payment.links.length; i++) {
+                    if (payment.links[i].rel === 'approval_url') {
+                        //res.redirect(payment.links[i].href);
+                        return res.status(200).send({
+                            errorCode: 0,
+                            data: payment.links[i].href
+                        })
+                    }
+                }
+
+            }
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: 'Payment function is error!'
         })
     }
 
-    paypal.configure({
-        'mode': 'sandbox', //sandbox or live
-        'client_id': paypalInfo.clientID,
-        'client_secret': paypalInfo.secret
-    });
-    const create_payment_json = {
-        "intent": "sale",
-        "payer": {
-            "payment_method": "paypal"
-        },
-        "redirect_urls": {
-            "return_url": `http://localhost:4000/moderator/tour/success-ads-tour/${req.query.tourID}`,
-            "cancel_url": "http://localhost:4000/moderator/tour/cancel-ads-tour"
-        },
-        "transactions": [{
-            "item_list": {
-                "items": [{
-                    "name": `Payment ads`,
-                    //"sku": "001",
-                    "price": `${ads.price}`,
-                    "currency": "USD",
-                    "quantity": 1
-                }]
-            },
-            "amount": {
-                "currency": "USD",
-                "total": `${ads.price}`
-            },
-            "description": "Ads payment"
-        }]
-    };
-
-
-    paypal.payment.create(create_payment_json, function (error, payment) {
-        if (error) {
-            return res.status(500).send({
-                errorCode: 500,
-                message: error
-            })
-        } else {
-            for (let i = 0; i < payment.links.length; i++) {
-                if (payment.links[i].rel === 'approval_url') {
-                    //res.redirect(payment.links[i].href);
-                    return res.status(200).send({
-                        errorCode: 0,
-                        data: payment.links[i].href
-                    })
-                }
-            }
-
-        }
-    });
 }
 
 exports.successAdsTour = async (req, res) => {
-    const ads = await Ads.findOne({})
-    const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
-    if (paypalInfo === null) {
-        return res.status(400).send({
-            errorCode: 400,
-            message: 'The manager of the tour you booked does not have an online payment method'
+    try {
+        const ads = await Ads.findOne({})
+        const paypalInfo = await PaypalInfo.findOne({ moderatorID: req.accountID }) //'622dbfb2fcdc11b7a3fcd5af'
+        if (paypalInfo === null) {
+            return res.status(400).send({
+                errorCode: 400,
+                message: 'The manager of the tour you booked does not have an online payment method'
+            })
+        }
+
+        paypal.configure({
+            'mode': 'sandbox', //sandbox or live
+            'client_id': paypalInfo.clientID,
+            'client_secret': paypalInfo.secret
+        });
+
+        const payerId = req.query.PayerID;
+        const paymentId = req.query.paymentId;
+
+        const execute_payment_json = {
+            "payer_id": payerId,
+            "transactions": [{
+                "amount": {
+                    "currency": "USD",
+                    "total": `${ads.price}`
+                }
+            }]
+        };
+        paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+            if (error) {
+                return res.status(500).send({
+                    errorCode: 500,
+                    message: error.response
+                })
+            } else {
+                const tourAds = new TourAds({
+                    tourID: req.params.tourID
+                })
+                tourAds.save()
+                    .then(() => {
+                        return res.status(200).send({
+                            errorCode: 0,
+                            message: 'save booked tour custom successfully'
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            }
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: 'Payment function is error!'
         })
     }
-
-    paypal.configure({
-        'mode': 'sandbox', //sandbox or live
-        'client_id': paypalInfo.clientID,
-        'client_secret': paypalInfo.secret
-    });
-
-    const payerId = req.query.PayerID;
-    const paymentId = req.query.paymentId;
-
-    const execute_payment_json = {
-        "payer_id": payerId,
-        "transactions": [{
-            "amount": {
-                "currency": "USD",
-                "total": `${ads.price}`
-            }
-        }]
-    };
-    paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
-        if (error) {
-            return res.status(500).send({
-                errorCode: 500,
-                message: error.response
-            })
-        } else {
-            const tourAds = new TourAds({
-                tourID: req.params.tourID
-            })
-            tourAds.save()
-                .then(() => {
-                    return res.status(200).send({
-                        errorCode: 0,
-                        message: 'save booked tour custom successfully'
-                    })
-                })
-                .catch(err => {
-                    console.log(err)
-                })
-        }
-    });
 }
 
 exports.cancelAdsTour = (req, res) => {

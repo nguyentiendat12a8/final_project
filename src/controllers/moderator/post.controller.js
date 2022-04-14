@@ -10,14 +10,17 @@ exports.addPost = async (req, res) => {
         path = path.substring(0, path.lastIndexOf(','))
         req.body.photo = path
     } else {
-        req.body.photo = ''
+        return res.status(400).json({
+            errorCode: 400,
+            message: 'Picture must be add in here!',
+        })
     }
     var post = new Post(req.body)
     post.moderatorID = req.accountID
     await post.save(err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Add post function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -30,7 +33,7 @@ exports.editPost = (req, res) => {
     Post.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Post server is error!'
         })
         if (post == null) {
             return res.status(400).send({
@@ -59,7 +62,10 @@ exports.updatePost = (req, res) => {
         path = path.substring(0, path.lastIndexOf(','))
         req.body.photo = path
     } else {
-        req.body.photo = 'No photo'
+        return res.status(400).json({
+            errorCode: 400,
+            message: 'Photo must be add in here!',
+        })
     }
     Post.findOneAndUpdate({ slug: req.params.slug, moderatorID: req.accountID }, {
         postText: req.body.postText,
@@ -67,7 +73,7 @@ exports.updatePost = (req, res) => {
     }, { new: true }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -80,7 +86,7 @@ exports.deletePost = (req, res) => {
     Post.findOneAndDelete({ slug: req.params.slug, moderatorID: req.accountID }, err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Delete post function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -93,7 +99,7 @@ exports.listPost = async (req, res) => {
     Post.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var listShow = []
         list.forEach(e => {
@@ -117,7 +123,7 @@ exports.detailPost = (req, res) => {
     Post.findOne({ slug: req.params.slug, moderatorID: req.accountID }, (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Post server is error!'
         })
         if (post == null) {
             return res.status(400).send({
@@ -137,7 +143,7 @@ exports.searchPost = async (req, res) => {
     Post.find({ moderatorID: req.accountID }, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var search = req.query.search
         var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))

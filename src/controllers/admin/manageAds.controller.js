@@ -20,7 +20,7 @@ exports.addAds = async (req, res) => {
     await ads.save(err => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Add ads function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -33,7 +33,7 @@ exports.viewAds = (req, res) => {
     Ads.findOne({}, (err, ads) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Ads server is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -42,11 +42,11 @@ exports.viewAds = (req, res) => {
     })
 }
 
-exports.editAds = (req,res) => {
+exports.editAds = (req, res) => {
     Ads.findOne({}, (err, ads) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Edit ads function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -55,11 +55,11 @@ exports.editAds = (req,res) => {
     })
 }
 
-exports.updateAds = (req,res) => {
-    Ads.findOneAndUpdate({}, {price: req.body.price}, {new: true}, (err) =>{
+exports.updateAds = (req, res) => {
+    Ads.findOneAndUpdate({}, { price: req.body.price }, { new: true }, (err) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         return res.status(200).send({
             errorCode: 0,
@@ -74,7 +74,7 @@ exports.listRoomAds = (req, res) => {
     RoomAds.find({}, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
 
         var listShow = []
@@ -104,7 +104,7 @@ exports.deleteRoomAds = (req, res) => {
     RoomAds.findByIdAndDelete(req.params.roomAdsID, (err) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Delete room ads function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -117,7 +117,7 @@ exports.showRoomAds = (req, res) => {
     RoomAds.find({}, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
 
         var listShow = []
@@ -135,7 +135,7 @@ exports.showRoomAds = (req, res) => {
             }
             return listShow.push(show)
         }
-        await Promise.all(list.map((hotelRoom) =>  getRoom(hotelRoom) ))
+        await Promise.all(list.map((hotelRoom) => getRoom(hotelRoom)))
 
         return res.status(200).send({
             errorCode: 0,
@@ -151,7 +151,7 @@ exports.listTourAds = (req, res) => {
     TourAds.find({}, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
 
         var listShow = []
@@ -183,7 +183,7 @@ exports.deleteTourAds = (req, res) => {
     TourAds.findByIdAndDelete(req.params.tourAdsID, (err) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Delete tour ads function is error!'
         })
         return res.status(200).send({
             errorCode: 0,
@@ -196,7 +196,7 @@ exports.showTourAds = (req, res) => {
     TourAds.find({}, async (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
 
         var listShow = []

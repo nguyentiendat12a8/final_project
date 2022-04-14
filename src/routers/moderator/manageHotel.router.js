@@ -2,7 +2,7 @@ const express = require('express')
 const { addHotelRoom, editHotelRoom, updateHotelRoom, deleteHotelRoom, listHotelRoom, detailHotelRoom,
      listBillHotelRoom, searchHotelRoom, filterHotelRoom, paymentAdsHotelRoom, successAdsHotelRoom, cancelAdsHotelRoom } = require('../../controllers/moderator/hotel.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
-const { upload } = require('../../middlewares/uploadFile.middleware')
+const { upload } = require('../../util/uploadFile.middleware')
 const router = express.Router()
 
 router.post('/add-hotel-room', [verifyToken, isModerator, upload.array('photo')], addHotelRoom )

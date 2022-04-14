@@ -1,7 +1,7 @@
 const express = require('express')
 const { addPost, listPost, detailPost, editPost, updatePost, deletePost, searchPost } = require('../../controllers/moderator/post.controller')
 const { verifyToken, isModerator } = require('../../middlewares/jwt.middleware')
-const { upload } = require('../../middlewares/uploadFile.middleware')
+const { upload } = require('../../util/uploadFile.middleware')
 const router = express.Router()
 
 router.post('/add-post', [verifyToken, isModerator, upload.array('photo')], addPost)

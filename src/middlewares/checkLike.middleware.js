@@ -3,7 +3,7 @@ const Like = db.like
 const PostExperience = db.postExperience
 
 exports.checkLike = async (req, res, next) => {
-
+try {
     const check = await Like.findOne({
         userID: req.accountID,
         postExperienceID: req.params.postExperienceID
@@ -19,5 +19,11 @@ exports.checkLike = async (req, res, next) => {
             })
         }
     } 
-    next()
+    next() 
+} catch (error) {
+    return res.status(500).send({
+        errorCode: 500,
+        message: 'Check like is error!'
+    })
+}
 }

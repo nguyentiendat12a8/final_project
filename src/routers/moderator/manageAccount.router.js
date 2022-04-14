@@ -3,11 +3,11 @@ const { checkDuplicateMod } = require('../../middlewares/verifySignUp.middleware
 const {signup, signin, updatePassword, editAccount, updateAccount, sendEmailResetPass, confirmLink, configPaypal, viewPaypal, editPaypal, updatePaypal,
     } = require('../../controllers/moderator/account.controller')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
-const {uploadAvatar} = require('../../middlewares/uploadFile.middleware')
+const {uploadAvatar} = require('../../util/uploadFile.middleware')
 const { isModerator }= require('../../middlewares/jwt.middleware')
 const router = express.Router()
 
-router.post('/signup', [checkDuplicateMod], signup)
+router.post('/signup', [checkDuplicateMod, uploadAvatar.single('avatar')], signup)
 router.post('/signin', signin)
 router.patch('/update-password',[verifyToken, isModerator], updatePassword)
 router.get('/edit-account',[verifyToken, isModerator], editAccount)

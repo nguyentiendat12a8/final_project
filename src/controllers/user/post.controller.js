@@ -6,7 +6,7 @@ exports.listPost = (req, res) => {
     Post.find({}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var show = []
         list.forEach(e => {
@@ -27,15 +27,15 @@ exports.listPost = (req, res) => {
 }
 
 exports.detailPost = async (req, res) => {
-    Post.findOne({ slug: req.params.slug },async (err, post) => {
+    Post.findOne({ slug: req.params.slug }, async (err, post) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: 'Detail post function is error!'
         })
         const mod = await Moderator.findById(post.moderatorID)
         if (!mod) return res.status(400).send({
             errorCode: 400,
-            message: 'Post is error'
+            message: 'Invalid link'
         })
         var show = {
             postTitle: post.postTitle,
@@ -58,7 +58,7 @@ exports.searchPost = async (req, res) => {
     Post.find({}, (err, list) => {
         if (err) return res.status(500).send({
             errorCode: 500,
-            message: err
+            message: err.message
         })
         var search = req.query.address
         var dataSearch = list.filter(r => r.address.toLowerCase().includes(search.toLowerCase()))

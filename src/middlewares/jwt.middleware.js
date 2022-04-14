@@ -5,53 +5,65 @@ const Admin = db.admin
 const Moderator = db.moderator
 
 exports.verifyToken = async (req, res, next) => {
-    let token = req.body.token || req.query.token || req.headers["x-access-token"];
-    if (!token) {
-        return res.status(401).send({
-            errorCode: 401,
-            message: "token is required!"
-        })
-    }
-    jwt.verify(token, config.TOKEN_KEY, (err, decoded) => {
-        if (err) {
-            if (err.name === 'JsonWebTokenError') {
-                return res.status(401).send({
-                    errorCode: 401,
-                    message: 'Unauthorized!'
-                })
-            }
+    try {
+        let token = req.body.token || req.query.token || req.headers["x-access-token"];
+        if (!token) {
             return res.status(401).send({
                 errorCode: 401,
-                message: err.message
+                message: "token is required!"
             })
         }
-        req.accountID = decoded.id
-        next()
-    })
+        jwt.verify(token, config.TOKEN_KEY, (err, decoded) => {
+            if (err) {
+                if (err.name === 'JsonWebTokenError') {
+                    return res.status(401).send({
+                        errorCode: 401,
+                        message: 'Unauthorized!'
+                    })
+                }
+                return res.status(401).send({
+                    errorCode: 401,
+                    message: err.message
+                })
+            }
+            req.accountID = decoded.id
+            next()
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: 'JWT server is error!'
+        })
+    }
 }
 
 exports.verifyRefreshToken = (req, res, next) => {
-    let refreshToken = req.body.refreshToken || req.query.refreshToken
-    //const refreshToken = req.cookies.access_token
-    //const token = req.body.access_token
-    if (!refreshToken) {
-        return res.status(401).send({
-            errorCode: 401,
-            message: 'Unauthorized!'
+    try {
+        let refreshToken = req.body.refreshToken || req.query.refreshToken
+        if (!refreshToken) {
+            return res.status(401).send({
+                errorCode: 401,
+                message: 'Unauthorized!'
+            })
+        }
+
+        jwt.verify(refreshToken, config.REFRESH_TOKEN_KEY, (err, decoded) => {
+            if (err) {
+                return res.status(401).send({ message: 'Unauthorized!' })
+            }
+            const token = jwt.sign({ id: decoded.id }, config.TOKEN_KEY, {
+                expiresIn: config.tokenLife
+            })
+            //req.userId = decoded.id
+            //return res.json(token)
+            return res.send({ token: token })
+        })
+    } catch (error) {
+        return res.status(500).send({
+            errorCode: 500,
+            message: 'JWT server is error!'
         })
     }
-
-    jwt.verify(refreshToken, config.REFRESH_TOKEN_KEY, (err, decoded) => {
-        if (err) {
-            return res.status(401).send({ message: 'Unauthorized!' })
-        }
-        const token = jwt.sign({ id: decoded.id }, config.TOKEN_KEY, {
-            expiresIn: config.tokenLife
-        })
-        //req.userId = decoded.id
-        //return res.json(token)
-        return res.send({ token: token })
-    })
 }
 
 exports.isAdmin = (req, res, next) => {
@@ -59,7 +71,7 @@ exports.isAdmin = (req, res, next) => {
         if (err) {
             return res.status(500).send({
                 errorCode: 500,
-                message: err
+                message: 'Admin server is error!'
             })
         }
         next()
@@ -71,7 +83,7 @@ exports.isModerator = (req, res, next) => {
         if (err) {
             return res.status(500).send({
                 errorCode: 500,
-                message: err
+                message: 'Moderator server is error!'
             })
         }
         next()

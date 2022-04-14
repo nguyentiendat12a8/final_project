@@ -2,7 +2,7 @@ const express = require('express')
 const { listTour, detailTour, paymentTour, success, cancel, listBillTour, detailBillTour, rateTour, addTourDraft, listOrganization, sendTourDraft, viewTourDraft, viewTourDraftToMod, paymentTourCustom, successPayCustom, cancelPayCustom, viewRateTour, searchTour, filterTour } = require('../../controllers/user/tour.controller')
 const { checkRate } = require('../../middlewares/checkRateTour.middleware')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
-const { upload } = require('../../middlewares/uploadFile.middleware')
+const { upload } = require('../../util/uploadFile.middleware')
 
 const router = express.Router()
 

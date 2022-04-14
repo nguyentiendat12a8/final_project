@@ -9,14 +9,26 @@ const User = db.user
 
 exports.signup = async (req, res) => {
   try {
-    const user = new User({
-      username: req.body.username,
-      password: bcrypt.hashSync(req.body.password, 8),
-      userName: req.body.userName,
-      email: req.body.email,
-      phone: req.body.phone,
-      avatar: req.file.path
-    })
+    var user
+    if (!req.file) {
+      user = new User({
+        username: req.body.username,
+        password: bcrypt.hashSync(req.body.password, 8),
+        userName: req.body.userName,
+        email: req.body.email,
+        phone: req.body.phone,
+        //avatar: req.file.path
+      })
+    } else {
+      user = new User({
+        username: req.body.username,
+        password: bcrypt.hashSync(req.body.password, 8),
+        userName: req.body.userName,
+        email: req.body.email,
+        phone: req.body.phone,
+        avatar: req.file.path
+      })
+    }
     user.save((err, user) => {
       if (err) {
         return res.status(500).send({
@@ -24,13 +36,16 @@ exports.signup = async (req, res) => {
           message: err
         })
       }
-      return res.send({
+      return res.status(200).send({
         errorCode: 0,
         message: "User was registered successfully!"
       })
     })
   } catch (error) {
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Sign up account function is error!'
+    })
   }
 }
 
@@ -109,7 +124,10 @@ exports.updatePassword = async (req, res, next) => {
       })
     }
   } catch (error) {
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Update password function is error!'
+    })
   }
 }
 
@@ -130,7 +148,7 @@ exports.editAccount = async (req, res, next) => {
     .catch(err => {
       return res.status(500).send({
         errorCode: 500,
-        message: err
+        message: 'Edit account function is error!'
       })
     })
 }
@@ -150,9 +168,15 @@ exports.updateAccount = async (req, res, next) => {
         phone: phone
       },
       { new: true })
-    return res.status(200).send({ message: 'Change info successfully!' })
+    return res.status(200).send({
+      errorCode: 0,
+      message: 'Change info successfully!'
+    })
   } catch (error) {
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Update account function is error!'
+    })
   }
 }
 
@@ -180,10 +204,15 @@ exports.sendEmailResetPass = async (req, res) => {
     const link = `${process.env.BASE_URL}/user/account/update-forgotten-password/${user._id}/${token.token}`
     await sendEmail(user.email, "Password reset", link);
 
-    res.send("password reset link sent to your email account")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset link sent to your email account"
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error)
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Forgot password function is error!'
+    })
   }
 }
 
@@ -208,9 +237,14 @@ exports.confirmLink = async (req, res) => {
     user.password = bcrypt.hashSync(req.body.password, 8)
     await user.save()
     await token.delete()
-    res.send("password reset sucessfully.")
+    return res.status(200).send({
+      errorCode: 0,
+      message: "password reset sucessfully."
+    })
   } catch (error) {
-    res.send("An error occured")
-    console.log(error);
+    return res.status(500).send({
+      errorCode: 500,
+      message: 'Change password function is error!'
+    })
   }
 }
