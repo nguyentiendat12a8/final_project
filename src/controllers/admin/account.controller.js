@@ -108,10 +108,20 @@ exports.updatePassword = async (req, res, next) => {
       message: 'User not found'
     })
     const password = req.body.password
-    const newPassword = bcrypt.hashSync(req.body.newPassword, 8)
+    const newPassword = req.body.newPassword
+    const newPasswordAgain = req.body.newPasswordAgain
+    if (newPassword !== newPasswordAgain) {
+      return res.status(400).send({
+        errorCode: 400,
+        message: 'New password invalid!'
+      })
+    }
     if (bcrypt.compareSync(password, user.password)) {
-      await Admin.findByIdAndUpdate({ _id: id }, { password: newPassword }, { new: true })
-      return res.status(200).send({ message: 'Change password successfully!' })
+      await Admin.findByIdAndUpdate({ _id: id }, { password: bcrypt.hashSync(newPassword, 8) }, { new: true })
+      return res.status(200).send({
+        errorCode: 0,
+        message: 'Change password successfully!'
+      })
     }
     else {
       return res.status(400).send({
