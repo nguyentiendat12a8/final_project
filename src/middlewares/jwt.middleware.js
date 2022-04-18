@@ -74,18 +74,31 @@ exports.isAdmin = (req, res, next) => {
                 message: 'Admin server is error!'
             })
         }
+        if(!user){
+            return res.status(401).send({
+                errorCode: 401,
+                message: 'Require user role!'
+            })
+        }
         next()
     })
 }
 
 exports.isModerator = (req, res, next) => {
-    Moderator.findById(req.userId).exec(err => {
+    Moderator.findById(req.userId).exec((err, moderator)=> {
         if (err) {
             return res.status(500).send({
                 errorCode: 500,
                 message: 'Moderator server is error!'
             })
         }
+        if(!moderator){
+            return res.status(401).send({
+                errorCode: 401,
+                message: 'Require moderator role!'
+            })
+        }
+        
         next()
     })
 }
