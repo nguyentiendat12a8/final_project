@@ -1,5 +1,5 @@
 const express = require('express')
-const { listTour, detailTour, paymentTour, success, cancel, listBillTour, detailBillTour, rateTour, addTourDraft, listOrganization, sendTourDraft, viewTourDraft, viewTourDraftToMod, paymentTourCustom, successPayCustom, cancelPayCustom, viewRateTour, searchTour, filterTour } = require('../../controllers/user/tour.controller')
+const { listTour, detailTour, paymentTour, success, cancel, listBillTour, detailBillTour, rateTour, addTourDraft, listOrganization, sendTourDraft, viewTourDraft, viewTourDraftToMod, paymentTourCustom, successPayCustom, cancelPayCustom, viewRateTour, searchTour, filterTour, vnpay, vnpayIpn, vnpayReturn } = require('../../controllers/user/tour.controller')
 const { checkRate } = require('../../middlewares/checkRateTour.middleware')
 const { verifyToken } = require('../../middlewares/jwt.middleware')
 const { upload } = require('../../util/uploadFile.middleware')
@@ -32,5 +32,9 @@ router.get('/cancle-pay-custom', [verifyToken], cancelPayCustom)
 router.get('/search-tour', searchTour)
 router.get('/filter-tour', filterTour)
 
+//vnpay
+router.post('/create_payment_url', vnpay)
+router.get('/vnpay_ipn', vnpayIpn)
+router.get('/vnpay_return', vnpayReturn)
 
 module.exports = router
